@@ -1,0 +1,24 @@
+name: Test
+on: [pull_request]
+
+jobs:
+  test:
+    name: Run the test suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby and install gems
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - name: Setup database
+        run: |
+          bin/rails db:setup
+
+      - name: Run tests
+        run: |
+          bin/rails test

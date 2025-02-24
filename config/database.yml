@@ -1,0 +1,42 @@
+default: &default
+  adapter: sqlite3
+  encoding: unicode
+  pool: 5
+
+development:
+  primary: &primary_development
+    <<: *default
+    database: storage/data_toolkit_development.sqlite3
+  cable:
+    <<: *primary_development
+    database: storage/data_toolkit_development_cable.sqlite3
+    migrations_paths: db/cable_migrate
+  cache:
+    <<: *primary_development
+    database: storage/data_toolkit_development_cache.sqlite3
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_development
+    database: storage/data_toolkit_development_queue.sqlite3
+    migrations_paths: db/queue_migrate
+
+test:
+  <<: *default
+  database: storage/data_toolkit_test.sqlite3
+
+production:
+  primary: &primary_production
+    <<: *default
+    database: storage/data_toolkit_production.sqlite3
+  cable:
+    <<: *primary_production
+    database: storage/data_toolkit_production_cable.sqlite3
+    migrations_paths: db/cable_migrate
+  cache:
+    <<: *primary_production
+    database: storage/data_toolkit_production_cache.sqlite3
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_production
+    database: storage/data_toolkit_production_queue.sqlite3
+    migrations_paths: db/queue_migrate
