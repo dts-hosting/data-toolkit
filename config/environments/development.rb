@@ -21,12 +21,10 @@ Rails.application.configure do
   # Run rails dev:cache to toggle Action Controller caching.
   config.action_controller.perform_caching = true
   config.action_controller.enable_fragment_cache_logging = true
+  config.cache_store = :solid_cache_store
 
   config.active_job.queue_adapter = :solid_queue
   config.solid_queue.connects_to = {database: {writing: :queue}}
-
-  # Change to :null_store to avoid any caching.
-  config.cache_store = :memory_store
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
