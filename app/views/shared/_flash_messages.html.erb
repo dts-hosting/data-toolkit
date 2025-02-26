@@ -1,9 +1,8 @@
 <div class="container d-flex justify-content-center align-items-center">
   <% if notice %>
-    <span data-controller="" data-autohide-delay-value="3000" class="text-success mt-4"><%= notice %></span>
+    <span data-controller="autohide" data-autohide-delay-value="3000" class="text-success mt-4"><%= notice %></span>
   <% end %>
-
   <% if alert %>
-    <span data-controller="" data-autohide-delay-value="5000" class="text-danger mt-4"><%= alert %></span>
+    <span data-controller="autohide" data-autohide-delay-value="5000" class="text-danger mt-4"><%= alert %></span>
   <% end %>
 </div>

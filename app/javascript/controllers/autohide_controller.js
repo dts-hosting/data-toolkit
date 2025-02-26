@@ -7,7 +7,7 @@ export default class extends Controller {
 
   connect() {
     setTimeout(() => {
-      this.element.classList.add(["visually-hidden"]);
+      this.element.classList.add(["d-none"]);
     }, this.delayValue || 5000);
   }
 }

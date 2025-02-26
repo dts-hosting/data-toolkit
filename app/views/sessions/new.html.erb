@@ -2,7 +2,6 @@
   <div class="card" style="width: 50%;">
     <div class="card-body">
       <h2 class="card-title text-center">Sign in</h2>
-
       <%= form_with url: session_path, class: "form" do |form| %>
         <div class="mb-3">
           <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address], class: "form-control" %>

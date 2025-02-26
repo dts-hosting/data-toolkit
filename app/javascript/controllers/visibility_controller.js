@@ -4,6 +4,6 @@ export default class extends Controller {
   static targets = ["element"];
 
   hide(event) {
-    this.elementTarget.classList.add(["hidden"]);
+    this.elementTarget.classList.add(["d-none"]);
   }
 }
