@@ -1,7 +1,7 @@
-one:
-  email_address: one@example.com
+admin:
+  email_address: admin@collectionspace.org
   password_digest: <%= BCrypt::Password.create("password") %>
 
-two:
-  email_address: two@example.com
+standard:
+  email_address: standard@example.org
   password_digest: <%= BCrypt::Password.create("password") %>
