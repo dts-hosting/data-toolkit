@@ -11,8 +11,16 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
-    def sign_in(user, password = "password")
-      post session_url, params: {email_address: user.email_address, password: password}
+    def create_user(attributes = {})
+      user = User.new(attributes)
+      user.save
+      user
+    end
+
+    def sign_in(user)
+      post session_url, params: {
+        cspace_url: user.cspace_url, email_address: user.email_address, password: user.password
+      }
     end
   end
 end

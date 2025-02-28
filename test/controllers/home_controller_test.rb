@@ -8,7 +8,12 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get the home page when authenticated" do
-    sign_in(users(:admin))
+    user = create_user(
+      cspace_url: "https://core.dev.collectionspace.org",
+      email_address: "admin@core.collectionspace.org",
+      password: "Administrator"
+    )
+    sign_in(user)
     get home_index_url
     assert_response :success
   end

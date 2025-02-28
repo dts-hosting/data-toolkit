@@ -6,10 +6,10 @@
       </span>
       <div class="d-flex">
         <% if authenticated? %>
-          <%= link_to "My profile", edit_password_path(Current.user.password_reset_token), class: "btn btn-outline-success me-2" %>
+          <%= link_to "My profile", user_path(Current.user), class: "btn btn-outline-success me-2" %>
           <%= button_to "Sign Out", session_path, method: :delete, class: "btn btn-outline-secondary" %>
         <% end %>
-      </form>
+      </div>
     </div>
   </nav>
 </header>

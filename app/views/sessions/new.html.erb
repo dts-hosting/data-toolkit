@@ -4,6 +4,9 @@
       <h2 class="card-title text-center">Sign in</h2>
       <%= form_with url: session_path, class: "form" do |form| %>
         <div class="mb-3">
+          <%= form.text_field :cspace_url, required: true, autofocus: true, autocomplete: "cspace-url", placeholder: "Enter your CollectionSpace url", value: params[:cspace_url], class: "form-control" %>
+        </div>
+        <div class="mb-3">
           <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address], class: "form-control" %>
         </div>
         <div class="mb-3">
@@ -13,12 +16,6 @@
           <%= form.submit "Sign in", class: "btn btn-primary" %>
         </div>
       <% end %>
-      <div>
-        <%= link_to "Forgot password?", new_password_path %>
-      </div>
-      <div>
-        <%= link_to "Create an account?", new_user_path %>
-      </div>
     </div>
   </div>
 </div>

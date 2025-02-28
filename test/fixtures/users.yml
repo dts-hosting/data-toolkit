@@ -1,7 +1,9 @@
-admin:
-  email_address: admin@collectionspace.org
-  password_digest: <%= BCrypt::Password.create("password") %>
+#admin:
+#  cspace_url: https://core.dev.collectionspace.org/cspace-services
+#  email_address: admin@collectionspace.org
+#  password: Administrator
 
-standard:
-  email_address: standard@example.org
-  password_digest: <%= BCrypt::Password.create("password") %>
+#reader:
+#  cspace_url: https://core.dev.collectionspace.org/cspace-services
+#  email_address: reader@collectionspace.org
+#  password: reader
