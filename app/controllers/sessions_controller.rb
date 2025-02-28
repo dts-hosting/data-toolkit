@@ -13,15 +13,19 @@ class SessionsController < ApplicationController
 
     if client.can_authenticate?
       user = User.find_or_create_by(cspace_url: cspace_url, email_address: email_address) do |user|
-        version_data = client.version
+        version_data = client.version # fyi, this also makes network requests to CSpace
         user.cspace_api_version = version_data.api.joined
         user.cspace_profile = version_data.ui.profile
         user.cspace_ui_version = version_data.ui.version
         user.password = password
       end
-      user.update(password: password) if user.password != password
-      start_new_session_for user
-      redirect_to after_authentication_url
+      if user.valid? # on create user will not be valid if version data could not be retrieved
+        user.update(password: password) if user.password != password # may have been updated since last login
+        start_new_session_for user
+        redirect_to after_authentication_url
+      else
+        redirect_to new_session_path, alert: "Failed to access version information from CollectionSpace."
+      end
     else
       redirect_to new_session_path, alert: "Failed to authenticate with CollectionSpace."
     end
