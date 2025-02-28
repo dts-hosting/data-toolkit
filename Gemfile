@@ -69,6 +69,9 @@ group :development, :test do
 end
 
 group :test do
+  gem "mocha"
   gem "webmock"
 end
 gem "pagy"
+
+gem "collectionspace-client", github: "collectionspace/collectionspace-client", branch: "main"

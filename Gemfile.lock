@@ -1,3 +1,13 @@
+GIT
+  remote: https://github.com/collectionspace/collectionspace-client.git
+  revision: 321d6c02e889c963b5fbd57e2fb20826bbd2e865
+  branch: main
+  specs:
+    collectionspace-client (0.15.1)
+      httparty
+      json
+      nokogiri
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -103,6 +113,7 @@ GEM
       bigdecimal
       rexml
     crass (1.0.6)
+    csv (3.3.2)
     date (3.4.1)
     debug (1.10.0)
       irb (~> 1.10)
@@ -120,6 +131,10 @@ GEM
       activesupport (>= 6.1)
     hashdiff (1.1.2)
     htmlbeautifier (1.4.3)
+    httparty (0.22.0)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.1.0)
@@ -161,7 +176,11 @@ GEM
     matrix (0.4.2)
     mini_mime (1.1.5)
     minitest (5.25.4)
+    mocha (2.7.1)
+      ruby2_keywords (>= 0.0.5)
     msgpack (1.8.0)
+    multi_xml (0.7.1)
+      bigdecimal (~> 3.1)
     net-imap (0.5.6)
       date
       net-protocol
@@ -281,6 +300,7 @@ GEM
       rubocop (>= 1.52.0, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
     ruby-progressbar (1.13.0)
+    ruby2_keywords (0.0.5)
     rubyzip (2.4.1)
     securerandom (0.4.1)
     selenium-webdriver (4.29.1)
@@ -403,12 +423,14 @@ DEPENDENCIES
   bootsnap
   brakeman
   capybara
+  collectionspace-client!
   debug
   dotenv
   htmlbeautifier
   importmap-rails
   jbuilder
   letter_opener
+  mocha
   pagy
   propshaft
   puma (>= 5.0)

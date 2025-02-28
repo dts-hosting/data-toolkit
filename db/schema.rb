@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_28_010627) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_28_203630) do
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -26,6 +26,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_28_010627) do
     t.datetime "updated_at", null: false
     t.string "cspace_url", null: false
     t.string "password", null: false
+    t.string "cspace_api_version", null: false
+    t.string "cspace_profile", null: false
+    t.string "cspace_ui_version", null: false
     t.index ["email_address", "cspace_url"], name: "index_users_on_email_address_and_cspace_url", unique: true
   end
 

@@ -1,9 +1,17 @@
-#admin:
-#  cspace_url: https://core.dev.collectionspace.org/cspace-services
-#  email_address: admin@collectionspace.org
-#  password: Administrator
+# TODO: make the fixtures more real
 
-#reader:
-#  cspace_url: https://core.dev.collectionspace.org/cspace-services
-#  email_address: reader@collectionspace.org
-#  password: reader
+admin:
+  cspace_api_version: "7.0.0"
+  cspace_profile: "core"
+  cspace_ui_version: "7.0.0"
+  cspace_url: https://core.dev.collectionspace.org/cspace-services
+  email_address: admin@collectionspace.org
+  password: Administrator
+
+reader:
+  cspace_api_version: "7.0.0"
+  cspace_profile: "core"
+  cspace_ui_version: "7.0.0"
+  cspace_url: https://core.dev.collectionspace.org/cspace-services
+  email_address: reader@collectionspace.org
+  password: reader

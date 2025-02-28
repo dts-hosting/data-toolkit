@@ -1,6 +1,7 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
+require "mocha/minitest"
 
 module ActiveSupport
   class TestCase
@@ -11,15 +12,25 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
-    def create_user(attributes = {})
-      user = User.new(attributes)
-      user.save
-      user
+    def sign_in(user)
+      client = CollectionSpace::Client.new
+      CollectionSpaceService.stubs(:client_for).returns(client)
+      client.stubs(:can_authenticate?).returns(true)
+      post session_url, params: {
+        cspace_url: user.cspace_url,
+        email_address: user.email_address,
+        password: user.password
+      }
     end
 
-    def sign_in(user)
+    def sign_in_with_failed_auth(user)
+      client = CollectionSpace::Client.new
+      CollectionSpaceService.stubs(:client_for).returns(client)
+      client.stubs(:can_authenticate?).returns(false)
       post session_url, params: {
-        cspace_url: user.cspace_url, email_address: user.email_address, password: user.password
+        cspace_url: user.cspace_url,
+        email_address: user.email_address,
+        password: user.password
       }
     end
   end

@@ -6,12 +6,17 @@ class SessionsController < ApplicationController
   end
 
   def create
-    cspace_url = User.format_cspace_url(session_params[:cspace_url])
+    cspace_url = CollectionSpaceService.format_url(session_params[:cspace_url])
     email_address = session_params[:email_address]
     password = session_params[:password]
+    client = CollectionSpaceService.client_for(cspace_url, email_address, password)
 
-    if User.can_authenticate?(cspace_url, email_address, password)
+    if client.can_authenticate?
       user = User.find_or_create_by(cspace_url: cspace_url, email_address: email_address) do |user|
+        version_data = client.version
+        user.cspace_api_version = version_data.ui.version
+        user.cspace_profile = version_data.ui.profile
+        user.cspace_ui_version = version_data.api.joined
         user.password = password
       end
       user.update(password: password) if user.password != password
