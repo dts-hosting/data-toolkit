@@ -14,9 +14,9 @@ class SessionsController < ApplicationController
     if client.can_authenticate?
       user = User.find_or_create_by(cspace_url: cspace_url, email_address: email_address) do |user|
         version_data = client.version
-        user.cspace_api_version = version_data.ui.version
+        user.cspace_api_version = version_data.api.joined
         user.cspace_profile = version_data.ui.profile
-        user.cspace_ui_version = version_data.api.joined
+        user.cspace_ui_version = version_data.ui.version
         user.password = password
       end
       user.update(password: password) if user.password != password
