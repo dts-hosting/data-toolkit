@@ -1,7 +1,7 @@
 <div class="container d-flex justify-content-center align-items-center mt-4">
   <div class="card" style="width: 50%;">
     <div class="card-body">
-      <h2 class="card-title text-center">Sign in</h2>
+      <h2 class="card-title text-center mb-3">Sign in</h2>
       <%= form_with url: session_path, class: "form" do |form| %>
         <div class="mb-3">
           <%= form.text_field :cspace_url, required: true, autofocus: true, autocomplete: "cspace-url", placeholder: "Enter your CollectionSpace url", value: params[:cspace_url], class: "form-control" %>
