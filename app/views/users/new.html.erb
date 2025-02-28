@@ -1,24 +1,22 @@
 <div class="container d-flex justify-content-center align-items-center mt-4">
   <div class="card" style="width: 50%;">
     <div class="card-body">
-      <h2 class="card-title text-center">Sign in</h2>
-      <%= form_with url: session_path, class: "form" do |form| %>
+      <h2 class="card-title text-center">Sign up</h2>
+      <%= form_with model: User, class: "form" do |form| %>
         <div class="mb-3">
           <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address], class: "form-control" %>
         </div>
         <div class="mb-3">
-          <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72, class: "form-control" %>
+          <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Enter new password", maxlength: 72, class: "form-control" %>
+        </div>
+        <div class="mb-3">
+          <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Repeat new password", maxlength: 72, class: "form-control" %>
         </div>
         <div class="d-flex justify-content-center">
           <%= form.submit "Sign in", class: "btn btn-primary" %>
         </div>
       <% end %>
-      <div>
-        <%= link_to "Forgot password?", new_password_path %>
-      </div>
-      <div>
-        <%= link_to "Create an account?", new_user_path %>
-      </div>
+      <%= link_to "Sign in", new_session_path %>
     </div>
   </div>
 </div>

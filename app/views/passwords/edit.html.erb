@@ -2,6 +2,7 @@
   <div class="card" style="width: 50%;">
     <div class="card-body">
       <h2 class="card-title text-center">Update your password</h2>
+      <h6 class="card-subtitle mb-3 text-center text-body-secondary"><%= @user.email_address %></h6>
       <%= form_with url: password_path(params[:token]), method: :put, class: "form" do |form| %>
         <div class="mb-3">
           <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Enter new password", maxlength: 72, class: "form-control" %>
