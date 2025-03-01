@@ -14,4 +14,4 @@ reader:
   cspace_ui_version: "7.0.0"
   cspace_url: https://core.dev.collectionspace.org/cspace-services
   email_address: reader@collectionspace.org
-  password: reader
+  password: dear_reader
