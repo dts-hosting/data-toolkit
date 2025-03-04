@@ -16,22 +16,10 @@ class DataConfig < ApplicationRecord
 
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
-
-  scope :optlist_overrides, ->(user) do
-    by_profile(user).with_config_type(:optlist_overrides)
-  end
-
-  scope :record_type, ->(user) do
-    by_profile(user).by_version(user).with_config_type(:record_type)
-  end
-
-  scope :term_lists, ->(user) do
-    by_profile(user).by_version(user).with_config_type(:term_lists)
-  end
-
-  scope :record_type_media, ->(user) do
-    record_type(user).where("record_type LIKE ?", "%media")
-  end
+  scope :optlist_overrides, ->(user) { by_profile(user).with_config_type(:optlist_overrides) }
+  scope :record_type, ->(user) { by_profile(user).by_version(user).with_config_type(:record_type) }
+  scope :term_lists, ->(user) { by_profile(user).by_version(user).with_config_type(:term_lists) }
+  scope :record_type_media, ->(user) { record_type(user).where("record_type LIKE ?", "%media") }
 
   def optlist_overrides_config?
     matches_config_type?(:optlist_overrides)
