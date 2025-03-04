@@ -2,19 +2,20 @@ require "test_helper"
 
 class DataConfigTest < ActiveSupport::TestCase
   def setup
+    # these are not saved to the db, we use them for validations
     @record_type_config = DataConfig.new(
       config_type: "record_type",
       profile: "core",
       record_type: "collectionobject",
-      url: "https://example.com/core-collectionobject-1.0.0.json",
-      version: "1.0.0"
+      url: "https://example.com/core-collectionobject-7.0.0.json",
+      version: "7.0.0"
     )
 
     @term_lists_config = DataConfig.new(
       config_type: "term_lists",
       profile: "core",
-      url: "https://example.com/core-vocbalaries-1.0.0.json",
-      version: "1.0.0"
+      url: "https://example.com/core-vocbalaries-7.0.0.json",
+      version: "7.0.0"
     )
 
     @optlist_config = DataConfig.new(
@@ -92,20 +93,20 @@ class DataConfigTest < ActiveSupport::TestCase
   # Scope Tests
   test "optlist_overrides scope" do
     @optlist_config.save!
-    assert_includes DataConfig.optlist_overrides, @optlist_config
-    assert_not_includes DataConfig.optlist_overrides, @record_type_config
+    assert_includes DataConfig.optlist_overrides(users(:admin)), @optlist_config
+    assert_not_includes DataConfig.optlist_overrides(users(:admin)), @record_type_config
   end
 
-  test "record_types scope" do
+  test "record_type scope" do
     @record_type_config.save!
-    assert_includes DataConfig.record_types, @record_type_config
-    assert_not_includes DataConfig.record_types, @optlist_config
+    assert_includes DataConfig.record_type(users(:admin)), @record_type_config
+    assert_not_includes DataConfig.record_type(users(:admin)), @optlist_config
   end
 
   test "term_lists scope" do
     @term_lists_config.save!
-    assert_includes DataConfig.term_lists, @term_lists_config
-    assert_not_includes DataConfig.term_lists, @record_type_config
+    assert_includes DataConfig.term_lists(users(:admin)), @term_lists_config
+    assert_not_includes DataConfig.term_lists(users(:admin)), @record_type_config
   end
 
   # Helper Method Tests
@@ -122,5 +123,23 @@ class DataConfigTest < ActiveSupport::TestCase
   test "term_lists_config?" do
     assert @term_lists_config.term_lists_config?
     assert_not @record_type_config.term_lists_config?
+  end
+
+  # Lookup Data Config Tests
+  test "lookup_data_config" do
+    user = users(:admin)
+    activities = [
+      Activity.new(
+        user: user,
+        data_config: create_data_config_record_type,
+        type: "Activities::ExportRecordId"
+      )
+    ]
+
+    # TODO: handle more cases
+
+    activities.each do |activity|
+      assert DataConfig.for(user, activity).any?
+    end
   end
 end

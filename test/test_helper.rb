@@ -12,6 +12,36 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+    def create_data_config_record_type(opts = {})
+      opts = {
+        config_type: "record_type",
+        profile: "core",
+        version: "7.0.0",
+        record_type: "collectionobject",
+        url: "https://example.com/collectionobject-7.0.0.json"
+      }.merge(opts)
+      DataConfig.create(opts)
+    end
+
+    def create_data_config_term_lists(opts = {})
+      opts = {
+        config_type: "term_lists",
+        profile: "core",
+        version: "7.0.0",
+        url: "https://example.com/vocabularies-7.0.0.json"
+      }.merge(opts)
+      DataConfig.create(opts)
+    end
+
+    def create_data_config_optlist_overrides(opts = {})
+      opts = {
+        config_type: "optlist_overrides",
+        profile: "core",
+        url: "https://example.com/optlist.json"
+      }.merge(opts)
+      DataConfig.create(opts)
+    end
+
     def sign_in(user)
       client = CollectionSpace::Client.new
       CollectionSpaceService.stubs(:client_for).returns(client)
