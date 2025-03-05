@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_04_005252) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_05_001319) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -60,6 +60,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_04_005252) do
     t.index ["config_type", "profile", "version", "record_type"], name: "unique_data_config_attributes", unique: true
   end
 
+  create_table "data_items", force: :cascade do |t|
+    t.json "data", null: false
+    t.integer "position", default: 0, null: false
+    t.integer "activity_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_id", "position"], name: "index_data_items_on_activity_id_and_position", unique: true
+    t.index ["activity_id"], name: "index_data_items_on_activity_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -85,5 +95,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_04_005252) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activities", "data_configs", primary_key: "id"
   add_foreign_key "activities", "users", primary_key: "id"
+  add_foreign_key "data_items", "activities"
   add_foreign_key "sessions", "users"
 end
