@@ -1,3 +1,4 @@
+# This task handles preprocessing of data items
 class Tasks::PreProcessTask < Task
   def dependencies
     [Tasks::FileUploadTask]
@@ -5,9 +6,10 @@ class Tasks::PreProcessTask < Task
 
   def finalizer
     # PreProcessReportJob
+    nil
   end
 
   def handler
-    # PreProcessJob
+    PreProcessJob
   end
 end
