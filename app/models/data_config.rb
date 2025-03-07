@@ -1,10 +1,5 @@
 class DataConfig < ApplicationRecord
   ALLOWED_CONFIG_TYPES = %i[optlist_overrides record_type term_lists].freeze
-  CONFIG_TYPE_MAPPING = {
-    optlist_overrides: "optlist_overrides",
-    record_type: "record_type",
-    term_lists: "term_lists"
-  }.freeze
   URL_FORMAT = URI::DEFAULT_PARSER.make_regexp(%w[http https]).freeze
 
   validates :config_type, presence: true,
@@ -38,12 +33,12 @@ class DataConfig < ApplicationRecord
   end
 
   def self.with_config_type(type)
-    where(config_type: CONFIG_TYPE_MAPPING[type])
+    where(config_type: type.to_s)
   end
 
   private
 
   def matches_config_type?(type)
-    config_type == CONFIG_TYPE_MAPPING[type]
+    config_type == type.to_s
   end
 end

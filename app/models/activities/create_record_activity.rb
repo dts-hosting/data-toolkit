@@ -4,6 +4,6 @@ class Activities::CreateRecordActivity < Activity
 
   def workflow
     # Tasks::FileUploadTask, Tasks::PreProcessTask, Tasks::ProcessTask, Tasks::TransferTask
-    []
+    [Tasks::FileUploadTask, Tasks::PreProcessTask]
   end
 end

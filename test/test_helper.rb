@@ -12,6 +12,15 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+    def create_activity(opts = {})
+      opts = {
+        user: users(:admin),
+        data_config: create_data_config_record_type,
+        type: "Activities::ExportRecordId"
+      }.merge(opts)
+      Activity.create(opts)
+    end
+
     def create_data_config_record_type(opts = {})
       opts = {
         config_type: "record_type",

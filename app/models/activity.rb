@@ -1,7 +1,8 @@
 class Activity < ApplicationRecord
   belongs_to :data_config
   belongs_to :user
-  has_many_attached :files
+  has_many :tasks, dependent: :destroy
+  has_many_attached :files, dependent: :destroy
 
   validate :data_config, :is_eligible?
 
@@ -10,9 +11,9 @@ class Activity < ApplicationRecord
   end
 
   after_create_commit do
-    # workflow.each do |task|
-    #   tasks.create(type: task)
-    # end
+    workflow.each do |task|
+      tasks.create(type: task)
+    end
   end
 
   private

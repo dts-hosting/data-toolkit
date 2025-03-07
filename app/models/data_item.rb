@@ -3,5 +3,5 @@ class DataItem < ApplicationRecord
 
   validates :data, presence: true
   validates :position, presence: true
-  validates_uniqueness_of :position, scope: :activity_id
+  validates :position, uniqueness: {scope: :activity_id}
 end

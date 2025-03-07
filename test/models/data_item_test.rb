@@ -2,15 +2,10 @@ require "test_helper"
 
 class DataItemTest < ActiveSupport::TestCase
   setup do
-    @activity = Activity.create(
-      user: users(:admin),
-      data_config: create_data_config_record_type,
-      type: "Activities::ExportRecordId"
-    )
     @data_item = DataItem.new(
       data: {objectNumber: "123"},
       position: 1,
-      activity: @activity
+      activity: create_activity
     )
   end
 

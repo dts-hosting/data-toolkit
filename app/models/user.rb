@@ -1,5 +1,6 @@
 # Represents a user in the system with CollectionSpace integration
 class User < ApplicationRecord
+  has_many :activities, dependent: :destroy
   has_many :sessions, dependent: :destroy
   encrypts :password
 
