@@ -5,8 +5,7 @@ class Task < ApplicationRecord
 
   enum :status, {pending: 0, queued: 1, running: 2, succeeded: 3, failed: 4}, default: :pending
 
-  validates :type, presence: true
-  validates :status, presence: true
+  validates :type, :status, presence: true
 
   # tasks that are required to have succeeded for this task to run
   def dependencies
@@ -20,7 +19,7 @@ class Task < ApplicationRecord
 
   # the primary job associated with this task (required)
   def handler
-    raise NotImplementedError
+    raise NotImplementedError, "#{self.class} must implement #handler"
   end
 
   def ok_to_run?
@@ -29,38 +28,47 @@ class Task < ApplicationRecord
 
   def progress
     case status.to_sym
-    when :pending, :queued
-      0
+    when :pending, :queued then 0
     when :running
-      calculate_progess
-    when :succeeded, :failed
-      100
-    else
-      0
+      current_progress = calculate_progress
+      finish_up if current_progress >= 100
+      current_progress
+    when :succeeded, :failed then 100
+    else 0
     end
   end
 
   def run
     return unless ok_to_run?
 
-    update(status: :queued)
-    # data_items.update(status: :undetermined, feedback: nil) # reset
+    transaction do
+      update!(status: :queued)
+      data_items.update_all(status: :pending, feedback: nil)
+    end
     handler.perform_later(self)
   end
 
   private
 
-  def calculate_progess
-    return 0 unless data_items.any?
+  def calculate_progress
+    return 0 if data_items.empty?
 
-    # TODO: data_items.where(status: :undetermined).count.to_f / data_items.count.to_f * 100
-    50
+    completed_items_ratio = data_items.where.not(status: :pending).count.to_f / data_items.count
+    (completed_items_ratio * 100).round(2)
+  end
+
+  def finish_up
+    new_status = data_items.where(status: :failed).exists? ? :failed : :succeeded
+    update!(status: new_status, completed_at: Time.current)
+
+    finalizer&.perform_later(self)
   end
 
   def met_dependencies
-    result = dependencies.find_all do |dependency|
-      activity.tasks.where(type: dependency).where(status: :succeeded).exists?
+    return true if dependencies.empty?
+
+    dependencies.all? do |dependency|
+      activity.tasks.exists?(type: dependency, status: :succeeded)
     end
-    result.size == dependencies.size
   end
 end
