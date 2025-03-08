@@ -1,9 +1,7 @@
 <header>
   <nav class="navbar bg-body-tertiary">
     <div class="container-fluid">
-      <span class="navbar-brand">
-        Data Toolkit
-      </span>
+      <%= image_tag "CollectionSpace-Logo.png", alt: "CollectionSpace Logo", height: 30, class: "d-inline-block align-text-top my-2" %>
       <div class="d-flex">
         <% if authenticated? %>
           <%= link_to "My profile", user_path(Current.user), class: "btn btn-outline-success me-2" %>
