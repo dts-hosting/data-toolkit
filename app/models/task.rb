@@ -12,7 +12,6 @@ class Task < ApplicationRecord
     []
   end
 
-  # set failed status for the task
   def fail!
     update!(status: :failed, completed_at: Time.current)
   end
@@ -53,7 +52,10 @@ class Task < ApplicationRecord
     handler.perform_later(self)
   end
 
-  # set succeeded status for the task
+  def start!
+    update!(status: :running, started_at: Time.current)
+  end
+
   def success!
     update!(status: :succeeded, completed_at: Time.current)
   end

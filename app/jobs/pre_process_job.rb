@@ -3,7 +3,7 @@ class PreProcessJob < ApplicationJob
 
   # This job spawns a sub-job for each data item
   def perform(task)
-    task.update(status: "running", started_at: Time.current)
+    task.start!
     Rails.logger.info "Pre process job started"
 
     # TODO: pre-checks b4 spawning sub jobs i.e required headers present etc.?
