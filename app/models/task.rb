@@ -78,7 +78,7 @@ class Task < ApplicationRecord
     return true if dependencies.empty?
 
     dependencies.all? do |dependency|
-      activity.tasks.exists?(type: dependency, status: :succeeded)
+      activity.tasks.exists?(type: dependency.to_s, status: :succeeded)
     end
   end
 end

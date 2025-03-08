@@ -15,9 +15,9 @@ module ActiveSupport
     def create_activity(opts = {})
       opts = {
         user: users(:admin),
-        data_config: create_data_config_record_type,
         type: "Activities::ExportRecordId"
       }.merge(opts)
+      opts[:data_config] = create_data_config_record_type unless opts[:data_config]
       Activity.create(opts)
     end
 

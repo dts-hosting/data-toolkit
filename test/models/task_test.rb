@@ -72,6 +72,56 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 1, @task.files.count
   end
 
+  # dependencies
+  test "should handle dependencies correctly" do
+    # TODO: flexible handling of stuff like this ...
+    activity = create_activity(
+      {
+        type: "Activities::CreateRecordActivity",
+        data_config: create_data_config_record_type({ record_type: "acquisitions" }),
+        files: [
+          Rack::Test::UploadedFile.new(
+            Rails.root.join("test/fixtures/files/test.csv"),
+            "text/csv"
+          )
+        ]
+      }
+    )
+    first_task = activity.tasks[0]
+    dependent_task = activity.tasks[1]
+
+    assert_includes dependent_task.dependencies, first_task.class
+    assert_not dependent_task.ok_to_run?
+
+    first_task.success!
+    assert dependent_task.ok_to_run?
+  end
+
+  # status transitions
+  test "should execute start! method correctly" do
+    @task.save!
+    @task.start!
+
+    assert_equal "running", @task.status
+    assert_not_nil @task.started_at
+  end
+
+  test "should execute fail! method correctly" do
+    @task.save!
+    @task.fail!
+
+    assert_equal "failed", @task.status
+    assert_not_nil @task.completed_at
+  end
+
+  test "should execute success! method correctly" do
+    @task.save!
+    @task.success!
+
+    assert_equal "succeeded", @task.status
+    assert_not_nil @task.completed_at
+  end
+
   # progress checking
   test "progress should be 0 when status is pending" do
     @task.status = :pending
