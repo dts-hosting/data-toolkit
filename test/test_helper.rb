@@ -63,7 +63,7 @@ module ActiveSupport
 
     def sign_in(user)
       client = user.client
-      CollectionSpaceService.stubs(:client_for).returns(client)
+      CollectionSpaceApi.stubs(:client_for).returns(client)
       client.stubs(:can_authenticate?).returns(true)
       post session_url, params: {
         cspace_url: user.cspace_url,
@@ -74,7 +74,7 @@ module ActiveSupport
 
     def sign_in_with_failed_auth(user)
       client = user.client
-      CollectionSpaceService.stubs(:client_for).returns(client)
+      CollectionSpaceApi.stubs(:client_for).returns(client)
       client.stubs(:can_authenticate?).returns(false)
       post session_url, params: {
         cspace_url: user.cspace_url,

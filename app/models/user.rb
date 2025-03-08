@@ -26,6 +26,6 @@ class User < ApplicationRecord
   # Returns a CollectionSpace client instance for the user
   # @return [CollectionSpace::Client]
   def client
-    CollectionSpaceService.client_for(cspace_url, email_address, password)
+    CollectionSpaceApi.client_for(cspace_url, email_address, password)
   end
 end

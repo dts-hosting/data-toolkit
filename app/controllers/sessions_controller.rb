@@ -27,7 +27,7 @@ class SessionsController < ApplicationController
   end
 
   def build_client
-    CollectionSpaceService.client_for(
+    CollectionSpaceApi.client_for(
       session_params[:cspace_url],
       session_params[:email_address],
       session_params[:password]

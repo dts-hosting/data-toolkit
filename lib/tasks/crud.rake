@@ -51,7 +51,7 @@ namespace :crud do
         email_address: args.fetch(:email_address),
         password: args.fetch(:password)
       }
-      client = CollectionSpaceService.client_for(
+      client = CollectionSpaceApi.client_for(
         opts[:cspace_url], opts[:email_address], opts[:password]
       )
       version_data = client.version

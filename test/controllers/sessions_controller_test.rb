@@ -68,7 +68,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
         password: "Administrator"
       )
     )
-    CollectionSpaceService.stubs(:client_for).returns(client)
+    CollectionSpaceApi.stubs(:client_for).returns(client)
     client
   end
 
