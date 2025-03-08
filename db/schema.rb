@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_07_014302) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_07_220641) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -68,8 +68,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_07_014302) do
     t.datetime "updated_at", null: false
     t.integer "status", default: 0, null: false
     t.json "feedback"
+    t.integer "current_task_id", null: false
     t.index ["activity_id", "position"], name: "index_data_items_on_activity_id_and_position", unique: true
     t.index ["activity_id"], name: "index_data_items_on_activity_id"
+    t.index ["current_task_id"], name: "index_data_items_on_current_task_id"
     t.index ["status"], name: "index_data_items_on_status"
   end
 
@@ -111,6 +113,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_07_014302) do
   add_foreign_key "activities", "data_configs", primary_key: "id"
   add_foreign_key "activities", "users", primary_key: "id"
   add_foreign_key "data_items", "activities"
+  add_foreign_key "data_items", "tasks", column: "current_task_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "activities"
 end

@@ -1,5 +1,6 @@
 class DataItem < ApplicationRecord
   belongs_to :activity
+  belongs_to :current_task, class_name: "Task"
 
   enum :status, {pending: 0, succeeded: 1, failed: 2}, default: :pending
 

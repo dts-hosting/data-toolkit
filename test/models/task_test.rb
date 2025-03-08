@@ -95,10 +95,11 @@ class TaskTest < ActiveSupport::TestCase
 
   test "progress should calculate percentage when status is running" do
     @task.save!
+    create_data_items_for_task(@task)
     @task.status = :running
 
-    3.times { |i| @task.activity.data_items.create!(status: :pending, position: i + 1, data: {content: "Data #{i + 1}"}) }
-    2.times { |i| @task.activity.data_items.create!(status: :succeeded, position: i + 4, data: {content: "Data #{i + 4}"}) }
+    @task.data_items.first.update(status: :succeeded)
+    @task.data_items.last.update(status: :succeeded)
 
     # Should be 40% complete (2 out of 5 items)
     assert_equal 40.0, @task.progress
@@ -111,10 +112,11 @@ class TaskTest < ActiveSupport::TestCase
 
   test "progress should trigger finish_up when reaching 100%" do
     @task.save!
+    create_data_items_for_task(@task)
     @task.status = :running
     @task.save!
 
-    3.times { |i| @task.activity.data_items.create!(status: :succeeded, position: i + 1, data: {content: "Data #{i + 1}"}) }
+    @task.data_items.update_all(status: :succeeded)
 
     @task.progress
 
@@ -124,11 +126,12 @@ class TaskTest < ActiveSupport::TestCase
 
   test "progress should set status to failed if any items failed" do
     @task.save!
+    create_data_items_for_task(@task)
     @task.status = :running
     @task.save!
 
-    2.times { |i| @task.activity.data_items.create!(status: :failed, position: i + 1, data: {content: "Data #{i + 1}"}) }
-    @task.activity.data_items.create!(status: :failed, position: 3, data: {content: "Data 3"})
+    @task.data_items.update_all(status: :succeeded)
+    @task.data_items.last.update(status: :failed)
 
     @task.progress
 

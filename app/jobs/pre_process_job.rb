@@ -1,15 +1,21 @@
 class PreProcessJob < ApplicationJob
   queue_as :default
 
-  # This job preprocesses data items and spawns a sub-job for each data item
+  # This job spawns a sub-job for each data item
   def perform(task)
     task.update(status: "running", started_at: Time.current)
     Rails.logger.info "Pre process job started"
 
-    sleep 10
-    task.data_items.each do |data_item|
-      # TODO: PreProcessDataItemJob(data_item)
-      data_item.update(status: "succeeded") # this would happen inside the job
+    # TODO: pre-checks b4 spawning sub jobs i.e required headers present etc.?
+    # if failed
+    #   # attach some kind of error report to the task
+    #   task.fail! && return
+    # end
+
+    sleep 10 # tmp for testing
+    task.data_items.in_batches(of: 1000) do |batch|
+      jobs = batch.map { |data_item| PreProcessDataItemJob.new(data_item) }
+      ActiveJob.perform_all_later(jobs)
     end
 
     Rails.logger.info "Pre process job finished spawning sub-jobs"

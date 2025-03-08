@@ -51,6 +51,16 @@ module ActiveSupport
       DataConfig.create(opts)
     end
 
+    def create_data_items_for_task(task, n = 5)
+      n.times do |i|
+        task.activity.data_items.create!(
+          current_task_id: task.id,
+          position: i,
+          data: { content: "Data #{i + 1}" }
+        )
+      end
+    end
+
     def sign_in(user)
       client = CollectionSpace::Client.new
       CollectionSpaceService.stubs(:client_for).returns(client)

@@ -12,6 +12,11 @@ class Task < ApplicationRecord
     []
   end
 
+  # set failed status for the task
+  def fail!
+    update!(status: :failed, completed_at: Time.current)
+  end
+
   # the job that runs when this task is complete (which can spawn other jobs etc.)
   def finalizer
     nil
@@ -43,9 +48,14 @@ class Task < ApplicationRecord
 
     transaction do
       update!(status: :queued)
-      data_items.update_all(status: :pending, feedback: nil)
+      data_items.update_all(current_task_id: id, status: :pending, feedback: nil)
     end
     handler.perform_later(self)
+  end
+
+  # set succeeded status for the task
+  def success!
+    update!(status: :succeeded, completed_at: Time.current)
   end
 
   private
@@ -58,9 +68,7 @@ class Task < ApplicationRecord
   end
 
   def finish_up
-    new_status = data_items.where(status: :failed).exists? ? :failed : :succeeded
-    update!(status: new_status, completed_at: Time.current)
-
+    data_items.where(status: :failed).exists? ? fail! : success!
     finalizer&.perform_later(self)
   end
 

@@ -2,10 +2,13 @@ require "test_helper"
 
 class DataItemTest < ActiveSupport::TestCase
   setup do
+    activity = create_activity
+    task = activity.tasks.create(type: "Tasks::PreProcessTask")
     @data_item = DataItem.new(
       data: {objectNumber: "123"},
-      position: 1,
-      activity: create_activity
+      position: 0,
+      activity: activity,
+      current_task_id: task.id
     )
   end
 
