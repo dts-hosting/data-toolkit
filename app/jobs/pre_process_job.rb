@@ -19,5 +19,8 @@ class PreProcessJob < ApplicationJob
     end
 
     Rails.logger.info "Pre process job finished spawning sub-jobs"
+  rescue => e
+    Rails.logger.error e.message
+    task.fail!
   end
 end

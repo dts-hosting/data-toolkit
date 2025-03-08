@@ -18,6 +18,9 @@ class FileUploadJob < ApplicationJob
 
     # Can update status directly as it's not spawning other jobs
     task.success!
+  rescue => e
+    Rails.logger.error e.message
+    task.fail!
   end
 
   def import_from_csv(task, file)

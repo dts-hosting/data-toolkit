@@ -7,4 +7,12 @@ class DataItem < ApplicationRecord
   validates :data, presence: true
   validates :position, presence: true
   validates :position, uniqueness: {scope: :activity_id}
+
+  def fail!(feedback)
+    update(status: :failed, feedback: feedback)
+  end
+
+  def success!
+    update(status: :succeeded)
+  end
 end
