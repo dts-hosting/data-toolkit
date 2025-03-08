@@ -57,6 +57,7 @@ namespace :crud do
       version_data = client.version
       user = User.new(
         opts.merge(
+          cspace_url: client.config.base_uri,
           cspace_api_version: version_data.api.joined,
           cspace_profile: version_data.ui.profile,
           cspace_ui_version: version_data.ui.version
