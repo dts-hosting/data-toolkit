@@ -1,4 +1,6 @@
 class Task < ApplicationRecord
+  include TransitionsStatus
+
   belongs_to :activity
   has_many :data_items, through: :activity
   has_many_attached :files
@@ -10,10 +12,6 @@ class Task < ApplicationRecord
   # tasks that are required to have succeeded for this task to run
   def dependencies
     []
-  end
-
-  def fail!
-    update!(status: :failed, completed_at: Time.current)
   end
 
   # the job that runs when this task is complete (which can spawn other jobs etc.)
@@ -47,17 +45,15 @@ class Task < ApplicationRecord
 
     transaction do
       update!(status: :queued)
-      data_items.update_all(current_task_id: id, status: :pending, feedback: nil)
+      data_items.update_all(
+        current_task_id: id,
+        status: :pending,
+        feedback: nil,
+        started_at: nil,
+        completed_at: nil
+      )
     end
     handler.perform_later(self)
-  end
-
-  def start!
-    update!(status: :running, started_at: Time.current)
-  end
-
-  def success!
-    update!(status: :succeeded, completed_at: Time.current)
   end
 
   private
@@ -65,7 +61,7 @@ class Task < ApplicationRecord
   def calculate_progress
     return 0 if data_items.empty?
 
-    completed_items_ratio = data_items.where.not(status: :pending).count.to_f / data_items.count
+    completed_items_ratio = data_items.where(status: [:failed, :succeeded]).count.to_f / data_items.count
     (completed_items_ratio * 100).round(2)
   end
 

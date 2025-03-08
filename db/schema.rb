@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_07_220641) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -69,6 +69,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_07_220641) do
     t.integer "status", default: 0, null: false
     t.json "feedback"
     t.integer "current_task_id", null: false
+    t.datetime "started_at"
+    t.datetime "completed_at"
     t.index ["activity_id", "position"], name: "index_data_items_on_activity_id_and_position", unique: true
     t.index ["activity_id"], name: "index_data_items_on_activity_id"
     t.index ["current_task_id"], name: "index_data_items_on_current_task_id"
@@ -92,6 +94,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_07_220641) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "feedback"
     t.index ["activity_id"], name: "index_tasks_on_activity_id"
     t.index ["status"], name: "index_tasks_on_status"
   end
@@ -110,8 +113,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_07_220641) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "activities", "data_configs", primary_key: "id"
-  add_foreign_key "activities", "users", primary_key: "id"
+  add_foreign_key "activities", "data_configs"
+  add_foreign_key "activities", "users"
   add_foreign_key "data_items", "activities"
   add_foreign_key "data_items", "tasks", column: "current_task_id"
   add_foreign_key "sessions", "users"

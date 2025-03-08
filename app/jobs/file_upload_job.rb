@@ -9,7 +9,7 @@ class FileUploadJob < ApplicationJob
     task.start!
     Rails.logger.info "File upload job started"
 
-    task.fail! && return if task.activity.files.empty?
+    task.fail!({errors: ["At least one file is required"]}) && return if task.activity.files.empty?
 
     task.activity.files.each do |file|
       # TODO: determine content type: import_from_excel(task, file)
@@ -20,7 +20,7 @@ class FileUploadJob < ApplicationJob
     task.success!
   rescue => e
     Rails.logger.error e.message
-    task.fail!
+    task.fail!({errors: [e.message]})
   end
 
   def import_from_csv(task, file)

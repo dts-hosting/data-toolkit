@@ -1,18 +1,12 @@
 class DataItem < ApplicationRecord
+  include TransitionsStatus
+
   belongs_to :activity
   belongs_to :current_task, class_name: "Task"
 
-  enum :status, {pending: 0, succeeded: 1, failed: 2}, default: :pending
+  enum :status, {pending: 0, running: 1, succeeded: 2, failed: 3}, default: :pending
 
   validates :data, presence: true
   validates :position, presence: true
   validates :position, uniqueness: {scope: :activity_id}
-
-  def fail!(feedback)
-    update(status: :failed, feedback: feedback)
-  end
-
-  def success!
-    update(status: :succeeded)
-  end
 end
