@@ -6,8 +6,8 @@ class User < ApplicationRecord
 
   validates :cspace_url, presence: true, length: {maximum: 2048},
     format: {
-      with: URI::DEFAULT_PARSER.make_regexp(%w[http https]),
-      message: "must be a valid URL"
+      with: /\A#{URI::DEFAULT_PARSER.make_regexp(%w[http https])}.*\/cspace-services\z/,
+      message: "must be a valid URL ending with /cspace-services"
     }
 
   validates :email_address, presence: true, uniqueness: {scope: :cspace_url},
@@ -23,17 +23,9 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
-  before_save :format_cspace_url
-
   # Returns a CollectionSpace client instance for the user
   # @return [CollectionSpace::Client]
   def client
     CollectionSpaceService.client_for(cspace_url, email_address, password)
-  end
-
-  private
-
-  def format_cspace_url
-    self.cspace_url = CollectionSpaceService.format_url(cspace_url)
   end
 end

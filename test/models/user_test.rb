@@ -11,13 +11,11 @@ class UserTest < ActiveSupport::TestCase
     User.create!(valid_user_attributes)
     user = User.new(valid_user_attributes)
 
-    assert user.valid?
-    assert_raises(ActiveRecord::RecordNotUnique) do
-      user.save(validate: false)
-    end
+    assert_not user.valid?
+    assert_includes user.errors[:email_address], "has already been taken"
 
     user = User.new(valid_user_attributes.merge(
-      cspace_url: "https://different-instance.collectivecare.org"
+      cspace_url: "https://different-instance.collectivecare.org/cspace-services"
     ))
     assert user.save
   end
@@ -61,19 +59,13 @@ class UserTest < ActiveSupport::TestCase
   test "cspace_url must be a valid URL" do
     user = User.new(valid_user_attributes.merge(cspace_url: "invalid-url"))
     assert_not user.valid?
-    assert_includes user.errors[:cspace_url], "must be a valid URL"
+    assert_includes user.errors[:cspace_url], "must be a valid URL ending with /cspace-services"
   end
 
   test "cspace_url maximum length" do
     user = User.new(valid_user_attributes.merge(cspace_url: "https://#{"a" * 2050}.com"))
     assert_not user.valid?
     assert_includes user.errors[:cspace_url], "is too long (maximum is 2048 characters)"
-  end
-
-  test "cspace_url formatting" do
-    user = User.new(valid_user_attributes.merge(cspace_url: "http://example.com/"))
-    user.save!
-    assert_equal "http://example.com/cspace-services", user.cspace_url
   end
 
   test "password is required" do
@@ -103,7 +95,7 @@ class UserTest < ActiveSupport::TestCase
     {
       email_address: "user@example.com",
       password: "password123",
-      cspace_url: "https://core.collectionspace.org",
+      cspace_url: "https://core.collectionspace.org/cspace-services",
       cspace_api_version: "1.0",
       cspace_profile: "core",
       cspace_ui_version: "1.0"

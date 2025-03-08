@@ -28,7 +28,7 @@ class SessionsController < ApplicationController
 
   def build_client
     CollectionSpaceService.client_for(
-      CollectionSpaceService.format_url(session_params[:cspace_url]),
+      session_params[:cspace_url],
       session_params[:email_address],
       session_params[:password]
     )
@@ -48,7 +48,7 @@ class SessionsController < ApplicationController
 
   def find_or_create_user(client)
     User.find_or_create_by(
-      cspace_url: CollectionSpaceService.format_url(session_params[:cspace_url]),
+      cspace_url: client.config.base_uri,
       email_address: session_params[:email_address]
     ) do |user|
       set_user_data(user, client)

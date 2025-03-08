@@ -56,13 +56,13 @@ module ActiveSupport
         task.activity.data_items.create!(
           current_task_id: task.id,
           position: i,
-          data: { content: "Data #{i + 1}" }
+          data: {content: "Data #{i + 1}"}
         )
       end
     end
 
     def sign_in(user)
-      client = CollectionSpace::Client.new
+      client = user.client
       CollectionSpaceService.stubs(:client_for).returns(client)
       client.stubs(:can_authenticate?).returns(true)
       post session_url, params: {
@@ -73,7 +73,7 @@ module ActiveSupport
     end
 
     def sign_in_with_failed_auth(user)
-      client = CollectionSpace::Client.new
+      client = user.client
       CollectionSpaceService.stubs(:client_for).returns(client)
       client.stubs(:can_authenticate?).returns(false)
       post session_url, params: {

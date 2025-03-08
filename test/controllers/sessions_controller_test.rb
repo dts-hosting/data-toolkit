@@ -27,7 +27,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should destroy session" do
-    sign_in(@user)
+    setup_successful_auth
     delete session_url
     assert_redirected_to new_session_path
     assert_nil session[:user_id]
@@ -61,7 +61,13 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   private
 
   def setup_mock_client
-    client = CollectionSpace::Client.new
+    client = CollectionSpace::Client.new(
+      CollectionSpace::Configuration.new(
+        base_uri: "https://core.dev.collectionspace.org/cspace-services",
+        username: "admin@core.collectionspace.org",
+        password: "Administrator"
+      )
+    )
     CollectionSpaceService.stubs(:client_for).returns(client)
     client
   end
@@ -83,7 +89,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     OpenStruct.new(
       api: OpenStruct.new(joined: "7.1.0"),
       ui: OpenStruct.new(
-        profile: "fcart",
+        profile: "core",
         version: "7.1.0"
       )
     )

@@ -78,7 +78,7 @@ class TaskTest < ActiveSupport::TestCase
     activity = create_activity(
       {
         type: "Activities::CreateRecordActivity",
-        data_config: create_data_config_record_type({ record_type: "acquisitions" }),
+        data_config: create_data_config_record_type({record_type: "acquisitions"}),
         files: [
           Rack::Test::UploadedFile.new(
             Rails.root.join("test/fixtures/files/test.csv"),

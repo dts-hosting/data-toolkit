@@ -7,7 +7,7 @@ class CollectionSpaceService
 
   def self.config_for(cspace_url, email_address, password)
     CollectionSpace::Configuration.new(
-      base_uri: cspace_url,
+      base_uri: format_url(cspace_url),
       username: email_address,
       password: password
     )

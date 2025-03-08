@@ -52,7 +52,7 @@ namespace :crud do
         password: args.fetch(:password)
       }
       client = CollectionSpaceService.client_for(
-        CollectionSpaceService.format_url(opts[:cspace_url]), opts[:email_address], opts[:password]
+        opts[:cspace_url], opts[:email_address], opts[:password]
       )
       version_data = client.version
       user = User.new(
