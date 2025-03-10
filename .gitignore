@@ -7,8 +7,9 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
+# Ignore all environment files (but .env which is docker ignored).
 /.env*
+!/.env
 
 # Ignore all logfiles and tempfiles.
 /log/*
