@@ -167,9 +167,10 @@ class TaskTest < ActiveSupport::TestCase
     @task.save!
 
     @task.data_items.update_all(status: :succeeded)
+    @task.data_items.last.update(status: :succeeded)
+    @task.reload
 
-    @task.progress
-
+    assert_equal 100, @task.progress
     assert_equal "succeeded", @task.status
     assert_not_nil @task.completed_at
   end
@@ -182,9 +183,9 @@ class TaskTest < ActiveSupport::TestCase
 
     @task.data_items.update_all(status: :succeeded)
     @task.data_items.last.update(status: :failed)
+    @task.reload
 
-    @task.progress
-
+    assert_equal 100, @task.progress
     assert_equal "failed", @task.status
     assert_not_nil @task.completed_at
   end

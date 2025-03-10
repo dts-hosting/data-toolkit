@@ -31,10 +31,7 @@ class Task < ApplicationRecord
   def progress
     case status.to_sym
     when :pending, :queued then 0
-    when :running
-      current_progress = calculate_progress
-      finish_up if current_progress >= 100
-      current_progress
+    when :running then calculate_progress
     when :succeeded, :failed then 100
     else 0
     end
@@ -54,6 +51,10 @@ class Task < ApplicationRecord
       )
     end
     handler.perform_later(self)
+  end
+
+  def update_progress
+    finish_up if running? && calculate_progress >= 100
   end
 
   private

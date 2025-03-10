@@ -9,4 +9,9 @@ class DataItem < ApplicationRecord
   validates :data, presence: true
   validates :position, presence: true
   validates :position, uniqueness: {scope: :activity_id}
+
+  after_update_commit do
+    next current_task.update_progress if current_task.progress >= 100
+    current_task.touch if rand < 0.1
+  end
 end
