@@ -28,6 +28,7 @@ end
 
 group :development do
   gem "htmlbeautifier"
+  gem "kamal", "~> 2.5"
   gem "letter_opener"
   gem "solargraph"
   gem "web-console"

@@ -1,0 +1,31 @@
+service: data-toolkit
+
+image: collectionspace/data-toolkit
+
+builder:
+  arch: amd64
+
+registry:
+  username:
+    - DOCKER_REGISTRY_USER
+  password:
+    - DOCKER_REGISTRY_PASSWORD
+
+ssh:
+  config: true
+  user: ubuntu
+
+volumes:
+  - "/storage:/rails/storage"
+
+env:
+  clear:
+    RAILS_ASSUME_SSL: true
+    RAILS_ENV: production
+    RAILS_FORCE_SSL: true
+    RAILS_LOG_TO_STDOUT: true
+  secret:
+    - ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+    - ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+    - ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
+    - SECRET_KEY_BASE
