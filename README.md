@@ -34,3 +34,33 @@ ACT_TYPE=Activities::CreateRecordActivity
 FILE=test/fixtures/files/test.csv
 ./bin/rake "crud:create:activity[$USER_ID,$DATA_CFG_ID,$ACT_TYPE,$FILE]"
 ```
+
+## Deployment
+
+Locally with Docker.
+
+```bash
+docker compose build
+docker compose up
+```
+
+Remote with Kamal.
+
+```bash
+# TODO: download .kamal/secrets.qa
+
+# verify access to docker registry
+bundle exec kamal registry login -d qa
+
+# verify connections to the server
+bundle exec kamal server bootstrap -d qa
+
+# run the deploy process
+bundle exec kamal deploy -d qa
+
+# run a command on the container
+bundle exec kamal app exec -d qa "bin/rails about"
+
+# connect to the container
+bundle exec kamal app exec -i -d qa "bin/rails console"
+```

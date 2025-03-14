@@ -1,0 +1,11 @@
+proxy:
+  ssl: true
+  host: toolkit.lyrasistechnology.org
+  app_port: 3000
+
+servers:
+  web:
+    hosts:
+      - toolkit.lyrasistechnology.org
+    env:
+      SOLID_QUEUE_IN_PUMA: true
