@@ -49,11 +49,11 @@ Remote with Kamal.
 ```bash
 # TODO: download .kamal/secrets.qa
 
-# verify access to docker registry
-bundle exec kamal registry login -d qa
-
 # verify connections to the server
 bundle exec kamal server bootstrap -d qa
+
+# verify access to docker registry
+bundle exec kamal registry login -d qa
 
 # run the deploy process
 bundle exec kamal deploy -d qa

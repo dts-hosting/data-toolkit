@@ -2,4 +2,4 @@
 
 echo "Docker set up on $KAMAL_HOSTS..."
 
-sudo usermod -aG docker ubuntu
+kamal server exec "sudo usermod -aG docker ubuntu"
