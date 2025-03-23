@@ -1,8 +1,10 @@
-class Activities::ExportRecordId < Activity
-  include NoFileRecordType
-  include OptList::NoOverride
+module Activities
+  class ExportRecordId < Activity
+    include NoFileRecordType
+    include OptList::NoOverride
 
-  def workflow
-    []
+    def workflow
+      []
+    end
   end
 end

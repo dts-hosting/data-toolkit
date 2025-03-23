@@ -1,8 +1,10 @@
-class Activities::AnalyzeMediaActivity < Activity
-  include MultiFileRecordType
-  include OptList::NoOverride
+module Activities
+  class AnalyzeMediaActivity < Activity
+    include MultiFileRecordType
+    include OptList::NoOverride
 
-  def workflow
-    []
+    def workflow
+      []
+    end
   end
 end

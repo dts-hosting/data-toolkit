@@ -1,8 +1,10 @@
-class Activities::ImportTermActivity < Activity
-  include SingleFileTermLists
-  include OptList::NoOverride
+module Activities
+  class ImportTermActivity < Activity
+    include SingleFileTermLists
+    include OptList::NoOverride
 
-  def workflow
-    []
+    def workflow
+      []
+    end
   end
 end

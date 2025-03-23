@@ -7,15 +7,15 @@ class DataConfigTest < ActiveSupport::TestCase
       config_type: "record_type",
       profile: "core",
       record_type: "collectionobject",
-      url: "https://example.com/core-collectionobject-7.0.0.json",
-      version: "7.0.0"
+      url: "https://example.com/core-collectionobject-1.0.0.json",
+      version: "1.0.0"
     )
 
     @term_lists_config = DataConfig.new(
       config_type: "term_lists",
       profile: "core",
-      url: "https://example.com/core-vocbalaries-7.0.0.json",
-      version: "7.0.0"
+      url: "https://example.com/core-vocbalaries-1.0.0.json",
+      version: "1.0.0"
     )
 
     @optlist_config = DataConfig.new(

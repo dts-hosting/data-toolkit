@@ -1,8 +1,10 @@
-class Activities::UpdateRecordActivity < Activity
-  include SingleFileRecordType
-  include OptList::AllowOverride
+module Activities
+  class UpdateRecordActivity < Activity
+    include SingleFileRecordType
+    include OptList::AllowOverride
 
-  def workflow
-    []
+    def workflow
+      []
+    end
   end
 end

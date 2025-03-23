@@ -1,8 +1,10 @@
-class Activities::DeleteRecordActivity < Activity
-  include SingleFileRecordType
-  include OptList::NoOverride
+module Activities
+  class DeleteRecordActivity < Activity
+    include SingleFileRecordType
+    include OptList::NoOverride
 
-  def workflow
-    []
+    def workflow
+      []
+    end
   end
 end
