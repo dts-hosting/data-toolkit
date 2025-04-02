@@ -503,6 +503,7 @@ DEPENDENCIES
   brakeman
   capybara
   collectionspace-client!
+  csv
   csvlint!
   debug
   dotenv
