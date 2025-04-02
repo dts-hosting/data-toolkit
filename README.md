@@ -2,10 +2,18 @@
 
 A Rails web application for CollectionSpace data related activities.
 
+Initial use/re-setup the application:
+
 ```bash
 rbenv install -s
 bundle install
 ./bin/setup
+```
+
+Restart dev server without re-installing, etc:
+
+```bash
+./bin/dev
 ```
 
 ```bash
