@@ -36,5 +36,18 @@ module ActiveSupport
         password: user.password
       }
     end
+
+    def fixture_file_path(file_name)
+      Rails.root.join("test", "fixtures", "files", file_name)
+    end
+
+    # @param fixtures [Array<String>] fixture file names
+    # @return [ActiveStorage::Attached::Many]
+    def fixtures_as_attachments(filenames)
+      create_activity({
+        type: Activities::AnalyzeMediaActivity,
+        files: create_uploaded_files(filenames).compact
+      }).files
+    end
   end
 end
