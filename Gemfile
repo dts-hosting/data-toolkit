@@ -43,4 +43,8 @@ end
 
 # app gems
 gem "collectionspace-client", github: "collectionspace/collectionspace-client", branch: "main"
+gem "csv"
+gem "csvlint",
+  git: "https://github.com/lyrasis/csvlint.rb.git",
+  tag: "1.5.0"
 gem "pagy"

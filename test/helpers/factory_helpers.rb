@@ -1,4 +1,15 @@
 module FactoryHelpers
+  # @param filenames [Array<String>] names of files in test/fixtures/files
+  # @return [Array<Rack::Test::UploadedFile>] that can be attached to Activities
+  def create_uploaded_files(filenames)
+    filenames.map do |filename|
+      path = fixture_file_path(filename)
+      ext = path.extname.delete_prefix(".")
+      mimetype = Mime::Type.lookup_by_extension(ext).to_s
+      Rack::Test::UploadedFile.new(path, mimetype)
+    end
+  end
+
   def create_activity(attributes = {})
     attributes = {
       user: users(:admin),

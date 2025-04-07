@@ -1,5 +1,4 @@
 require "csv"
-# TODO: require "roo"
 
 class FileUploadJob < ApplicationJob
   queue_as :default
@@ -9,31 +8,26 @@ class FileUploadJob < ApplicationJob
     task.start!
     Rails.logger.info "File upload job started"
 
-    task.fail!({errors: ["At least one file is required"]}) && return if task.activity.files.empty?
-
-    task.activity.files.each do |file|
-      # TODO: determine content type: import_from_excel(task, file)
-      import_from_csv(task, file)
+    if task.activity.files.empty?
+      task.fail!({errors: ["At least one file is required"]}) &&
+        return
     end
+
+    validated = FilesValidator.call(task.activity.files)
+    task.fail!(validated.feedback) && return unless validated.valid?
+
+    validated.data.each { |table| import_from_csv(task, table) }
 
     # Can update status directly as it's not spawning other jobs
     task.success!
   rescue => e
-    Rails.logger.error e.message
+    Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"
     task.fail!({errors: [e.message]})
   end
 
-  def import_from_csv(task, file)
+  def import_from_csv(task, table)
     importer = BatchImporter.new(task)
-    file.open do |f|
-      CSV.foreach(f.path, headers: true) do |row|
-        importer.process_row(row.to_h)
-      end
-    end
+    table.each { |row| importer.process_row(row.to_h) }
     importer.finalize
-  end
-
-  def import_from_excel(task, file)
-    # TODO: do it
   end
 end
