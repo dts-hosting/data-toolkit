@@ -4,6 +4,26 @@ namespace :crud do
       hash.transform_values! { |v| (v.is_a?(String) && v.empty?) ? nil : v }
     end
 
+    def create_or_update_data_config(opts)
+      convert_empty_strings_to_nil(opts)
+      existing = find_existing_data_config(opts)
+      if existing.empty?
+        data_config = DataConfig.new(opts)
+        save_and_print(data_config)
+      else
+        data_config = existing.first
+        data_config.update(url: opts[:url])
+        puts "UPDATED URL:\n#{data_config.to_json}"
+      end
+    end
+
+    def find_existing_data_config(opts)
+      DataConfig.where(config_type: opts[:config_type],
+        profile: opts[:profile],
+        version: opts[:version],
+        record_type: opts[:record_type])
+    end
+
     def save_and_print(object)
       unless object.valid?
         puts object.errors.full_messages.to_json
@@ -40,9 +60,7 @@ namespace :crud do
         url: args.fetch(:url)
       }
 
-      convert_empty_strings_to_nil(opts)
-      data_config = DataConfig.new(opts)
-      save_and_print(data_config)
+      create_or_update_data_config(opts)
     end
 
     task :user, [:cspace_url, :email_address, :password] => :environment do |_t, args|
@@ -68,6 +86,32 @@ namespace :crud do
   end
 
   namespace :import do
-    # TODO: desc "Import Data Configs from manifest"
+    desc "Import DataConfigs from a manifest"
+    task :data_config_manifest, [:url] => :environment do |t, args|
+      url = args[:url]
+      raise "Invalid URL: #{url}" unless url.present? &&
+        url =~ URI::DEFAULT_PARSER.make_regexp
+
+      response = Net::HTTP.get_response(URI.parse(url))
+      unless response.is_a?(Net::HTTPSuccess)
+        raise "Manifest download failed: [#{response.code}] #{response.body}"
+      end
+
+      data = JSON.parse(response.body)
+      unless data[data.keys.first]&.is_a?(Array)
+        raise "Invalid manifest, expected array: #{response.body}"
+      end
+
+      data[data.keys.first].each do |entry|
+        opts = {
+          config_type: entry["dataConfigType"].tr(" ", "_").to_sym,
+          profile: entry["profile"],
+          version: entry["version"],
+          record_type: entry["type"],
+          url: entry["url"]
+        }
+        create_or_update_data_config(opts)
+      end
+    end
   end
 end
