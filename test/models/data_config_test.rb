@@ -20,7 +20,7 @@ class DataConfigTest < ActiveSupport::TestCase
 
     @optlist_config = DataConfig.new(
       config_type: "optlist_overrides",
-      profile: "core",
+      profile: "tenantname",
       url: "https://example.com/core-optlist.json"
     )
   end
@@ -93,8 +93,8 @@ class DataConfigTest < ActiveSupport::TestCase
   # Scope Tests
   test "optlist_overrides scope" do
     @optlist_config.save!
-    assert_includes DataConfig.optlist_overrides(users(:admin)), @optlist_config
-    assert_not_includes DataConfig.optlist_overrides(users(:admin)), @record_type_config
+    assert_includes DataConfig.optlist_overrides(users(:hostedtenantuser)), @optlist_config
+    assert_not_includes DataConfig.optlist_overrides(users(:hostedtenantuser)), @record_type_config
   end
 
   test "record_type scope" do

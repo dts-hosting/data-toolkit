@@ -64,6 +64,8 @@ class SessionsController < ApplicationController
   end
 
   def update_user_if_needed(user)
+    opt_overrides = DataConfig.optlist_overrides(user)
+    user.update(data_config_id: opt_overrides.first.id) unless opt_overrides.empty?
     user.update(password: session_params[:password]) if user.password != session_params[:password]
   end
 

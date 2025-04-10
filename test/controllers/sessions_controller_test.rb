@@ -58,12 +58,35 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Failed to access version information from CollectionSpace.", flash[:alert]
   end
 
+  test "associates optlist_overrides DataConfig with User" do
+    oo = create_data_config_optlist_overrides({profile: "tenantname"})
+    user = users(:hostedtenantuser)
+    @client = setup_mock_tenant_client
+    setup_successful_auth
+    post session_url, params: auth_params(user)
+    user.reload
+
+    assert_equal oo.id, user.data_config_id
+  end
+
   private
 
   def setup_mock_client
     client = CollectionSpace::Client.new(
       CollectionSpace::Configuration.new(
         base_uri: "https://core.dev.collectionspace.org/cspace-services",
+        username: "admin@core.collectionspace.org",
+        password: "Administrator"
+      )
+    )
+    CollectionSpaceApi.stubs(:client_for).returns(client)
+    client
+  end
+
+  def setup_mock_tenant_client
+    client = CollectionSpace::Client.new(
+      CollectionSpace::Configuration.new(
+        base_uri: "https://tenantname.collectionspace.org/cspace-services",
         username: "admin@core.collectionspace.org",
         password: "Administrator"
       )

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_10_184116) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -108,6 +108,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
     t.string "cspace_api_version", null: false
     t.string "cspace_profile", null: false
     t.string "cspace_ui_version", null: false
+    t.integer "data_config_id"
+    t.index ["data_config_id"], name: "index_users_on_data_config_id"
     t.index ["email_address", "cspace_url"], name: "index_users_on_email_address_and_cspace_url", unique: true
   end
 
@@ -119,4 +121,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
   add_foreign_key "data_items", "tasks", column: "current_task_id"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "activities"
+  add_foreign_key "users", "data_configs"
 end

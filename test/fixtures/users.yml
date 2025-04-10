@@ -7,6 +7,7 @@ admin:
   cspace_url: https://core.dev.collectionspace.org/cspace-services
   email_address: admin@collectionspace.org
   password: Administrator
+  data_config_id: nil
 
 reader:
   cspace_api_version: "1.0.0"
@@ -15,3 +16,13 @@ reader:
   cspace_url: https://core.dev.collectionspace.org/cspace-services
   email_address: reader@collectionspace.org
   password: dear_reader
+  data_config_id: nil
+
+hostedtenantuser:
+  cspace_api_version: "1.0.0"
+  cspace_profile: "core"
+  cspace_ui_version: "1.0.0"
+  cspace_url: https://tenantname.collectionspace.org/cspace-services
+  email_address: user@tenantname.collectionspace.org
+  password: apassword
+  data_config_id: nil

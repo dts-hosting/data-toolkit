@@ -2,6 +2,7 @@ class DataConfig < ApplicationRecord
   ALLOWED_CONFIG_TYPES = %i[optlist_overrides record_type term_lists].freeze
   URL_FORMAT = URI::DEFAULT_PARSER.make_regexp(%w[http https]).freeze
 
+  belongs_to :user, optional: true
   validates :config_type, presence: true,
     inclusion: {in: ALLOWED_CONFIG_TYPES.map(&:to_s)}
   validates :profile, presence: true
@@ -11,7 +12,13 @@ class DataConfig < ApplicationRecord
 
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
-  scope :optlist_overrides, ->(user) { by_profile(user).with_config_type(:optlist_overrides) }
+  scope :optlist_overrides, ->(user) {
+    with_config_type(:optlist_overrides)
+      .select do |x|
+      url = user.cspace_url.sub(/https?:\/\//, "")
+      url.start_with?(x.profile)
+    end
+  }
   scope :record_type, ->(user) { by_profile(user).by_version(user).with_config_type(:record_type) }
   scope :term_lists, ->(user) { by_profile(user).by_version(user).with_config_type(:term_lists) }
   scope :record_type_media, ->(user) { record_type(user).where("record_type LIKE ?", "%media") }
@@ -30,6 +37,10 @@ class DataConfig < ApplicationRecord
 
   def self.for(user, activity)
     send(activity.data_config_type.to_sym, user)
+  end
+
+  def self.for_user(user)
+    user
   end
 
   def self.with_config_type(type)

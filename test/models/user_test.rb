@@ -80,6 +80,13 @@ class UserTest < ActiveSupport::TestCase
     assert_includes user.errors[:password], "is too short (minimum is 8 characters)"
   end
 
+  test "can create without optlist_overrides DataConfig" do
+    user = User.create!(valid_user_attributes)
+    Session.create!(user: user)
+
+    assert_nil user.data_config_id
+  end
+
   test "destroying user destroys associated sessions" do
     user = User.create!(valid_user_attributes)
     Session.create!(user: user)
