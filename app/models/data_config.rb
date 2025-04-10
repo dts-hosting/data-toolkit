@@ -6,8 +6,14 @@ class DataConfig < ApplicationRecord
     inclusion: {in: ALLOWED_CONFIG_TYPES.map(&:to_s)}
   validates :profile, presence: true
   validates :url, presence: true, format: {with: URL_FORMAT}
-  validates :version, presence: true, unless: :optlist_overrides_config?
+
+  validates :record_type, absence: true, if: -> { optlist_overrides_config? || term_lists_config? }
   validates :record_type, presence: true, if: :record_type_config?
+
+  validates :version, absence: true, if: :optlist_overrides_config?
+  validates :version, presence: true, if: -> { record_type_config? || term_lists_config? }
+
+  validate :unique_attributes
 
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
@@ -40,5 +46,23 @@ class DataConfig < ApplicationRecord
 
   def matches_config_type?(type)
     config_type == type.to_s
+  end
+
+  def unique_attributes
+    query = DataConfig.where(
+      config_type: config_type,
+      profile: profile
+    )
+
+    query = query.where(version: version.nil? ? nil : version)
+    query = query.where(record_type: record_type.nil? ? nil : record_type)
+
+    if persisted?
+      query = query.where.not(id: id)
+    end
+
+    if query.exists?
+      errors.add(:data_config, "this set of attributes already exists")
+    end
   end
 end
