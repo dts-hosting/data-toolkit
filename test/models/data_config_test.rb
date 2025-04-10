@@ -62,9 +62,12 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_includes @record_type_config.errors[:record_type], "can't be blank"
   end
 
-  test "record_type not required for term_lists config" do
+  test "record_type not required and unsupported for term_lists config" do
     @term_lists_config.record_type = nil
     assert @term_lists_config.valid?
+
+    @term_lists_config.record_type = "collectionobject"
+    assert_not @term_lists_config.valid?
   end
 
   test "invalid without url" do
@@ -85,9 +88,76 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_includes @record_type_config.errors[:version], "can't be blank"
   end
 
-  test "version not required for optlist_overrides config" do
+  test "record_type not required and unsupported for optlist_overrides config" do
+    @optlist_config.record_type = nil
+    assert @optlist_config.valid?
+
+    @optlist_config.record_type = "collectionobject"
+    assert_not @optlist_config.valid?
+  end
+
+  test "version not required and unsupported for optlist_overrides config" do
     @optlist_config.version = nil
     assert @optlist_config.valid?
+
+    @optlist_config.version = "1.0.0"
+    assert_not @optlist_config.valid?
+  end
+
+  test "uniqueness validation for different config types" do
+    base_url = "https://example.com/config"
+    profile_name = "test_profile"
+    version_value = "1.0"
+    record_type_value = "object"
+
+    # Test for record_type config (requires config_type, profile, version, record_type)
+    opts = {
+      config_type: "record_type",
+      profile: profile_name,
+      version: version_value,
+      record_type: record_type_value,
+      url: base_url
+    }
+    DataConfig.create!(opts)
+
+    duplicate_record = DataConfig.new(opts)
+    assert_not duplicate_record.valid?
+    assert_includes duplicate_record.errors[:data_config], "this set of attributes already exists"
+
+    different_record = DataConfig.new(opts.merge(record_type: "different_record_type"))
+    assert different_record.valid?
+
+    # Test for term_lists config (requires config_type, profile, version)
+    opts = {
+      config_type: "term_lists",
+      profile: profile_name,
+      version: version_value,
+      url: base_url
+    }
+    DataConfig.create!(opts)
+
+    duplicate_term_lists = DataConfig.new(opts)
+
+    assert_not duplicate_term_lists.valid?
+    assert_includes duplicate_term_lists.errors[:data_config], "this set of attributes already exists"
+
+    different_version_term_lists = DataConfig.new(opts.merge(version: "2.0"))
+    assert different_version_term_lists.valid?
+
+    # Test for optlist_overrides config (requires config_type, profile)
+    opts = {
+      config_type: "optlist_overrides",
+      profile: profile_name,
+      url: base_url
+    }
+    DataConfig.create!(opts)
+
+    duplicate_optlist = DataConfig.new(opts)
+    assert_not duplicate_optlist.valid?
+    assert_includes duplicate_optlist.errors[:data_config], "this set of attributes already exists"
+
+    different_profile_optlist = DataConfig.new(opts.merge(profile: "different_profile"))
+    assert different_profile_optlist.valid?
   end
 
   # Scope Tests
