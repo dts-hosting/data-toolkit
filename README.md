@@ -31,9 +31,11 @@ REC_TYPE=collectionobjects
 CFG_URL=https://ex.com/c-9035928.json
 ./bin/rake "crud:create:data_config[$CFG_TYPE,$PROFILE,$UI_VERSION,$REC_TYPE,$CFG_URL]"
 
-# TODO: import data configs from manifest
-MF_URL=
-./bin/rake crud:import:data_config[$MF_URL]
+# import data configs from manifest
+MF_URL=https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/community_profile_mappers_release_8_1_1.json
+./bin/rake crud:import:data_config_manifest[$MF_URL]
+
+# Note: MF_URL in the example above is for record_type DataConfigs. An optlist_override manifest lives at: https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/optlist_overrides.json
 
 # create an activity
 USER_ID=1
