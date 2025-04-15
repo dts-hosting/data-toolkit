@@ -1,7 +1,5 @@
 module Activities
   class DeleteRecordActivity < Activity
-    include OptList::NoOverride
-
     validates :files, presence: true,
       length: {is: 1, message: "must have exactly one file"}
 

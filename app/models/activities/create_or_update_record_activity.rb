@@ -1,7 +1,5 @@
 module Activities
   class CreateOrUpdateRecordActivity < Activity
-    include OptList::AllowOverride
-
     validates :files, presence: true,
       length: {is: 1, message: "must have exactly one file"}
 
