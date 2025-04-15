@@ -1,5 +1,5 @@
 module Activities
-  class ImportTermActivity < Activity
+  class ImportTerms < Activity
     validates :files, presence: true,
       length: {is: 1, message: "must have exactly one file"}
 

@@ -1,6 +1,6 @@
 require "csv"
 
-class FileUploadJob < ApplicationJob
+class ProcessUploadedFilesJob < ApplicationJob
   queue_as :default
 
   # This job iterates files to create data items

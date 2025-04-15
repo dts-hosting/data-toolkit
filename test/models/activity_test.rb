@@ -9,7 +9,7 @@ class ActivityTest < ActiveSupport::TestCase
     @activity = Activity.new(
       user: @user,
       data_config: @data_config,
-      type: "Activities::ExportRecordId"
+      type: "Activities::ExportRecordIds"
     )
   end
 

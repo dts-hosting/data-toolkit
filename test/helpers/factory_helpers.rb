@@ -13,7 +13,7 @@ module FactoryHelpers
   def create_activity(attributes = {})
     attributes = {
       user: users(:admin),
-      type: "Activities::ExportRecordId"
+      type: "Activities::ExportRecordIds"
     }.merge(attributes)
     attributes[:data_config] = create_data_config_record_type unless attributes[:data_config]
     Activity.create(attributes)

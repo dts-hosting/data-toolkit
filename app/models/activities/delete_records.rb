@@ -1,5 +1,5 @@
 module Activities
-  class DeleteRecordActivity < Activity
+  class DeleteRecords < Activity
     validates :files, presence: true,
       length: {is: 1, message: "must have exactly one file"}
 
@@ -7,7 +7,7 @@ module Activities
 
     # Tasks::DeleteFilePrecheck, Tasks::LookupAndDeleteRecords
     def workflow
-      [Tasks::FileUploadTask]
+      [Tasks::ProcessUploadedFiles]
     end
   end
 end

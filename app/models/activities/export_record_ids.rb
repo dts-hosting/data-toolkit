@@ -1,5 +1,5 @@
 module Activities
-  class ExportRecordId < Activity
+  class ExportRecordIds < Activity
     validates :files, presence: false
 
     def data_config_type = "record_type"

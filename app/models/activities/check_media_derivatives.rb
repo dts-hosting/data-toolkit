@@ -1,12 +1,12 @@
 module Activities
-  class AnalyzeMediaActivity < Activity
+  class CheckMediaDerivatives < Activity
     # Takes 0 to many files. Runs on all site media of record_type if no file
     #   given
 
     def data_config_type = "record_type"
 
     def workflow
-      [Tasks::FileUploadTask]
+      [Tasks::ProcessUploadedFiles]
     end
   end
 end

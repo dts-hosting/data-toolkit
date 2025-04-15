@@ -1,17 +1,17 @@
 require "test_helper"
 
-class FileUploadJobTest < ActiveJob::TestCase
+class ProcessUploadedFilesJobTest < ActiveJob::TestCase
   # TODO Test that BatchImporter is called as expected
 
   test "job is performed successfully with valid CSVs" do
     assert_performed_jobs 0
 
     assert_nothing_raised do
-      assert_performed_jobs 1, only: FileUploadJob do
+      assert_performed_jobs 1, only: ProcessUploadedFilesJob do
         files = create_uploaded_files(["test.csv", "valid_lf.csv"])
 
         activity = create_activity({
-          type: Activities::AnalyzeMediaActivity,
+          type: Activities::CheckMediaDerivatives,
           files: files
         })
         activity.save
@@ -23,11 +23,11 @@ class FileUploadJobTest < ActiveJob::TestCase
     assert_performed_jobs 0
 
     assert_nothing_raised do
-      assert_performed_jobs 1, only: FileUploadJob do
+      assert_performed_jobs 1, only: ProcessUploadedFilesJob do
         files = create_uploaded_files(["invalid_encoding.csv", "valid_lf.csv"])
 
         activity = create_activity({
-          type: Activities::AnalyzeMediaActivity,
+          type: Activities::CheckMediaDerivatives,
           files: files
         })
         activity.save

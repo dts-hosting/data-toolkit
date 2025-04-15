@@ -1,8 +1,8 @@
 # This task handles preprocessing of data items
 module Tasks
-  class PreProcessTask < Task
+  class PreCheckIngestData < Task
     def dependencies
-      [Tasks::FileUploadTask]
+      [Tasks::ProcessUploadedFiles]
     end
 
     def finalizer
@@ -10,8 +10,6 @@ module Tasks
       nil
     end
 
-    def handler
-      PreProcessJob
-    end
+    def handler = PreCheckIngestDataJob
   end
 end
