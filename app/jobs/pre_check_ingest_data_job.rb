@@ -1,4 +1,4 @@
-class PreProcessJob < ApplicationJob
+class PreCheckIngestDataJob < ApplicationJob
   queue_as :default
 
   # This job spawns a sub-job for each data item
@@ -13,7 +13,7 @@ class PreProcessJob < ApplicationJob
     # end
 
     task.data_items.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |data_item| PreProcessDataItemJob.new(data_item) }
+      jobs = batch.map { |data_item| PreCheckIngestDataItemJob.new(data_item) }
       ActiveJob.perform_all_later(jobs)
     end
 

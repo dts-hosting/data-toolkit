@@ -1,4 +1,4 @@
-class PreProcessDataItemJob < ApplicationJob
+class PreCheckIngestDataItemJob < ApplicationJob
   queue_as :default
 
   def perform(data_item)

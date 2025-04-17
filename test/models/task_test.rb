@@ -3,7 +3,7 @@ require "test_helper"
 class TaskTest < ActiveSupport::TestCase
   def setup
     @task = Task.new(
-      type: "Tasks::FileUploadTask",
+      type: "Tasks::ProcessUploadedFiles",
       activity: create_activity
     )
   end
@@ -77,7 +77,7 @@ class TaskTest < ActiveSupport::TestCase
     # TODO: flexible handling of stuff like this ...
     activity = create_activity(
       {
-        type: "Activities::CreateRecordActivity",
+        type: "Activities::CreateOrUpdateRecords",
         data_config: create_data_config_record_type({record_type: "acquisitions"}),
         files: [
           Rack::Test::UploadedFile.new(

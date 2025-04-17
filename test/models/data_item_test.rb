@@ -3,7 +3,7 @@ require "test_helper"
 class DataItemTest < ActiveSupport::TestCase
   setup do
     activity = create_activity
-    task = activity.tasks.create(type: "Tasks::PreProcessTask")
+    task = activity.tasks.create(type: "Tasks::PreCheckIngestData")
     @data_item = DataItem.new(
       data: {objectNumber: "123"},
       position: 0,

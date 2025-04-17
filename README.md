@@ -40,7 +40,7 @@ MF_URL=https://raw.githubusercontent.com/collectionspace/cspace-config-untangler
 # create an activity
 USER_ID=1
 DATA_CFG_ID=1
-ACT_TYPE=Activities::CreateRecordActivity
+ACT_TYPE=Activities::CreateOrUpdateRecords
 FILE=test/fixtures/files/test.csv
 ./bin/rake "crud:create:activity[$USER_ID,$DATA_CFG_ID,$ACT_TYPE,$FILE]"
 ```
