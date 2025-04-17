@@ -47,6 +47,7 @@ namespace :crud do
 
       convert_empty_strings_to_nil(opts)
       activity = Activity.new(opts)
+      activity.build_batch_config
       save_and_print(activity)
     end
 
