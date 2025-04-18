@@ -22,6 +22,10 @@ class DataConfig < ApplicationRecord
   scope :term_lists, ->(user) { by_profile(user).by_version(user).with_config_type(:term_lists) }
   scope :record_type_media, ->(user) { record_type(user).where("record_type LIKE ?", "%media") }
 
+  def display_name
+    "#{profile} #{version} #{record_type}".strip
+  end
+
   def optlist_overrides_config?
     matches_config_type?(:optlist_overrides)
   end

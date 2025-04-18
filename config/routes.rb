@@ -1,8 +1,6 @@
 Rails.application.routes.draw do
   resource :session
   resources :users, only: [:show]
-  get "home/index"
-  root to: "home#index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -15,4 +13,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  root to: "home#my_activities"
+  get "/all_activities", to: "home#index", as: :all_activities
+  get "/my_activities", to: "home#my_activities", as: :my_activities
 end

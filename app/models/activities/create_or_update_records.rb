@@ -5,6 +5,9 @@ module Activities
 
     def data_config_type = "record_type"
 
+    def data_handler = @data_handler ||=
+      CollectionSpaceMapper.single_record_type_handler_for(self)
+
     def requires_batch_config?
       true
     end
@@ -15,7 +18,8 @@ module Activities
       [Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData]
     end
 
-    def data_handler = @data_handler ||=
-                         CollectionSpaceMapper.single_record_type_handler_for(self)
+    def self.display_name
+      "Create or Update Records"
+    end
   end
 end

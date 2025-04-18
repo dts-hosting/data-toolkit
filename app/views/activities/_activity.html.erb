@@ -1,0 +1,30 @@
+<%= tag.div id: dom_id(activity), class: "card mb-3" do %>
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-3">
+        <div class="d-flex align-items-center mb-1">
+          <span class="text-muted small me-2">Type</span>
+        </div>
+        <span class="text-monospace fw-medium"><%= activity.class.display_name %></span>
+      </div>
+      <div class="col-md-3">
+        <div class="d-flex align-items-center mb-1">
+          <span class="text-muted small me-2">Data Config</span>
+        </div>
+        <span class="text-monospace fw-medium"><%= activity.data_config.display_name %></span>
+      </div>
+      <div class="col-md-3">
+        <div class="d-flex align-items-center mb-1">
+          <span class="text-muted small me-2">Task</span>
+        </div>
+        <span class="text-monospace fw-medium"><%= task_name(activity) %></span>
+      </div>
+      <div class="col-md-3 text-end">
+        <div class="d-flex align-items-center mb-1 justify-content-end">
+          <span class="text-muted small me-2">Last Updated</span>
+        </div>
+        <span class="text-monospace fw-medium"><%= activity.updated_at.strftime("%b %d, %Y %H:%M") %></span>
+      </div>
+    </div>
+  </div>
+<% end %>

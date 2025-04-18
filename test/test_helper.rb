@@ -24,6 +24,7 @@ module ActiveSupport
         email_address: user.email_address,
         password: user.password
       }
+      user
     end
 
     def sign_in_with_failed_auth(user)

@@ -12,5 +12,9 @@ module Activities
     def workflow
       [Tasks::ProcessUploadedFiles]
     end
+
+    def self.display_name
+      "Check Media Derivatives"
+    end
   end
 end

@@ -1,4 +1,36 @@
-<div class="container mt-4">
-  <h2>Home#index</h2>
-  <p>Find me in app/views/home/index.html.erb</p>
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-md-3">
+      <%= render "shared/menu" %>
+    </div>
+
+    <div class="col-md-9">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0">Dashboard</h5>
+        </div>
+        <div class="card-body">
+          <p>Welcome to your activities dashboard.</p>
+
+          <div id="activities">
+            <%= turbo_frame_tag :activities_page, @pagy.page, target: :_top do %>
+              <% if @activities.empty? %>
+                <div class="alert alert-info text-center">
+                  <p class="mb-0">No activities found.</p>
+                </div>
+              <% else %>
+                <%= render partial: "activities/activity", collection: @activities, locals: {inline: true} %>
+              <% end %>
+
+              <% if @pagy.next %>
+                <%= turbo_frame_tag :activities_page, @pagy.next, src: root_path(page: @pagy.next), loading: :lazy, target: :_top do %>
+                  <%= tag.div "Loading..." %>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

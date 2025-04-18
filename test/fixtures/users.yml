@@ -15,3 +15,11 @@ reader:
   cspace_url: https://core.dev.collectionspace.org/cspace-services
   email_address: reader@collectionspace.org
   password: dear_reader
+
+external:
+  cspace_api_version: "1.0.0"
+  cspace_profile: "core"
+  cspace_ui_version: "1.0.0"
+  cspace_url: https://some.other.org/cspace-services
+  email_address: user@other.org
+  password: doesn'tmatter

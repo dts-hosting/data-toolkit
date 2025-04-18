@@ -6,5 +6,9 @@ module Tasks
     after_create_commit { run }
 
     def handler = ProcessUploadedFilesJob
+
+    def self.display_name
+      "Process Uploaded Files"
+    end
   end
 end
