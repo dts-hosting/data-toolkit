@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_17_185552) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -47,6 +47,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
     t.datetime "updated_at", null: false
     t.index ["data_config_id"], name: "index_activities_on_data_config_id"
     t.index ["user_id"], name: "index_activities_on_user_id"
+  end
+
+  create_table "batch_configs", force: :cascade do |t|
+    t.string "batch_mode", null: false
+    t.boolean "check_record_status", null: false
+    t.string "date_format", null: false
+    t.boolean "force_defaults", null: false
+    t.string "multiple_recs_found", null: false
+    t.string "null_value_string_handling", null: false
+    t.string "response_mode", null: false
+    t.boolean "search_if_not_cached", null: false
+    t.string "status_check_method", null: false
+    t.boolean "strip_id_values", null: false
+    t.string "two_digit_year_handling", null: false
+    t.integer "activity_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_id"], name: "index_batch_configs_on_activity_id"
   end
 
   create_table "data_configs", force: :cascade do |t|
@@ -115,6 +133,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_08_192715) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activities", "data_configs"
   add_foreign_key "activities", "users"
+  add_foreign_key "batch_configs", "activities"
   add_foreign_key "data_items", "activities"
   add_foreign_key "data_items", "tasks", column: "current_task_id"
   add_foreign_key "sessions", "users"

@@ -5,6 +5,10 @@ module Activities
 
     def data_config_type = "record_type"
 
+    def requires_batch_config?
+      false
+    end
+
     # Tasks::DeleteFilePrecheck, Tasks::LookupAndDeleteRecords
     def workflow
       [Tasks::ProcessUploadedFiles]

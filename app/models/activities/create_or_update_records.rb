@@ -5,6 +5,10 @@ module Activities
 
     def data_config_type = "record_type"
 
+    def requires_batch_config?
+      true
+    end
+
     def workflow
       # Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData,
       #   Tasks::ProcessTask, Tasks::TransferTask

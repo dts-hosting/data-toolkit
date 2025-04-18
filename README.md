@@ -18,10 +18,15 @@ Restart dev server without re-installing, etc:
 
 ```bash
 # create a user
-CSPACE_URL=https://core.dev.collectionspace.org
-EMAIL_ADDRESS=admin@core.collectionspace.org
+CSPACE_URL=https://anthro.collectionspace.org
+EMAIL_ADDRESS=admin@anthro.collectionspace.org
 PASSWORD=Administrator
 ./bin/rake "crud:create:user[$CSPACE_URL,$EMAIL_ADDRESS,$PASSWORD]"
+
+# import data configs from manifest
+MF_URL=https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/community_profile_mappers_release_8_1_1_newstyle.json
+./bin/rake crud:import:data_config_manifest[$MF_URL]
+# Note: MF_URL in the example above is for record_type DataConfigs. An optlist_override manifest lives at: https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/optlist_overrides.json
 
 # create a data config
 CFG_TYPE=record_type
@@ -30,12 +35,6 @@ UI_VERSION=9035928
 REC_TYPE=collectionobjects
 CFG_URL=https://ex.com/c-9035928.json
 ./bin/rake "crud:create:data_config[$CFG_TYPE,$PROFILE,$UI_VERSION,$REC_TYPE,$CFG_URL]"
-
-# import data configs from manifest
-MF_URL=https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/community_profile_mappers_release_8_1_1_newstyle.json
-./bin/rake crud:import:data_config_manifest[$MF_URL]
-
-# Note: MF_URL in the example above is for record_type DataConfigs. An optlist_override manifest lives at: https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/optlist_overrides.json
 
 # create an activity
 USER_ID=1
