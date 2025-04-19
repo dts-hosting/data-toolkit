@@ -3,11 +3,15 @@ class PreCheckIngestDataItemJob < ApplicationJob
 
   def perform(data_item)
     data_item.start!
-    # TODO: do some work lazy ...
-    # sleep rand 1 # real slow one ...
+
+    checker = IngestDataPreCheckItem.new(
+      data_item.activity.data_handler, data_item.data
+    )
+    data_item.fail!(checker.feedback) && return unless checker.ok?
+
     data_item.success!
   rescue => e
     Rails.logger.error e.message
-    data_item.fail!({errors: [e.message]})
+    data_item.fail!({errors: {"application error" => [e.message]}})
   end
 end
