@@ -21,13 +21,14 @@ class HomeControllerContentTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "should get all_activities with activities from same cspace_url" do
-    get all_activities_url
+  test "should get group_activities with activities from same cspace_url" do
+    get group_activities_url
     assert_response :success
 
-    assert_select "##{dom_id(@admin.activities.first)}"
-    assert_select "##{dom_id(@admin.activities.last)}"
+    assert_select "##{dom_id(@admin.activities.first)}", count: 0
+
     assert_select "##{dom_id(@reader.activities.first)}"
+    assert_select "##{dom_id(@reader.activities.last)}"
 
     assert_select "##{dom_id(@external.activities.first)}", count: 0
   end

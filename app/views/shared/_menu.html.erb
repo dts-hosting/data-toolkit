@@ -1,10 +1,9 @@
-<div class="card shadow-sm">
+<div class="card">
   <div class="card-header">
     <h5 class="mb-0">Activities</h5>
   </div>
-  <div class="card-body">
 
-    <!-- View section -->
+  <div class="card-body">
     <div class="mb-4">
       <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">View</h6>
       <ul class="nav flex-column">
@@ -14,14 +13,13 @@
           <% end %>
         </li>
         <li class="nav-item">
-          <%= link_to all_activities_path, class: "nav-link ps-2 py-1 rounded #{'active fw-medium bg-light' if current_page?('#')}" do %>
-            <i class="bi bi-list-ul me-2 text-secondary"></i>All activities
+          <%= link_to group_activities_path, class: "nav-link ps-2 py-1 rounded #{'active fw-medium bg-light' if current_page?('#')}" do %>
+            <i class="bi bi-list-ul me-2 text-secondary"></i>Group activities
           <% end %>
         </li>
       </ul>
     </div>
 
-    <!-- Perform section -->
     <div>
       <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Perform</h6>
       <ul class="nav flex-column">

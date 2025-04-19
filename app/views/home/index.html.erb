@@ -5,13 +5,12 @@
     </div>
 
     <div class="col-md-9">
-      <div class="card shadow-sm">
+      <div class="card">
         <div class="card-header">
           <h5 class="mb-0">Dashboard</h5>
         </div>
         <div class="card-body">
           <p>Welcome to your activities dashboard.</p>
-
           <div id="activities">
             <%= turbo_frame_tag :activities_page, @pagy.page, target: :_top do %>
               <% if @activities.empty? %>
