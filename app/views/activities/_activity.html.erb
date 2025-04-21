@@ -1,9 +1,10 @@
 <%= tag.div id: dom_id(activity), class: "card mb-3" do %>
-  <% if activity.user != Current.user %>
-    <div class="card-header">
-      <%= activity.user.email_address %>
-    </div>
-  <% end %>
+  <div class="card-header d-flex justify-content-between">
+    <div><%= file_names(activity) %></div>
+    <% if activity.user != Current.user %>
+      <span class="ms-auto"><%= activity.user.email_address %></span>
+    <% end %>
+  </div>
   <div class="card-body position-relative">
     <div class="position-absolute top-0 end-0 mt-2 me-2">
       <div class="btn-group" role="group" aria-label="Activity actions">
