@@ -23,18 +23,22 @@
   <body>
     <%= render "shared/header" %>
     <div class="container">
-      <%= render "shared/flash_messages" %>
-      <div class="container-fluid mt-4">
-        <div class="row">
-          <div class="col-md-3">
-            <%= render "shared/menu" %>
-          </div>
+      <% if authenticated? %>
+        <%= render "shared/flash_messages" %>
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-md-3">
+              <%= render "shared/menu" %>
+            </div>
 
-          <div class="col-md-9">
-            <%= yield %>
+            <div class="col-md-9">
+              <%= yield %>
+            </div>
           </div>
         </div>
-      </div>
+      <% else %>
+        <%= yield %>
+      <% end %>
     </div>
     <%= render "shared/footer" %>
   </body>
