@@ -12,6 +12,7 @@ class ProcessUploadedFilesJobTest < ActiveJob::TestCase
 
         activity = create_activity({
           type: Activities::CheckMediaDerivatives,
+          data_config: create_data_config_record_type(record_type: "media"),
           files: files
         })
         activity.save
@@ -28,6 +29,7 @@ class ProcessUploadedFilesJobTest < ActiveJob::TestCase
 
         activity = create_activity({
           type: Activities::CheckMediaDerivatives,
+          data_config: create_data_config_record_type(record_type: "media"),
           files: files
         })
         activity.save

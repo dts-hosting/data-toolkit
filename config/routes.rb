@@ -17,4 +17,8 @@ Rails.application.routes.draw do
   root to: "home#index"
   get "/my_activities", to: "home#index"
   get "/group_activities", to: "home#group_activities", as: :group_activities
+
+  resources :activities, only: [:show, :destroy]
+  get "/activities/new/:type", to: "activities#new", as: "new_activity_with_type"
+  post "/activities", to: "activities#create"
 end

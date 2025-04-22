@@ -1,0 +1,15 @@
+<tr id="<%= dom_id(task) %>">
+  <td><%= task.class.display_name %></td>
+  <td>
+    <span class="badge bg-<%= task_status_color(task.status) %>">
+      <%= task.status.titleize %>
+    </span>
+  </td>
+  <td><%= task.created_at.strftime("%b %d, %Y %H:%M") %></td>
+  <td><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></td>
+  <td>
+    <%= link_to "#", class: "btn btn-outline-primary btn-sm", title: "View task details" do %>
+      <i class="bi bi-eye"></i>
+    <% end %>
+  </td>
+</tr>

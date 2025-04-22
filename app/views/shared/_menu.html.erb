@@ -23,10 +23,10 @@
     <div>
       <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Perform</h6>
       <ul class="nav flex-column">
-        <% Activity.display_names.each do |activity_name| %>
+        <% Activity.display_names.each do |name| %>
           <li class="nav-item">
-            <%= link_to "#", class: "nav-link ps-2 py-1 rounded" do %>
-              <i class="bi bi-plus-circle me-2 text-secondary"></i><%= activity_name %>
+            <%= link_to new_activity_with_type_path(type: name.parameterize), class: "nav-link ps-2 py-1 rounded" do %>
+              <i class="bi bi-plus-circle me-2 text-secondary"></i><%= name %>
             <% end %>
           </li>
         <% end %>

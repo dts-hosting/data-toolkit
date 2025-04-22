@@ -3,7 +3,7 @@ module Activities
     # Takes 0 to many files. Runs on all site media of record_type if no file
     #   given
 
-    def data_config_type = "record_type"
+    def data_config_type = "record_type_media"
 
     def requires_batch_config?
       false

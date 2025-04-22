@@ -47,6 +47,7 @@ module ActiveSupport
     def fixtures_as_attachments(filenames)
       create_activity({
         type: Activities::CheckMediaDerivatives,
+        data_config: create_data_config_record_type(record_type: "media"),
         files: create_uploaded_files(filenames).compact
       }).files
     end

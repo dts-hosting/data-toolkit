@@ -35,6 +35,13 @@ class Activity < ApplicationRecord
     raise NotImplementedError
   end
 
+  # TODO: this doesn't handle number of files. Will need to do something about that.
+  def requires_files?
+    file_validators = self.class._validators[:files] || []
+    presence_validator = file_validators.find { |v| v.is_a?(ActiveRecord::Validations::PresenceValidator) }
+    !!presence_validator
+  end
+
   def self.display_name
     raise NotImplementedError
   end
