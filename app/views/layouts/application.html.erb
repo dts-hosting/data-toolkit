@@ -23,8 +23,8 @@
   <body>
     <%= render "shared/header" %>
     <div class="container">
+      <%= render "shared/flash_messages" %>
       <% if authenticated? %>
-        <%= render "shared/flash_messages" %>
         <div class="container-fluid mt-4">
           <div class="row">
             <div class="col-md-3">
