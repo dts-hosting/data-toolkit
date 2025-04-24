@@ -40,7 +40,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
             "text/csv"
           )],
           batch_config_attributes: {
-            batch_mode: "a"
+            batch_mode: "full record"
           }
         }
       }

@@ -59,7 +59,6 @@ class BatchConfig < ApplicationRecord
 
   # Used for validation and for select options in the ui
   def self.values(property)
-    # TODO: CollectionSpace::Mapper::BatchConfig.VALID_VALUES[property]
-    %w[a b c]
+    CollectionSpace::Mapper::BatchConfig::VALID_VALUES[property]
   end
 end
