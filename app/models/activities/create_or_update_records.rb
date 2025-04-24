@@ -6,7 +6,7 @@ module Activities
     def data_config_type = "record_type"
 
     def data_handler = @data_handler ||=
-      CollectionSpaceMapper.single_record_type_handler_for(self)
+                         CollectionSpaceMapper.single_record_type_handler_for(self)
 
     def requires_batch_config?
       true
