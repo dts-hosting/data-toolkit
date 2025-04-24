@@ -14,5 +14,8 @@ module Activities
       #   Tasks::ProcessTask, Tasks::TransferTask
       [Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData]
     end
+
+    def data_handler = @data_handler ||=
+                         CollectionSpaceMapper.single_record_type_handler_for(self)
   end
 end

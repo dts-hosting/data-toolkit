@@ -42,7 +42,28 @@ group :test do
 end
 
 # app gems
-gem "collectionspace-client", github: "collectionspace/collectionspace-client", branch: "main"
+gem "collectionspace-client",
+  github: "collectionspace/collectionspace-client",
+  branch: "main"
+gem "collectionspace-mapper",
+  github: "collectionspace/collectionspace-mapper",
+  branch: "data-toolkit"
+# I feel like I shouldn't have to put this here, as data-toolkit never
+#   calls or uses collectionspace-refcache directly.
+# If I don't put this here, and include the data-toolkit branch of
+#   collectionspace-refcache only in collectionspace-mapper Gemfile,
+#   then data-toolkit doesn't see refcache as a dependency at all and it
+#   falls over starting up when mapper is autoloaded and requires refcache:
+#     /Users/kristina/.rbenv/versions/3.4.1/lib/ruby/3.4.0/bundled_gems.rb:82:
+#     in 'Kernel.require': cannot load such file -- collectionspace/refcache (LoadError)
+# If I add refcache as a dependency in mapper's gemspec, data-toolkit
+#   installs the latest release of refcache, which does not work with changes
+#   made in mapper.
+# Hopefully this is here temporarily until we are not having to point to
+#   branches, and development isn't so intense
+gem "collectionspace-refcache",
+  github: "collectionspace/collectionspace-refcache",
+  branch: "data-toolkit"
 gem "csv"
 gem "csvlint",
   git: "https://github.com/lyrasis/csvlint.rb.git",
