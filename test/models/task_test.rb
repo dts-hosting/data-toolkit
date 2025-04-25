@@ -124,50 +124,50 @@ class TaskTest < ActiveSupport::TestCase
 
   # progress checking
   test "progress should be 0 when status is pending" do
-    @task.status = :pending
+    @task.status = "pending"
     assert_equal 0, @task.progress
   end
 
   test "progress should be 0 when status is queued" do
-    @task.status = :queued
+    @task.status = "queued"
     assert_equal 0, @task.progress
   end
 
   test "progress should be 100 when status is succeeded" do
-    @task.status = :succeeded
+    @task.status = "succeeded"
     assert_equal 100, @task.progress
   end
 
   test "progress should be 100 when status is failed" do
-    @task.status = :failed
+    @task.status = "failed"
     assert_equal 100, @task.progress
   end
 
   test "progress should calculate percentage when status is running" do
     @task.save!
     create_data_items_for_task(@task)
-    @task.status = :running
+    @task.status = "running"
 
-    @task.data_items.first.update(status: :succeeded)
-    @task.data_items.last.update(status: :succeeded)
+    @task.data_items.first.update(status: "succeeded")
+    @task.data_items.last.update(status: "succeeded")
 
     # Should be 40% complete (2 out of 5 items)
     assert_equal 40.0, @task.progress
   end
 
   test "progress should be 0 when running with no data items" do
-    @task.status = :running
+    @task.status = "running"
     assert_equal 0, @task.progress
   end
 
   test "progress should trigger finish_up when reaching 100%" do
     @task.save!
     create_data_items_for_task(@task)
-    @task.status = :running
+    @task.status = "running"
     @task.save!
 
-    @task.data_items.update_all(status: :succeeded)
-    @task.data_items.last.update(status: :succeeded)
+    @task.data_items.update_all(status: "succeeded")
+    @task.data_items.last.update(status: "succeeded")
     @task.reload
 
     assert_equal 100, @task.progress
@@ -178,11 +178,11 @@ class TaskTest < ActiveSupport::TestCase
   test "progress should set status to failed if any items failed" do
     @task.save!
     create_data_items_for_task(@task)
-    @task.status = :running
+    @task.status = "running"
     @task.save!
 
-    @task.data_items.update_all(status: :succeeded)
-    @task.data_items.last.update(status: :failed)
+    @task.data_items.update_all(status: "succeeded")
+    @task.data_items.last.update(status: "failed")
     @task.reload
 
     assert_equal 100, @task.progress
