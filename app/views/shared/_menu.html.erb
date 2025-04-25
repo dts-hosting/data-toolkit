@@ -1,0 +1,36 @@
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">Activities</h5>
+  </div>
+
+  <div class="card-body">
+    <div class="mb-4">
+      <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">View</h6>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <%= link_to my_activities_path, class: "nav-link ps-2 py-1 rounded #{'active fw-medium bg-light' if current_page?('#')}" do %>
+            <i class="bi bi-person-fill me-2 text-secondary"></i>My activities
+          <% end %>
+        </li>
+        <li class="nav-item">
+          <%= link_to group_activities_path, class: "nav-link ps-2 py-1 rounded #{'active fw-medium bg-light' if current_page?('#')}" do %>
+            <i class="bi bi-list-ul me-2 text-secondary"></i>Group activities
+          <% end %>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Perform</h6>
+      <ul class="nav flex-column">
+        <% Activity.display_names.each do |name| %>
+          <li class="nav-item">
+            <%= link_to new_activity_with_type_path(type: name.parameterize), class: "nav-link ps-2 py-1 rounded" do %>
+              <i class="bi bi-plus-circle me-2 text-secondary"></i><%= name %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>

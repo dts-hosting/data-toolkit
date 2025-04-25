@@ -57,6 +57,10 @@ class Task < ApplicationRecord
     finish_up if running? && calculate_progress >= 100
   end
 
+  def self.display_name
+    raise NotImplementedError
+  end
+
   private
 
   def calculate_progress

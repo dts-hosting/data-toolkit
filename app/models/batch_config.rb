@@ -43,13 +43,22 @@ class BatchConfig < ApplicationRecord
     options[:only] ? attrs.slice(*options[:only]) : attrs
   end
 
+  def self.boolean_attributes
+    [:check_record_status, :force_defaults, :search_if_not_cached, :strip_id_values]
+  end
+
   def self.default_value(property)
     values(property).first
   end
 
+  def self.select_attributes
+    [:batch_mode, :date_format, :multiple_recs_found,
+      :null_value_string_handling, :response_mode, :status_check_method,
+      :two_digit_year_handling]
+  end
+
   # Used for validation and for select options in the ui
   def self.values(property)
-    # TODO: CollectionSpace::Mapper::BatchConfig.VALID_VALUES[property]
-    %w[a b c]
+    CollectionSpace::Mapper::BatchConfig::VALID_VALUES[property]
   end
 end

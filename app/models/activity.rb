@@ -1,4 +1,6 @@
 class Activity < ApplicationRecord
+  include Descendents
+
   belongs_to :data_config
   belongs_to :user
   has_many :data_items, dependent: :destroy
@@ -20,8 +22,27 @@ class Activity < ApplicationRecord
     end
   end
 
+  def current_task
+    tasks.where.not(status: "pending").order(:created_at).last
+  end
+
+  def next_task
+    tasks.where(status: "pending").order(:created_at).first
+  end
+
   # Used to determine whether to include fields for batch config in ui
   def requires_batch_config?
+    raise NotImplementedError
+  end
+
+  # TODO: this doesn't handle number of files. Will need to do something about that.
+  def requires_files?
+    file_validators = self.class._validators[:files] || []
+    presence_validator = file_validators.find { |v| v.is_a?(ActiveRecord::Validations::PresenceValidator) }
+    !!presence_validator
+  end
+
+  def self.display_name
     raise NotImplementedError
   end
 

@@ -2,8 +2,8 @@ require "test_helper"
 
 class BatchConfigTest < ActiveSupport::TestCase
   def setup
-    activity = create_activity
-    @batch_config = BatchConfig.new(activity: activity)
+    @activity = create_activity
+    @batch_config = BatchConfig.new(activity: @activity)
   end
 
   test "should be valid with required attributes" do
@@ -52,18 +52,20 @@ class BatchConfigTest < ActiveSupport::TestCase
   test "as_json should return all custom attributes" do
     batch_config = BatchConfig.new(
       activity: @activity,
-      batch_mode: "a",
+      batch_mode: "vocabulary terms",
       check_record_status: true,
-      date_format: "a",
+      date_format: "day month year",
       force_defaults: false,
-      multiple_recs_found: "a",
-      null_value_string_handling: "a",
-      response_mode: "a",
+      multiple_recs_found: "use_first",
+      null_value_string_handling: "empty",
+      response_mode: "verbose",
       search_if_not_cached: true,
-      status_check_method: "a",
+      status_check_method: "cache",
       strip_id_values: true,
-      two_digit_year_handling: "a"
+      two_digit_year_handling: "literal"
     )
+
+    assert batch_config.valid?
 
     json_output = batch_config.as_json
 
@@ -76,17 +78,17 @@ class BatchConfigTest < ActiveSupport::TestCase
 
     assert_equal expected_keys.sort, json_output.keys.sort
 
-    assert_equal "a", json_output[:batch_mode]
+    assert_equal BatchConfig.values(:batch_mode).last, json_output[:batch_mode]
     assert_equal true, json_output[:check_record_status]
-    assert_equal "a", json_output[:date_format]
+    assert_equal BatchConfig.values(:date_format).last, json_output[:date_format]
     assert_equal false, json_output[:force_defaults]
-    assert_equal "a", json_output[:multiple_recs_found]
-    assert_equal "a", json_output[:null_value_string_handling]
-    assert_equal "a", json_output[:response_mode]
+    assert_equal BatchConfig.values(:multiple_recs_found).last, json_output[:multiple_recs_found]
+    assert_equal BatchConfig.values(:null_value_string_handling).last, json_output[:null_value_string_handling]
+    assert_equal BatchConfig.values(:response_mode).last, json_output[:response_mode]
     assert_equal true, json_output[:search_if_not_cached]
-    assert_equal "a", json_output[:status_check_method]
+    assert_equal BatchConfig.values(:status_check_method).last, json_output[:status_check_method]
     assert_equal true, json_output[:strip_id_values]
-    assert_equal "a", json_output[:two_digit_year_handling]
+    assert_equal BatchConfig.values(:two_digit_year_handling).last, json_output[:two_digit_year_handling]
   end
 
   test "as_json with only option returns specified attributes" do

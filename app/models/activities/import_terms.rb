@@ -12,5 +12,9 @@ module Activities
     def workflow
       []
     end
+
+    def self.display_name
+      "Import Terms"
+    end
   end
 end

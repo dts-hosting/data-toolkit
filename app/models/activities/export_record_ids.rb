@@ -11,5 +11,9 @@ module Activities
     def workflow
       []
     end
+
+    def self.display_name
+      "Export Record IDs"
+    end
   end
 end
