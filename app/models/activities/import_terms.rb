@@ -6,7 +6,7 @@ module Activities
     def data_config_type = "term_lists"
 
     def requires_batch_config?
-      true
+      false
     end
 
     def workflow

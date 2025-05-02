@@ -22,6 +22,10 @@ class Activity < ApplicationRecord
     end
   end
 
+  def boolean_attributes
+    BatchConfig.boolean_attributes
+  end
+
   def current_task
     tasks.where.not(status: "pending").order(:created_at).last
   end
@@ -40,6 +44,10 @@ class Activity < ApplicationRecord
     file_validators = self.class._validators[:files] || []
     presence_validator = file_validators.find { |v| v.is_a?(ActiveRecord::Validations::PresenceValidator) }
     !!presence_validator
+  end
+
+  def select_attributes
+    BatchConfig.select_attributes
   end
 
   def self.display_name

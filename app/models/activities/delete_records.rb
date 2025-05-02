@@ -6,7 +6,12 @@ module Activities
     def data_config_type = "record_type"
 
     def requires_batch_config?
-      false
+      true
+    end
+
+    def select_attributes
+      # TODO: [:record_matchpoint]
+      []
     end
 
     # Tasks::DeleteFilePrecheck, Tasks::LookupAndDeleteRecords
