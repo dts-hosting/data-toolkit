@@ -78,6 +78,7 @@ class TaskTest < ActiveSupport::TestCase
     activity = create_activity(
       {
         type: "Activities::CreateOrUpdateRecords",
+        config: {action: "create"},
         data_config: create_data_config_record_type({record_type: "acquisitions"}),
         files: [
           Rack::Test::UploadedFile.new(

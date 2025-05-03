@@ -58,6 +58,10 @@
       </div>
     </div>
 
+    <% if @activity.config.any? %>
+      <%= render partial: "activity_config", locals: { activity: @activity } %>
+    <% end %>
+
     <% if @activity.batch_config.present? %>
       <%= render partial: "batch_config", locals: { activity: @activity } %>
     <% end %>

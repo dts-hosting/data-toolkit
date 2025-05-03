@@ -1,11 +1,22 @@
 module Activities
   class DeleteRecords < Activity
-    validates :files, presence: true,
-      length: {is: 1, message: "must have exactly one file"}
+    validates :files, presence: true, length: {is: 1, message: "must have exactly one file"}
 
     def data_config_type = "record_type"
 
     def requires_batch_config?
+      true
+    end
+
+    def requires_config?
+      false
+    end
+
+    def requires_files?
+      true
+    end
+
+    def requires_single_file?
       true
     end
 

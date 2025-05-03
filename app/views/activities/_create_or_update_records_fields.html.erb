@@ -1,0 +1,26 @@
+<div class="mb-4">
+  <%= form.fields_for :config do |config_form| %>
+    <div class="mb-3">
+      <h6>Transfer mode</h6>
+      <div>
+        <div class="form-check form-check-inline">
+          <%= config_form.radio_button :action, "create", class: "form-check-input",
+                                       checked: config_checked?(activity, "action", "create", true) %>
+          <%= config_form.label :action_create, "Create", class: "form-check-label" %>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <%= config_form.radio_button :action, "update", class: "form-check-input",
+                                       checked: config_checked?(activity, "action", "update") %>
+          <%= config_form.label :action_update, "Update", class: "form-check-label" %>
+        </div>
+
+        <div class="form-check form-check-inline">
+          <%= config_form.radio_button :action, "create_and_update", class: "form-check-input",
+                                       checked: config_checked?(activity, "action", "create_and_update") %>
+          <%= config_form.label :action_create_and_update, "Create and Update", class: "form-check-label" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
