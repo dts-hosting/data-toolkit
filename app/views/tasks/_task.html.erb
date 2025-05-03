@@ -8,7 +8,7 @@
   <td><%= task.created_at.strftime("%b %d, %Y %H:%M") %></td>
   <td><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></td>
   <td>
-    <%= link_to "#", class: "btn btn-outline-primary btn-sm", title: "View task details" do %>
+    <%= link_to activity_task_path(task.activity, task), class: "btn btn-outline-primary btn-sm", title: "View task details" do %>
       <i class="bi bi-eye"></i>
     <% end %>
   </td>

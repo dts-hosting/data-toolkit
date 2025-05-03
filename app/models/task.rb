@@ -1,4 +1,5 @@
 class Task < ApplicationRecord
+  include ActionView::RecordIdentifier
   include TransitionsStatus
 
   belongs_to :activity
@@ -10,6 +11,8 @@ class Task < ApplicationRecord
   }, default: :pending
 
   validates :type, :status, presence: true
+
+  after_update_commit :broadcast_updates
 
   # tasks that are required to have succeeded for this task to run
   def dependencies
@@ -64,6 +67,18 @@ class Task < ApplicationRecord
   end
 
   private
+
+  def broadcast_updates
+    broadcast_replace_to [activity, :tasks],
+      target: dom_id(self),
+      partial: "tasks/task",
+      locals: {task: self}
+
+    broadcast_update_to self,
+      target: "#{dom_id(self)}_details",
+      partial: "tasks/details",
+      locals: {task: self}
+  end
 
   def calculate_progress
     return 0 if data_items.empty?

@@ -1,0 +1,14 @@
+<%= turbo_stream_from @task %>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><%= @task.class.display_name %></h5>
+    <div>
+      <%= link_to "Back to Activity", activity_path(@activity), class: "btn btn-sm btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card-body" id="<%= dom_id(@task) %>_details">
+    <%= render "details", task: @task %>
+  </div>
+</div>

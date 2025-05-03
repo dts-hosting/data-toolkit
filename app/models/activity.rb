@@ -3,7 +3,7 @@ class Activity < ApplicationRecord
 
   belongs_to :data_config
   belongs_to :user
-  has_many :data_items, dependent: :destroy
+  has_many :data_items, dependent: :delete_all
   has_many :tasks, dependent: :destroy
   has_many_attached :files, dependent: :destroy
   has_one :batch_config, dependent: :destroy

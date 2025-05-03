@@ -1,0 +1,25 @@
+<div class="mb-3">
+  <div class="row mb-2">
+    <div class="col-sm-3 fw-bold">Status:</div>
+    <div class="col-sm-9">
+      <span class="badge bg-<%= task_status_color(task.status) %>">
+        <%= task.status.titleize %>
+      </span>
+    </div>
+  </div>
+
+  <div class="row mb-2">
+    <div class="col-sm-3 fw-bold">Progress:</div>
+    <div class="col-sm-9"><%= task.progress %>%</div>
+  </div>
+
+  <div class="row mb-2">
+    <div class="col-sm-3 fw-bold">Created:</div>
+    <div class="col-sm-9"><%= task.created_at.strftime("%b %d, %Y %H:%M") %></div>
+  </div>
+
+  <div class="row mb-2">
+    <div class="col-sm-3 fw-bold">Updated:</div>
+    <div class="col-sm-9"><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></div>
+  </div>
+</div>
