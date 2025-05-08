@@ -6,6 +6,12 @@ module ApplicationHelper
     current_value == value || (current_value.nil? && default)
   end
 
+  def data_config_type_label(activity)
+    label = activity.data_config_type.humanize
+    label += " type" unless label.end_with?(" type")
+    label
+  end
+
   def file_names(activity, max_files: 3)
     return "No files" if activity.files.blank?
 

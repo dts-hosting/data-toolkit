@@ -2,7 +2,7 @@ module Activities
   class CheckMediaDerivatives < Activity
     # Takes 0 to many files. Runs on all site media of record_type if no file given
 
-    def data_config_type = "record_type_media"
+    def data_config_type = "media_record_type"
 
     def requires_batch_config?
       false

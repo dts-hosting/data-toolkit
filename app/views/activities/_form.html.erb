@@ -27,11 +27,11 @@
 
         <div class="row mb-3">
           <div class="col-sm-3">
-            <%= form.label :data_config, class: "col-form-label" %>
+            <%= form.label :data_config, data_config_type_label(activity), class: "col-form-label" %>
           </div>
           <div class="col-sm-9">
             <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
-                                       { include_blank: "Select a data configuration" },
+                                       { include_blank: "Select a #{data_config_type_label(activity)}" },
                                        class: "form-select" %>
           </div>
         </div>
@@ -39,10 +39,13 @@
         <% if activity.requires_files? %>
           <div class="row mb-3">
             <div class="col-sm-3">
-              <%= form.label activity.requires_single_file? ? :file : :files, class: "col-form-label" %>
+              <%= form.label :files, activity.requires_single_file? ? "File" : "Files", class: "col-form-label" %>
             </div>
             <div class="col-sm-9">
-              <%= form.file_field :files, multiple: true, class: "form-control" %>
+              <%= form.file_field :files,
+                                  multiple: !activity.requires_single_file?,
+                                  name: "activity[files][]",
+                                  class: "form-control" %>
             </div>
           </div>
         <% end %>

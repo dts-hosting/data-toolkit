@@ -22,7 +22,7 @@
       <h6 class="text-muted fw-semibold border-bottom pb-2 mb-3">Basic Information</h6>
 
       <div class="row mb-3">
-        <div class="col-sm-3 fw-bold">Data Configuration:</div>
+        <div class="col-sm-3 fw-bold"><%= data_config_type_label(@activity) %>:</div>
         <div class="col-sm-9"><%= @activity.data_config.display_name %></div>
       </div>
 
