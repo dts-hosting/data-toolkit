@@ -34,6 +34,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
       post activities_url, params: {
         activity: {
           type: "Activities::CreateOrUpdateRecords",
+          config: {action: "create"},
           data_config_id: @data_config.id,
           files: [fixture_file_upload(
             Rails.root.join("test/fixtures/files/test.csv"),
@@ -91,7 +92,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
       delete activity_url(@admin_activity)
     end
 
-    assert_redirected_to activities_path
+    assert_redirected_to root_path
     assert_equal "Activity was successfully deleted.", flash[:notice]
   end
 

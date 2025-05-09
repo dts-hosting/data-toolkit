@@ -8,6 +8,18 @@ module Activities
       false
     end
 
+    def requires_config?
+      true
+    end
+
+    def requires_files?
+      false
+    end
+
+    def requires_single_file?
+      false
+    end
+
     def workflow
       []
     end

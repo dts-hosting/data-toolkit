@@ -23,7 +23,7 @@ class ActivitiesController < ApplicationController
 
   def destroy
     @activity.destroy
-    redirect_to activities_path, status: :see_other, notice: "Activity was successfully deleted."
+    redirect_to root_path, status: :see_other, notice: "Activity was successfully deleted."
   end
 
   private
@@ -56,6 +56,7 @@ class ActivitiesController < ApplicationController
       :type,
       :data_config_id,
       {files: []},
+      config: {},
       batch_config_attributes: BatchConfig.boolean_attributes + BatchConfig.select_attributes
     ]
 

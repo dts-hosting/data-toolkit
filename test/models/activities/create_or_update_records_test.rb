@@ -7,6 +7,7 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
     files = create_uploaded_files(["test.csv"])
     @activity = Activity.new(
       user: user,
+      config: {action: "create"},
       data_config: data_config,
       type: "Activities::CreateOrUpdateRecords",
       files: files
@@ -23,6 +24,12 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
     @activity.user = nil
     refute @activity.valid?
     assert_not_nil @activity.errors[:user]
+  end
+
+  test "should require a config" do
+    @activity.config = nil
+    refute @activity.valid?
+    assert_not_nil @activity.errors[:config]
   end
 
   test "should require a data_config" do

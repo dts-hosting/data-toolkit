@@ -1,3 +1,5 @@
+<%= turbo_stream_from @activity, :tasks %>
+
 <div class="card mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><%= @activity.class.display_name %></h5>
@@ -20,7 +22,7 @@
       <h6 class="text-muted fw-semibold border-bottom pb-2 mb-3">Basic Information</h6>
 
       <div class="row mb-3">
-        <div class="col-sm-3 fw-bold">Data Configuration:</div>
+        <div class="col-sm-3 fw-bold"><%= data_config_type_label(@activity) %>:</div>
         <div class="col-sm-9"><%= @activity.data_config.display_name %></div>
       </div>
 
@@ -58,6 +60,10 @@
       </div>
     </div>
 
+    <% if @activity.config.any? %>
+      <%= render partial: "activity_config", locals: { activity: @activity } %>
+    <% end %>
+
     <% if @activity.batch_config.present? %>
       <%= render partial: "batch_config", locals: { activity: @activity } %>
     <% end %>
@@ -80,8 +86,8 @@
           <th></th>
         </tr>
         </thead>
-        <tbody>
-          <%= render partial: "tasks/task", collection: @activity.tasks.order(:created_at) %>
+        <tbody id="activity_<%= @activity.id %>_tasks">
+        <%= render partial: "tasks/task", collection: @activity.tasks.order(:created_at) %>
         </tbody>
       </table>
     </div>

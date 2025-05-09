@@ -1,7 +1,7 @@
 module Activities
   class CreateOrUpdateRecords < Activity
-    validates :files, presence: true,
-      length: {is: 1, message: "must have exactly one file"}
+    validates :files, presence: true, length: {is: 1, message: "must have exactly one file"}
+    validates :config, presence: true
 
     def data_config_type = "record_type"
 
@@ -9,6 +9,18 @@ module Activities
                          CollectionSpaceMapper.single_record_type_handler_for(self)
 
     def requires_batch_config?
+      true
+    end
+
+    def requires_config?
+      true
+    end
+
+    def requires_files?
+      true
+    end
+
+    def requires_single_file?
       true
     end
 
