@@ -4,6 +4,7 @@ class DataConfigTest < ActiveSupport::TestCase
   def setup
     # these are not saved to the db, we use them for validations
     @record_type_config = DataConfig.new(
+      manifest: manifests(:v1),
       config_type: "record_type",
       profile: "core",
       record_type: "collectionobject",
@@ -12,6 +13,7 @@ class DataConfigTest < ActiveSupport::TestCase
     )
 
     @term_lists_config = DataConfig.new(
+      manifest: manifests(:v1),
       config_type: "term_lists",
       profile: "core",
       url: "https://example.com/core-vocbalaries-1.0.0.json",
@@ -19,6 +21,7 @@ class DataConfigTest < ActiveSupport::TestCase
     )
 
     @optlist_config = DataConfig.new(
+      manifest: manifests(:v1),
       config_type: "optlist_overrides",
       profile: "core",
       url: "https://example.com/core-optlist.json"
@@ -112,6 +115,7 @@ class DataConfigTest < ActiveSupport::TestCase
 
     # Test for record_type config (requires config_type, profile, version, record_type)
     opts = {
+      manifest: manifests(:v1),
       config_type: "record_type",
       profile: profile_name,
       version: version_value,
@@ -129,6 +133,7 @@ class DataConfigTest < ActiveSupport::TestCase
 
     # Test for term_lists config (requires config_type, profile, version)
     opts = {
+      manifest: manifests(:v1),
       config_type: "term_lists",
       profile: profile_name,
       version: version_value,
@@ -146,6 +151,7 @@ class DataConfigTest < ActiveSupport::TestCase
 
     # Test for optlist_overrides config (requires config_type, profile)
     opts = {
+      manifest: manifests(:v1),
       config_type: "optlist_overrides",
       profile: profile_name,
       url: base_url
@@ -207,7 +213,6 @@ class DataConfigTest < ActiveSupport::TestCase
     ]
 
     # TODO: handle more cases
-
     activities.each do |activity|
       assert DataConfig.for(user, activity).any?
     end

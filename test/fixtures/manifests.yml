@@ -1,0 +1,3 @@
+v1:
+  manifest_registry: registry
+  url: https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/community_profile_mappers_release_1_0_0_newstyle.json

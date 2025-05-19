@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_02_224834) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_19_221629) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -76,7 +76,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_224834) do
     t.string "url", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "manifest_id", null: false
     t.index ["config_type", "profile", "version", "record_type"], name: "unique_data_config_attributes", unique: true
+    t.index ["manifest_id"], name: "index_data_configs_on_manifest_id"
   end
 
   create_table "data_items", force: :cascade do |t|
@@ -94,6 +96,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_224834) do
     t.index ["activity_id"], name: "index_data_items_on_activity_id"
     t.index ["current_task_id"], name: "index_data_items_on_current_task_id"
     t.index ["status"], name: "index_data_items_on_status"
+  end
+
+  create_table "manifest_registries", force: :cascade do |t|
+    t.string "url", null: false
+    t.date "last_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "manifests", force: :cascade do |t|
+    t.string "url", null: false
+    t.integer "manifest_registry_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["manifest_registry_id"], name: "index_manifests_on_manifest_registry_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -135,8 +152,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_224834) do
   add_foreign_key "activities", "data_configs"
   add_foreign_key "activities", "users"
   add_foreign_key "batch_configs", "activities"
+  add_foreign_key "data_configs", "manifests"
   add_foreign_key "data_items", "activities"
   add_foreign_key "data_items", "tasks", column: "current_task_id"
+  add_foreign_key "manifests", "manifest_registries"
   add_foreign_key "sessions", "users"
   add_foreign_key "tasks", "activities"
 end

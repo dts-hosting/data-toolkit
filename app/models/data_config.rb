@@ -1,11 +1,12 @@
 class DataConfig < ApplicationRecord
   ALLOWED_CONFIG_TYPES = %i[optlist_overrides record_type term_lists].freeze
-  URL_FORMAT = URI::DEFAULT_PARSER.make_regexp(%w[http https]).freeze
+
+  include RequiresUrl
+  belongs_to :manifest
 
   validates :config_type, presence: true,
     inclusion: {in: ALLOWED_CONFIG_TYPES.map(&:to_s)}
   validates :profile, presence: true
-  validates :url, presence: true, format: {with: URL_FORMAT}
 
   validates :record_type, absence: true, if: -> { optlist_overrides_config? || term_lists_config? }
   validates :record_type, presence: true, if: :record_type_config?

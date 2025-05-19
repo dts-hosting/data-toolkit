@@ -28,6 +28,7 @@ module FactoryHelpers
 
   def create_data_config_record_type(attributes = {})
     attributes = {
+      manifest: manifests(:v1),
       config_type: "record_type",
       profile: "core",
       version: "1.0.0",
@@ -39,6 +40,7 @@ module FactoryHelpers
 
   def create_data_config_term_lists(attributes = {})
     attributes = {
+      manifest: manifests(:v1),
       config_type: "term_lists",
       profile: "core",
       version: "1.0.0",
@@ -49,6 +51,7 @@ module FactoryHelpers
 
   def create_data_config_optlist_overrides(attributes = {})
     attributes = {
+      manifest: manifests(:v1),
       config_type: "optlist_overrides",
       profile: "core",
       url: "https://example.com/optlist.json"
