@@ -2,7 +2,7 @@ module TransitionsStatus
   extend ActiveSupport::Concern
 
   included do
-    def fail!(feedback = {})
+    def fail!(feedback = "")
       update!(status: "failed", completed_at: Time.current, feedback: feedback)
     end
 
