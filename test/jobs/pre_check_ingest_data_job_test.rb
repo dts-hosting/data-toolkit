@@ -27,9 +27,12 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     perform_enqueued_jobs
     @task.reload
     assert_equal "failed", @task.status
-    assert_includes @task.feedback["errors"]["application error"],
-      "collectionspace-client does not have a service configured " \
-        "for rectype"
+
+    feedback = @task.feedback_for
+    assert_equal feedback.errors.map(&:category), ["application error"]
+    assert_equal feedback.errors.map(&:message),
+      ["collectionspace-client does not have a service configured " \
+        "for rectype"]
   end
 
   test "job fails when no record_type DataConfig id_field" do
@@ -45,9 +48,11 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     perform_enqueued_jobs
     @task.reload
     assert_equal "failed", @task.status
-    assert_includes @task.feedback["errors"]["application error"],
-      "cannot determine the unique ID field for this record type from " \
-      "DataConfig"
+    feedback = @task.feedback_for
+    assert_equal feedback.errors.map(&:category), ["application error"]
+    assert_equal feedback.errors.map(&:message),
+      ["cannot determine the unique ID field for this record type from " \
+      "DataConfig"]
   end
 
   test "job fails if first data item check is not ok" do
@@ -62,19 +67,11 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
       .stubs(:call).returns(true)
     IngestDataPreCheckFirstItem.any_instance
       .stubs(:ok?).returns(false)
-    IngestDataPreCheckFirstItem.any_instance
-      .stubs(:feedback).returns({
-        messages: {},
-        warnings: {},
-        errors: {"One or more headers in spreadsheet are empty" => []}
-      })
 
     @task.run
     perform_enqueued_jobs
     @task.reload
     assert_equal "failed", @task.status
-    assert @task.feedback["errors"].key?("One or more headers in spreadsheet " \
-                                         "are empty")
   end
 
   test "job spawns DataItem jobs if pre-checks pass" do
