@@ -1,5 +1,6 @@
 class Task < ApplicationRecord
   include ActionView::RecordIdentifier
+  include Feedbackable
   include TransitionsStatus
 
   belongs_to :activity, touch: true

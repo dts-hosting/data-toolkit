@@ -1,4 +1,5 @@
 class DataItem < ApplicationRecord
+  include Feedbackable
   include TransitionsStatus
 
   belongs_to :activity

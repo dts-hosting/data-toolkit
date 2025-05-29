@@ -33,6 +33,7 @@ class PreCheckIngestDataJob < ApplicationJob
     Rails.logger.info "#{self.class.name} finished spawning sub-jobs"
   rescue => e
     Rails.logger.error e.message
-    task.fail!({errors: [e.message]})
+    feedback.add_to_errors(subtype: :application_error, details: e)
+    task.fail!(feedback)
   end
 end
