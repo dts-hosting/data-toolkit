@@ -19,4 +19,6 @@ class DataItem < ApplicationRecord
     next current_task.update_progress if current_task.progress >= 100
     current_task.touch if rand < 0.1 # bumps task.updated_at
   end
+
+  def feedback_context = current_task.class.name
 end

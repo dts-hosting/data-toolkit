@@ -35,6 +35,8 @@ class Task < ApplicationRecord
     met_dependencies && pending? && started_at.nil?
   end
 
+  def feedback_context = self.class.name
+
   def progress
     case status
     when "pending", "queued" then 0
