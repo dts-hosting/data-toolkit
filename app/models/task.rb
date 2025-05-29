@@ -92,7 +92,7 @@ class Task < ApplicationRecord
   end
 
   def finish_up
-    data_items.where(status: "failed").exists? ? fail! : success!
+    data_items.where(status: "failed").exists? ? fail!({}) : success!
     finalizer&.perform_later(self)
   end
 
