@@ -109,7 +109,7 @@ class TaskTest < ActiveSupport::TestCase
 
   test "should execute fail! method correctly" do
     @task.save!
-    @task.fail!
+    @task.fail!({})
 
     assert_equal "failed", @task.status
     assert_not_nil @task.completed_at
