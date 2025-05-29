@@ -7,7 +7,9 @@ module TransitionsStatus
     end
 
     def start!
-      update!(status: "running", started_at: Time.current)
+      update!(status: "running",
+        started_at: Time.current,
+        feedback: Feedback.new(feedback_context))
     end
 
     def success!
