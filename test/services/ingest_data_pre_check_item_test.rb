@@ -7,7 +7,7 @@ class IngestDataPreCheckItemTest < ActiveJob::TestCase
     activity = create_activity
     task = activity.tasks.create(type: "Tasks::PreCheckIngestData")
     @data_item = DataItem.new(
-      data: @data_hash,
+      data: {},
       position: 0,
       activity: activity,
       current_task_id: task.id
@@ -16,30 +16,34 @@ class IngestDataPreCheckItemTest < ActiveJob::TestCase
   end
 
   test "fails when required field is empty" do
-    @data_hash = {objectnumber: "", title: "t", "": "foo"}
+    data_hash = {objectnumber: "", title: "t", "": "foo"}
+    @data_item.update!(data: data_hash)
+    @data_item.start!
+
     @mock_handler.expect(:validate, empty_required_field_response,
-      [@data_hash])
-    checker = IngestDataPreCheckItem.new(@mock_handler, @data_hash)
-    feedback = {
-      messages: {},
-      warnings: {},
-      errors: {"Empty required field(s)" => ["objectnumber must be populated"]}
-    }
-    assert_equal feedback, checker.feedback
+      [data_hash])
+    checker = IngestDataPreCheckItem.new(
+      @mock_handler, data_hash, @data_item.feedback_for
+    )
+
+    assert_equal [:required_field_value_missing],
+      checker.feedback.errors.map(&:subtype)
+    assert_equal ["objectnumber must be populated"],
+      checker.feedback.errors.map(&:details)
     refute checker.ok?
   end
 
   test "succeeds when data is valid" do
-    @data_hash = {objectnumber: "123", title: "t", "": "foo"}
+    data_hash = {objectnumber: "123", title: "t", "": "foo"}
+    @data_item.update!(data: data_hash)
+    @data_item.start!
+
     @mock_handler.expect(:validate, valid_response,
       [@data_hash])
-    checker = IngestDataPreCheckItem.new(@mock_handler, @data_hash)
-    feedback = {
-      messages: {},
-      warnings: {},
-      errors: {}
-    }
-    assert_equal feedback, checker.feedback
+    checker = IngestDataPreCheckItem.new(
+      @mock_handler, @data_hash, @data_item.feedback_for
+    )
+    refute checker.feedback.displayable?
     assert checker.ok?
   end
 

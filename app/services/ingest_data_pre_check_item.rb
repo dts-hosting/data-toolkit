@@ -1,34 +1,35 @@
 class IngestDataPreCheckItem
-  def initialize(handler, data)
+  def initialize(handler, data, feedback)
     @handler = handler
     @data = data
-    @messages = {}
-    @warnings = {}
-    @errors = {}
+    @feedback_obj = feedback
     @status = :not_checked
   end
 
   def ok?
     run_checks unless @status == :checked
 
-    @errors.empty?
+    feedback_obj.ok?
   end
 
   def feedback
     run_checks unless @status == :checked
 
-    {messages: @messages, warnings: @warnings, errors: @errors}
+    feedback_obj
   end
 
   private
 
-  attr_reader :handler, :data
+  attr_reader :handler, :data, :feedback_obj
 
   def run_checks
     @status = :checked
 
     if empty_required_fields?
-      @errors["Empty required field(s)"] = empty_fields
+      feedback_obj.add_to_errors(
+        subtype: :required_field_value_missing,
+        details: empty_fields.join("; ")
+      )
     end
   end
 

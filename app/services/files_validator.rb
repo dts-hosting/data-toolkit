@@ -1,5 +1,4 @@
-# Given multiple files, validates all supported file types and compiles
-#   feedback
+# Given multiple files, validates all supported file types
 class FilesValidator
   VALIDATOR_MAP = {
     "text/csv" => CsvValidator
@@ -8,9 +7,9 @@ class FilesValidator
   def self.call(...) = new(...).call
 
   # @param files [ActiveStorage::Attachment::Many]
-  def initialize(files)
+  def initialize(files, feedback = nil)
     @files = files
-    @errors = []
+    @feedback = feedback || Feedback.new("Tasks::ProcessUploadedFiles")
   end
 
   def call
@@ -19,27 +18,23 @@ class FilesValidator
     rescue => err
       @validity_status = false
       Rails.logger.error "#{err.message} -- #{err.backtrace.first(5)}"
-      @errors << err.message
+      @feedback.add_to_errors(subtype: :application_error, details: err)
     end
 
     self
+  end
+
+  def feedback
+    return @feedback if validity_status == false
+
+    @compiled_feedback ||= compile_feedback
   end
 
   # @return [Boolean, NilClass]
   def valid?
     return false if validity_status == false
 
-    true if results.all?(&:valid?)
-  end
-
-  # @return [Hash]
-  def feedback
-    return {errors: errors, warnings: []} unless errors.empty?
-
-    {
-      errors: compile_feedback(:errors),
-      warnings: compile_feedback(:warnings)
-    }
+    true if feedback.ok?
   end
 
   def data
@@ -55,7 +50,7 @@ class FilesValidator
 
   private
 
-  attr_reader :files, :results, :validity_status, :errors
+  attr_reader :files, :results, :validity_status
 
   def pick_validator(file)
     validator = VALIDATOR_MAP[file.blob.content_type]
@@ -63,11 +58,10 @@ class FilesValidator
       raise("Cannot find validator for #{file.filename}")
   end
 
-  def compile_feedback(type)
-    results.map do |result|
-      next if result.feedback[type].empty?
-
-      {result.feedback[:filename] => result.feedback[type]}
-    end.compact
+  def compile_feedback
+    results.map(&:feedback)
+      .inject(@feedback) do |result, next_value|
+        result + next_value
+      end
   end
 end

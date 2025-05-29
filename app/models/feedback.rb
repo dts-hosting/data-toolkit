@@ -4,10 +4,12 @@ class Feedback
   include ActiveModel::Serializers::JSON
 
   attribute_method_prefix "add_to_"
-  define_attribute_methods :errors
+  attribute_method_prefix "clear_"
+  # define_attribute_methods :errors
 
   attr_accessor :errors, :warnings, :messages
 
+  # @param parent [String] name of Task with which Feedback is associated
   def initialize(parent = nil)
     @parent = parent
     @errors = []
@@ -19,14 +21,25 @@ class Feedback
 
   def displayable? = [errors, warnings, messages].any? { |arr| !arr.empty? }
 
+  def +(other)
+    @errors = [errors, other.errors].flatten
+    @warnings = [warnings, other.warnings].flatten
+    @messages = [messages, other.messages].flatten
+    self
+  end
+
   # @param [Hash] args
-  # @option args [String] :category
+  # @option args [String] :subtype
   # @option args [String, nil] :message
-  # @option args [String, nil] :detail
+  # @option args [String, nil] :details
   def add_to_attribute(attribute, **args)
     args[:parent] = parent
-    classname = "Feedback#{attribute.delete_suffix("s").capitalize}"
-    send(attribute) << classname.constantize.new(**args).validate
+    args[:type] = attribute.singularize
+    send(attribute) << FeedbackElement.new(**args).validate
+  end
+
+  def clear_attribute(attribute)
+    instance_variable_set(:"@#{attribute}", [])
   end
 
   def attributes=(hash)
@@ -37,14 +50,15 @@ class Feedback
         public_send("#{key}=", value)
       else
         value.each do |element|
-          public_send(:"add_to_#{key}", **element.transform_keys(&:to_sym))
+          h = element.transform_keys(&:to_sym)
+          public_send(:"add_to_#{key}", **h)
         end
       end
     end
   end
 
   def attributes
-    {"errors" => [], "warnings" => [], "messages" => [], "parent" => parent}
+    {"parent" => parent, "errors" => [], "warnings" => [], "messages" => []}
   end
 
   private

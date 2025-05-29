@@ -1,3 +1,4 @@
+require "ostruct"
 require "test_helper"
 
 class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
@@ -15,7 +16,9 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     @task.reload
 
     assert_equal "failed", @task.status
-    assert @task.feedback.key?("data item failures")
+    feedback = @task.feedback_for
+    errtypes = feedback.errors.map(&:subtype).uniq
+    assert_equal [:required_field_value_missing], errtypes
   end
 
   test "does nothing if all item jobs succeed" do
@@ -24,7 +27,10 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     @task.reload
 
     assert_equal "succeeded", @task.status
-    assert_nil @task.feedback
+
+    feedback = @task.feedback_for
+    assert feedback.ok?
+    refute feedback.displayable?
   end
 
   test "does not run if pre-item checks fail" do
@@ -79,18 +85,20 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
 
   def fail_task(task:, indexes:)
     indexes.each do |idx|
-      task.data_items[idx]
-        .update!(
-          status: "failed",
-          feedback: {
-            messages: {},
-            warnings: {},
-            errors: {"Empty required field(s)" =>
-                     ["objectnumber must be populated"]}
-          }
-        )
+      data_item = @task.data_items[idx]
+      feedback = data_item.feedback_for
+      feedback.add_to_errors(
+        subtype: :required_field_value_missing,
+        details: ["objectnumber must be populated"]
+      )
+      data_item.update!(
+        status: "failed",
+        feedback: feedback
+      )
     end
     task.running! # we need to be running to transition using update_progress
     task.update_progress
   end
+
+  def valid_response = OpenStruct.new(valid?: true, errors: [])
 end

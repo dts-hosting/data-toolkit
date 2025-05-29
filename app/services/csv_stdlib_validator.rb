@@ -6,16 +6,21 @@ require "csv"
 class CsvStdlibValidator
   def self.call(...) = new(...).call
 
-  # @return [Array<String>]
-  attr_reader :errors
-
   # @return [CSV::Table]
   attr_reader :data
 
+  # @return [Feedback]
+  attr_reader :feedback
+
   # @param filepath [String]
-  def initialize(filepath)
+  # @param filename [nil, String] the user-known filename is not the basename
+  #   of the Rails storage path, so this should be passed explicitly in
+  #   production, so the feedback can record which file it is about
+  def initialize(filepath, filename: nil)
     @filepath = filepath
-    @errors = []
+    @filename = filename || filepath.basename.to_s
+    @feedback = Feedback.new("Tasks::ProcessUploadedFiles")
+    @feedback_subtype_prefix = :csv_stdlib
   end
 
   # @return [CsvStdlibValidator]
@@ -24,29 +29,25 @@ class CsvStdlibValidator
     self
   end
 
-  # @return [Boolean, NilClass]
-  def valid? = validity_status
-
-  # To provide consistent interface
-  def warnings = []
-
   def to_s
-    "<##{self.class}:#{object_id.to_s(8)} valid?: #{valid?}>"
+    "<##{self.class}:#{object_id.to_s(8)} " \
+      "filename: #{filename} " \
+      "valid?: #{valid?}>"
   end
   alias_method :inspect, :to_s
 
   private
 
-  attr_reader :filepath, :validity_status
+  attr_reader :filepath, :filename, :feedback_subtype_prefix
 
   def run_validation
     @data = File.open(filepath, encoding: "bom|utf-8") do |file|
       CSV.table(file)
     end
-    @validity_status = true
   rescue CSV::MalformedCSVError => err
     Rails.logger.error "#{filepath} - #{err.message}\n#{err.backtrace}"
-    errors << err.message
-    @validity_status = false
+    feedback.add_to_errors(subtype: :"#{feedback_subtype_prefix}_malformed_csv",
+      details: err.message,
+      prefix: filename)
   end
 end
