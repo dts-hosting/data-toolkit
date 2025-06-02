@@ -7,13 +7,9 @@ module TransitionsStatus
     end
 
     def start!
-      context = if is_a?(DataItem)
-        current_task.class.name
-      else
-        self.class.name
-      end
-      feedback = Feedback.new(context)
-      update!(status: "running", started_at: Time.current, feedback: feedback)
+      update!(status: "running",
+        started_at: Time.current,
+        feedback: Feedback.new(feedback_context))
     end
 
     def success!
