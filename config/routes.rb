@@ -19,7 +19,11 @@ Rails.application.routes.draw do
   get "/group_activities", to: "home#group_activities", as: :group_activities
 
   resources :activities, only: [:show, :destroy] do
-    resources :tasks, only: [:show]
+    resources :tasks, only: [:show] do
+      member do
+        post :run
+      end
+    end
   end
   get "/activities/new/:type", to: "activities#new", as: "new_activity_with_type"
   post "/activities", to: "activities#create"

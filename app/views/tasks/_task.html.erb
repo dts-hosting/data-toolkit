@@ -8,6 +8,16 @@
   <td><%= task.created_at.strftime("%b %d, %Y %H:%M") %></td>
   <td><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></td>
   <td>
+    <%= button_to run_activity_task_path(task.activity, task),
+                  method: :post,
+                  form: { "data-turbo": true },
+                  class: "btn btn-outline-success btn-sm d-inline-block",
+                  form_class: "d-inline",
+                  title: task.ok_to_run? ? "Run task" : "Not eligible to run",
+                  disabled: !task.ok_to_run? do %>
+      <i class="bi bi-play"></i>
+    <% end %>
+
     <%= link_to activity_task_path(task.activity, task), class: "btn btn-outline-primary btn-sm", title: "View task details" do %>
       <i class="bi bi-eye"></i>
     <% end %>

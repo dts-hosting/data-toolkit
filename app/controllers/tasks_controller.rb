@@ -1,7 +1,12 @@
 class TasksController < ApplicationController
-  before_action :set_task, only: %i[show]
+  before_action :set_task, only: %i[show run]
 
   def show
+  end
+
+  def run
+    @task.run
+    redirect_to activity_path(@activity), notice: "Task was successfully queued."
   end
 
   private
