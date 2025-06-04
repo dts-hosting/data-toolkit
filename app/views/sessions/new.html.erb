@@ -12,7 +12,7 @@
                               autocomplete: "cspace-url",
                               placeholder: "Enter your instance URL",
                               value: params[:cspace_url],
-                              class: "form-control form-control-lg" %>
+                              class: "form-control form-control" %>
           <small class="text-muted mt-1 d-block">Example: https://core.collectionspace.org</small>
         </div>
 
@@ -23,7 +23,7 @@
                                autocomplete: "username",
                                placeholder: "Enter your email",
                                value: params[:email_address],
-                               class: "form-control form-control-lg" %>
+                               class: "form-control form-control" %>
         </div>
 
         <div class="mb-4">
@@ -33,7 +33,7 @@
                                   autocomplete: "current-password",
                                   placeholder: "Enter your password",
                                   maxlength: 72,
-                                  class: "form-control form-control-lg" %>
+                                  class: "form-control form-control" %>
         </div>
 
         <div class="alert alert-warning text-center mb-4" role="alert">
@@ -42,7 +42,7 @@
         </div>
 
         <div class="d-grid gap-2">
-          <%= form.submit "Sign in", class: "btn btn-primary btn-lg" %>
+          <%= form.submit "Sign in", class: "btn btn-primary btn" %>
         </div>
       <% end %>
     </div>
