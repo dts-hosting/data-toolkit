@@ -103,6 +103,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_221629) do
     t.date "last_updated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["url"], name: "index_manifest_registries_on_url", unique: true
   end
 
   create_table "manifests", force: :cascade do |t|
@@ -111,6 +112,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_221629) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["manifest_registry_id"], name: "index_manifests_on_manifest_registry_id"
+    t.index ["url"], name: "index_manifests_on_url", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
