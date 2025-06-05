@@ -1,6 +1,6 @@
 class ManifestRegistry < ApplicationRecord
   include RequiresUrl
-  has_many :manifests, dependent: :delete_all
+  has_many :manifests, dependent: :destroy
 
   validates :url, uniqueness: true
 

@@ -1,5 +1,5 @@
 class ManifestRegistriesController < ApplicationController
-  before_action :set_manifest_registry, only: [:show]
+  before_action :set_manifest_registry, only: [:show, :destroy, :run]
 
   def index
     @manifest_registry = ManifestRegistry.new
@@ -18,6 +18,16 @@ class ManifestRegistriesController < ApplicationController
       @manifest_registries = ManifestRegistry.all.order(created_at: :desc)
       render :index, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @manifest_registry.destroy
+    redirect_to manifest_registries_path, notice: "Manifest registry was successfully deleted."
+  end
+
+  def run
+    ManifestRegistryImportJob.perform_later
+    redirect_to manifest_registries_path, notice: "Registry import job has been queued."
   end
 
   private

@@ -28,5 +28,9 @@ Rails.application.routes.draw do
   get "/activities/new/:type", to: "activities#new", as: "new_activity_with_type"
   post "/activities", to: "activities#create"
 
-  resources :manifest_registries, only: [:index, :show, :create]
+  resources :manifest_registries, only: [:index, :show, :create, :destroy] do
+    member do
+      post :run
+    end
+  end
 end

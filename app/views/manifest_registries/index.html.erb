@@ -1,6 +1,14 @@
 <%= render "form", manifest_registry: @manifest_registry %>
 
-<h5 class="mb-3">Manifest Registries</h5>
+<div class="d-flex align-items-center gap-3 mb-3">
+  <h5 class="mb-0">Manifest Registries</h5>
+  <% if @manifest_registries.any? %>
+    <%= button_to "Update Registries",
+                  run_manifest_registry_path(@manifest_registries.first),
+                  method: :post,
+                  class: "btn btn-sm btn-outline-success" %>
+  <% end %>
+</div>
 
 <% if @manifest_registries.any? %>
   <%= render @manifest_registries %>

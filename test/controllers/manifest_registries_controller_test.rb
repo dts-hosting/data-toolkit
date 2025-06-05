@@ -53,4 +53,33 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_select ".alert-danger"
   end
+
+  test "should destroy manifest registry" do
+    @manifest_registry.manifests.create!(url: "https://example.com/test-manifest")
+    create_data_config_record_type(manifest: @manifest_registry.manifests.first)
+
+    assert_difference("ManifestRegistry.count", -1) do
+      delete manifest_registry_url(@manifest_registry)
+    end
+
+    assert_redirected_to manifest_registries_path
+    assert_equal "Manifest registry was successfully deleted.", flash[:notice]
+  end
+
+  test "should handle non-existent manifest registry" do
+    assert_no_difference("ManifestRegistry.count") do
+      delete manifest_registry_url(id: 999999)
+    end
+
+    assert_response :not_found
+  end
+
+  test "should run manifest registry import job" do
+    assert_enqueued_with(job: ManifestRegistryImportJob) do
+      post run_manifest_registry_url(@manifest_registry)
+    end
+
+    assert_redirected_to manifest_registries_path
+    assert_equal "Registry import job has been queued.", flash[:notice]
+  end
 end
