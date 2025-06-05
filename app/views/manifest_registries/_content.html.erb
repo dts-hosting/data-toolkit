@@ -1,0 +1,9 @@
+<h5 class="mb-3">Manifests</h5>
+
+<% if manifests.any? %>
+  <%= render manifests %>
+<% else %>
+  <div class="alert alert-info">
+    No manifests have been loaded from this registry yet.
+  </div>
+<% end %>

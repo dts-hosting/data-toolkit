@@ -1,7 +1,9 @@
 class Manifest < ApplicationRecord
   include RequiresUrl
   belongs_to :manifest_registry
-  has_many :data_configs, dependent: :destroy
+  has_many :data_configs, dependent: :delete_all
+
+  validates :url, uniqueness: true
 
   # Import data configs from a manifest
   # @return [void]

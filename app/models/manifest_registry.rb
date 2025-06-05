@@ -1,6 +1,8 @@
 class ManifestRegistry < ApplicationRecord
   include RequiresUrl
-  has_many :manifests, dependent: :destroy
+  has_many :manifests, dependent: :delete_all
+
+  validates :url, uniqueness: true
 
   # Import manifests from a registry
   # @return [void]

@@ -20,7 +20,7 @@
       </ul>
     </div>
 
-    <div>
+    <div class="mb-4">
       <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Perform</h6>
       <ul class="nav flex-column">
         <% Activity.display_names.each do |name| %>
@@ -32,5 +32,19 @@
         <% end %>
       </ul>
     </div>
+
+    <% if admin? %>
+      <div>
+        <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Admin</h6>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <%= link_to manifest_registries_path, class: "nav-link ps-2 py-1 rounded" do %>
+              <i class="bi bi-plus-circle me-2 text-secondary"></i>
+              Manifest Registries
+            <% end %>
+          </li>
+        </ul>
+      </div>
+    <% end %>
   </div>
 </div>

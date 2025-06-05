@@ -1,0 +1,11 @@
+<%= render "form", manifest_registry: @manifest_registry %>
+
+<h5 class="mb-3">Manifest Registries</h5>
+
+<% if @manifest_registries.any? %>
+  <%= render @manifest_registries %>
+<% else %>
+  <div class="alert alert-info">
+    No manifest registries have been added yet.
+  </div>
+<% end %>
