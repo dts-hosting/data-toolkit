@@ -8,4 +8,5 @@ servers:
     hosts:
       - toolkit.lyrasistechnology.org
     env:
+      ADMIN_EMAILS: admin@core.collectionspace.org,admin@anthro.collectionspace.org
       SOLID_QUEUE_IN_PUMA: true
