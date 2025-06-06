@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_19_221629) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_06_000706) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -111,6 +111,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_19_221629) do
     t.integer "manifest_registry_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "data_configs_count", default: 0, null: false
     t.index ["manifest_registry_id"], name: "index_manifests_on_manifest_registry_id"
     t.index ["url"], name: "index_manifests_on_url", unique: true
   end

@@ -11,7 +11,9 @@
 </div>
 
 <% if @manifest_registries.any? %>
-  <%= render @manifest_registries %>
+  <div id="manifest_registries">
+    <%= render @manifest_registries %>
+  </div>
 <% else %>
   <div class="alert alert-info">
     No manifest registries have been added yet.

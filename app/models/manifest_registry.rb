@@ -4,6 +4,8 @@ class ManifestRegistry < ApplicationRecord
 
   validates :url, uniqueness: true
 
+  broadcasts_refreshes
+
   # Import manifests from a registry
   # @return [void]
   def import(&block)

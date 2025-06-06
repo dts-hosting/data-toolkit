@@ -1,9 +1,9 @@
-<div class="card mb-3">
+<%= turbo_stream_from manifest %>
+<div id="<%= dom_id(manifest) %>" class="card mb-3">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h6 class="mb-0 text-break">
       <a href="<%= manifest.url %>" target="_blank"><%= manifest.name_for_url %></a>
     </h6>
-    <%= link_to "View Details", "#", class: "btn btn-sm btn-outline-primary" %>
   </div>
   <div class="card-body">
     <div class="row">
@@ -11,7 +11,7 @@
         <span>Imported: <%= manifest.created_at %></span>
       </div>
       <div class="col-md-6">
-        <span>Data Configs: <%= manifest.data_configs.count %></span>
+        <span>Data Configs: <%= manifest.data_configs_count %></span>
       </div>
     </div>
   </div>

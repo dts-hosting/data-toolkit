@@ -5,9 +5,11 @@ class Manifest < ApplicationRecord
 
   validates :url, uniqueness: true
 
+  broadcasts_refreshes_to :manifest_registry
+
   # Import data configs from a manifest
   # @return [void]
-  def import
+  def import(&block)
     response = Net::HTTP.get_response(URI.parse(url))
     raise "Failed to fetch manifest" unless response.is_a?(Net::HTTPSuccess)
 
@@ -27,6 +29,7 @@ class Manifest < ApplicationRecord
       }
       data_config = DataConfig.find_or_create_by(opts)
       data_config.update(url: url) if url != data_config.url
+      yield data_config if block_given?
     end
   end
 end
