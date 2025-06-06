@@ -68,4 +68,15 @@ module FactoryHelpers
       )
     end
   end
+
+  def valid_user_attributes
+    {
+      email_address: "user@example.com",
+      password: "password123",
+      cspace_url: "https://core.collectionspace.org/cspace-services",
+      cspace_api_version: "1.0",
+      cspace_profile: "core",
+      cspace_ui_version: "1.0"
+    }
+  end
 end

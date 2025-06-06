@@ -23,6 +23,10 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
+  def admin?
+    Rails.configuration.admin_emails.include?(email_address)
+  end
+
   # Returns a CollectionSpace client instance for the user
   # @return [CollectionSpace::Client]
   def client
