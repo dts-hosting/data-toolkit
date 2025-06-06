@@ -57,6 +57,7 @@ class DataConfig < ApplicationRecord
 
   def unique_attributes
     query = DataConfig.where(
+      manifest_id: manifest_id,
       config_type: config_type,
       profile: profile
     )
