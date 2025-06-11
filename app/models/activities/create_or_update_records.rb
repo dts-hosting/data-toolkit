@@ -12,7 +12,7 @@ module Activities
       true
     end
 
-    def requires_config?
+    def requires_config_fields?
       true
     end
 
