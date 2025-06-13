@@ -10,7 +10,6 @@
 # Ignore all environment files (but .env which is docker ignored).
 /.env*
 !/.env
-/.kamal/secrets*
 
 # Ignore all logfiles and tempfiles.
 /log/*

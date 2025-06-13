@@ -1,0 +1,71 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      # - main
+      - qa
+  workflow_dispatch:
+
+jobs:
+  deploy-qa:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: qa
+
+    env:
+      DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+      DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${{ secrets.DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY }}
+      DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ${{ secrets.DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY }}
+      DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ${{ secrets.DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT }}
+      DATA_TOOLKIT_SECRET_KEY_BASE: ${{ secrets.DATA_TOOLKIT_SECRET_KEY_BASE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Configure SSH Key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Kamal deploy
+        run: bundle exec kamal deploy -d qa
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: prod
+
+    env:
+      DOCKER_REGISTRY_USER: ${{ secrets.DOCKER_REGISTRY_USER }}
+      DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${{ secrets.DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY }}
+      DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ${{ secrets.DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY }}
+      DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ${{ secrets.DATA_TOOLKIT_ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT }}
+      DATA_TOOLKIT_SECRET_KEY_BASE: ${{ secrets.DATA_TOOLKIT_SECRET_KEY_BASE }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Configure SSH Key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Kamal deploy
+        run: bundle exec kamal deploy -d prod
