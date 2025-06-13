@@ -8,7 +8,7 @@ module Activities
       false
     end
 
-    def requires_config?
+    def requires_config_fields?
       false
     end
 

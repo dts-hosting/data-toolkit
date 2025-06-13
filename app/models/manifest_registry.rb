@@ -2,6 +2,10 @@ class ManifestRegistry < ApplicationRecord
   include RequiresUrl
   has_many :manifests, dependent: :destroy
 
+  validates :url, uniqueness: true
+
+  broadcasts_refreshes
+
   # Import manifests from a registry
   # @return [void]
   def import(&block)

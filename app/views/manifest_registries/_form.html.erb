@@ -1,0 +1,29 @@
+<%= form_with(model: manifest_registry, local: true) do |form| %>
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Add New Manifest Registry</h5>
+      <div>
+        <%= form.submit "Add Registry", class: "btn btn-sm btn-primary" %>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <% if manifest_registry.errors.any? %>
+        <div class="alert alert-danger">
+          <h6><%= pluralize(manifest_registry.errors.count, "error") %> prohibited this registry from being saved:</h6>
+          <ul>
+            <% manifest_registry.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-group">
+        <%= form.label :url, "URL" %>
+        <%= form.url_field :url, class: "form-control", placeholder: "https://example.com/manifest-registry.json" %>
+        <small class="form-text text-muted">Enter the URL for the manifest registry</small>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,27 @@
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Registry Information</h5>
+    <div>
+      <%= link_to "Back", :back, class: "btn btn-sm btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-3 fw-bold">URL:</div>
+      <div class="col-md-9">
+        <a href="<%= manifest_registry.url %>" target="_blank" class="text-break">
+          <%= manifest_registry.url %>
+        </a>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-3 fw-bold">Last Updated:</div>
+      <div class="col-md-9"><%= manifest_registry.last_updated_at || 'Never' %></div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-3 fw-bold">Total Manifests:</div>
+      <div class="col-md-9"><%= manifest_registry.manifests.count %></div>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,10 @@
 module ApplicationHelper
   include Pagy::Frontend
 
+  def admin?
+    authenticated? && Current.user.admin?
+  end
+
   def config_checked?(record, field, value, default = false)
     current_value = record.config&.dig(field)
     current_value == value || (current_value.nil? && default)

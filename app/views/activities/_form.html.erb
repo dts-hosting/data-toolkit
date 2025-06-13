@@ -51,7 +51,7 @@
         <% end %>
       </div>
 
-      <% if activity.requires_config? %>
+      <% if activity.requires_config_fields? %>
         <%= render "#{activity.class.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
       <% end %>
 

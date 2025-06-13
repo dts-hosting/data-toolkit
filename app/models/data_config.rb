@@ -2,7 +2,7 @@ class DataConfig < ApplicationRecord
   ALLOWED_CONFIG_TYPES = %i[optlist_overrides record_type term_lists].freeze
 
   include RequiresUrl
-  belongs_to :manifest
+  belongs_to :manifest, counter_cache: true
 
   validates :config_type, presence: true,
     inclusion: {in: ALLOWED_CONFIG_TYPES.map(&:to_s)}
@@ -15,6 +15,8 @@ class DataConfig < ApplicationRecord
   validates :version, presence: true, if: -> { record_type_config? || term_lists_config? }
 
   validate :unique_attributes
+
+  broadcasts_refreshes_to :manifest
 
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
@@ -55,6 +57,7 @@ class DataConfig < ApplicationRecord
 
   def unique_attributes
     query = DataConfig.where(
+      manifest_id: manifest_id,
       config_type: config_type,
       profile: profile
     )

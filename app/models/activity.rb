@@ -38,7 +38,7 @@ class Activity < ApplicationRecord
     raise NotImplementedError
   end
 
-  def require_config?
+  def requires_config_fields?
     raise NotImplementedError
   end
 

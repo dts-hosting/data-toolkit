@@ -4,5 +4,9 @@ module RequiresUrl
 
   included do
     validates :url, presence: true, format: {with: URL_FORMAT}
+
+    def name_for_url
+      url.split("/")[-1]
+    end
   end
 end
