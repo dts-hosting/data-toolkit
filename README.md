@@ -47,8 +47,6 @@ docker compose up
 Remote with Kamal.
 
 ```bash
-# TODO: download .kamal/secrets.qa
-
 # verify connections to the server
 bundle exec kamal server bootstrap -d qa
 
@@ -63,4 +61,23 @@ bundle exec kamal app exec -d qa "bin/rails about"
 
 # connect to the container
 bundle exec kamal app exec -i -d qa "bin/rails console"
+```
+
+_To run Kamal locally you must first [export these envvars](.kamal/secrets-common)._
+
+A deployment can also be made via Github:
+
+1. Pushes to `main` will deploy to production (TODO).
+2. Pushes to `qa` will deploy to `qa`.
+3. A deployment can be triggered via the Github Actions UI.
+4. A deployment can be triggered via the Github Actions CLI.
+
+```bash
+# deploy via push to qa
+git checkout qa
+git reset --hard $my-branch && git push --force origin qa
+
+# deploy via gh cli
+gh workflow run deploy.yml # uses the current branch
+gh workflow run deploy.yml --ref qa # specify the branch to run from
 ```
