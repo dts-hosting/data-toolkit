@@ -1,6 +1,6 @@
 require "test_helper"
 
-class TasksControllerTest < ActionDispatch::IntegrationTest
+class TasksControllerAccessTest < ActionDispatch::IntegrationTest
   setup do
     @admin = users(:admin)
     @reader = users(:reader)
@@ -61,6 +61,41 @@ class TasksControllerTest < ActionDispatch::IntegrationTest
     delete session_url
 
     get activity_task_url(@admin_activity, @admin_task)
+    assert_redirected_to new_session_path
+  end
+
+  test "owner should be able to run their own task" do
+    @admin_task.update!(status: "pending", started_at: nil)
+    post run_activity_task_url(@admin_activity, @admin_task)
+
+    assert_redirected_to activity_path(@admin_activity)
+    assert_equal "Task was successfully queued.", flash[:notice]
+
+    @admin_task.reload
+    assert_equal "queued", @admin_task.status
+  end
+
+  test "user from same organization cannot run another user's task" do
+    @reader_task.update!(status: "pending", started_at: nil)
+    post run_activity_task_url(@reader_activity, @reader_task)
+
+    assert_redirected_to my_activities_url
+    assert_equal "You don't have permission to queue this task.", flash[:alert]
+
+    assert_equal "pending", @reader_task.status
+  end
+
+  test "user from different organization cannot run task" do
+    post run_activity_task_url(@external_activity, @external_task)
+
+    assert_redirected_to my_activities_url
+    assert_equal "You don't have permission to access this task.", flash[:alert]
+  end
+
+  test "should not run task when not logged in" do
+    delete session_url
+
+    post run_activity_task_url(@admin_activity, @admin_task)
     assert_redirected_to new_session_path
   end
 end

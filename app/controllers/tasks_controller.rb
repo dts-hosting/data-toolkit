@@ -5,8 +5,12 @@ class TasksController < ApplicationController
   end
 
   def run
-    @task.run
-    redirect_to activity_path(@activity), notice: "Task was successfully queued."
+    if @task.user == Current.user
+      @task.run
+      redirect_to activity_path(@activity), notice: "Task was successfully queued."
+    else
+      redirect_to my_activities_url, alert: "You don't have permission to queue this task."
+    end
   end
 
   private

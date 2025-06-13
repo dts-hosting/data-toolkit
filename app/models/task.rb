@@ -3,6 +3,7 @@ class Task < ApplicationRecord
   include TransitionsStatus
 
   belongs_to :activity
+  delegate :user, to: :activity
   has_many :data_items, through: :activity
   has_many_attached :files
 
