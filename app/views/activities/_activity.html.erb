@@ -1,3 +1,4 @@
+<%= turbo_stream_from activity %>
 <%= tag.div id: dom_id(activity), class: "card mb-3" do %>
   <div class="card-header d-flex justify-content-between">
     <div><%= file_names(activity) %></div>
@@ -41,7 +42,16 @@
           <div class="d-flex align-items-center mb-1">
             <span class="text-muted small me-2">Workflow Task</span>
           </div>
-          <span class="text-monospace fw-medium"><%= task_name(activity) %></span>
+          <div class="d-flex align-items-center">
+            <% if activity.current_task %>
+              <span class="text-monospace fw-medium me-2"><%= task_name(activity) %></span>
+              <span class="badge bg-<%= task_status_color(activity.current_task.status) %>">
+                <%= activity.current_task.status %>
+              </span>
+            <% else %>
+              <span class="text-monospace fw-medium">No task is active</span>
+            <% end %>
+          </div>
         </div>
 
         <div class="mb-3">

@@ -43,4 +43,35 @@ class ActivityTest < ActiveSupport::TestCase
     )
     assert @activity.files.attached?
   end
+
+  test "current_task returns the first task when new activity created" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    current_expected = activity.tasks.where(type: "Tasks::ProcessUploadedFiles").first
+    next_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
+
+    assert_equal current_expected, activity.current_task
+    assert_equal next_expected, activity.next_task
+  end
+
+  test "current_task returns first non-pending, most recently created task" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    current_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
+    current_expected.queued!
+    next_expected = nil # TODO: update when workflow fully defined
+
+    assert_equal current_expected, activity.current_task
+    assert_equal next_expected, activity.next_task
+  end
 end

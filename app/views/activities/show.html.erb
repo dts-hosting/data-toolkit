@@ -1,6 +1,7 @@
+<%= turbo_stream_from @activity%>
 <%= turbo_stream_from @activity, :tasks %>
 
-<div class="card mb-4">
+<div id="<%= dom_id(@activity) %>" class="card mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><%= @activity.class.display_name %></h5>
     <div>

@@ -22,6 +22,8 @@ class Activity < ApplicationRecord
     end
   end
 
+  broadcasts_refreshes
+
   def boolean_attributes
     BatchConfig.boolean_attributes
   end

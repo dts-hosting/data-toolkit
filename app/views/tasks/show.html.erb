@@ -1,6 +1,6 @@
 <%= turbo_stream_from @task %>
 
-<div class="card">
+<div class="card mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0"><%= @task.class.display_name %></h5>
     <div>
@@ -12,3 +12,7 @@
     <%= render "details", task: @task %>
   </div>
 </div>
+
+<% if @task.feedback.present? %>
+  <%= render "feedback", feedback: @task.feedback %>
+<% end %>
