@@ -2,7 +2,7 @@ class Task < ApplicationRecord
   include ActionView::RecordIdentifier
   include TransitionsStatus
 
-  belongs_to :activity
+  belongs_to :activity, touch: true
   delegate :user, to: :activity
   has_many :data_items, through: :activity
   has_many_attached :files
