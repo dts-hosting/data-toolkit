@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   scan_ruby:
@@ -52,6 +52,11 @@ jobs:
 
       - name: Lint code for consistent style
         run: bundle exec standardrb
+
+      - name: Lint with Prettier for JavaScript and CSS
+        uses: actionsx/prettier@v3
+        with:
+          args: --check .
 
   test:
     runs-on: ubuntu-latest

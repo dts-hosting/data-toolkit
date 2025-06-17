@@ -215,6 +215,7 @@ GEM
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
+    iniparse (1.5.0)
     io-console (0.8.0)
     irb (1.15.2)
       pp (>= 0.6.0)
@@ -309,6 +310,10 @@ GEM
     observer (0.1.2)
     open_uri_redirections (0.2.1)
     ostruct (0.6.1)
+    overcommit (0.67.1)
+      childprocess (>= 0.6.3, < 6)
+      iniparse (~> 1.4)
+      rexml (>= 3.3.9)
     pagy (9.3.4)
     parallel (1.27.0)
     parser (3.3.8.0)
@@ -562,6 +567,7 @@ DEPENDENCIES
   kamal (~> 2.6)
   letter_opener
   mocha
+  overcommit
   pagy
   propshaft
   puma (>= 5.0)

@@ -2,5 +2,5 @@ plugins:
   - standard-rails
 
 ignore:
-  - 'db/migrate/**/*':
+  - "db/migrate/**/*":
       - Rails/ReversibleMigration
