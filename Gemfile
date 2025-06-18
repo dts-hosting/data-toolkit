@@ -30,6 +30,7 @@ group :development do
   gem "htmlbeautifier"
   gem "kamal", "~> 2.6"
   gem "letter_opener"
+  gem "overcommit", require: false
   gem "solargraph"
   gem "web-console"
 end

@@ -1,0 +1,6 @@
+Prettier:
+  enabled: true
+  command: ["npx", "prettier", "--check", "."]
+StandardRB:
+  enabled: true
+  command: ["bundle", "exec", "standardrb"]
