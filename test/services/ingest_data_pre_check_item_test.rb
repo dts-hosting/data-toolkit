@@ -26,10 +26,10 @@ class IngestDataPreCheckItemTest < ActiveJob::TestCase
       @mock_handler, data_hash, @data_item.feedback_for
     )
 
-    assert_equal ["required field value(s) missing"],
-      checker.feedback.errors.map(&:category)
+    assert_equal [:required_field_value_missing],
+      checker.feedback.errors.map(&:subtype)
     assert_equal ["objectnumber must be populated"],
-      checker.feedback.errors.map(&:detail)
+      checker.feedback.errors.map(&:details)
     refute checker.ok?
   end
 

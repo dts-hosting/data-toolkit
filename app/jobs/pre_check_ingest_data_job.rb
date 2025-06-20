@@ -20,7 +20,7 @@ class PreCheckIngestDataJob < ApplicationJob
 
     if fail_msg
       Rails.logger.error fail_msg
-      feedback.add_to_errors(category: "application error", message: fail_msg)
+      feedback.add_to_errors(subtype: :application_error, details: fail_msg)
       task.fail!(feedback.as_json) && return
     end
 

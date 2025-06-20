@@ -27,8 +27,8 @@ class IngestDataPreCheckItem
 
     if empty_required_fields?
       feedback_obj.add_to_errors(
-        category: "required field value(s) missing",
-        detail: empty_fields.join("; ")
+        subtype: :required_field_value_missing,
+        details: empty_fields.join("; ")
       )
     end
   end

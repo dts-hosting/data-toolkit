@@ -20,13 +20,13 @@ class Feedback
   def displayable? = [errors, warnings, messages].any? { |arr| !arr.empty? }
 
   # @param [Hash] args
-  # @option args [String] :category
+  # @option args [String] :subtype
   # @option args [String, nil] :message
-  # @option args [String, nil] :detail
+  # @option args [String, nil] :details
   def add_to_attribute(attribute, **args)
     args[:parent] = parent
-    classname = "Feedback#{attribute.delete_suffix("s").capitalize}"
-    send(attribute) << classname.constantize.new(**args).validate
+    args[:type] = attribute.singularize
+    send(attribute) << FeedbackElement.new(**args).validate
   end
 
   def attributes=(hash)
@@ -44,7 +44,7 @@ class Feedback
   end
 
   def attributes
-    {"errors" => [], "warnings" => [], "messages" => [], "parent" => parent}
+    {"parent" => parent, "errors" => [], "warnings" => [], "messages" => []}
   end
 
   private

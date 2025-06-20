@@ -30,7 +30,7 @@ class IngestDataPreCheckFirstItem
 
     if empty_header_ct > 0
       empty_header_ct.times do
-        feedback_obj.add_to_errors(category: "empty header")
+        feedback_obj.add_to_errors(subtype: :empty_header)
       end
       return self
     end
@@ -38,7 +38,7 @@ class IngestDataPreCheckFirstItem
     unless required_fields_present?
       missing_fields.each do |field|
         feedback_obj.add_to_errors(
-          category: "required field missing", detail: field
+          subtype: :required_field_missing, details: field
         )
       end
       return self
@@ -73,15 +73,15 @@ class IngestDataPreCheckFirstItem
   def report_known_and_unknown_fields
     result = handler.check_fields(data)
     feedback_obj.add_to_messages(
-      category: "known fields",
-      message: "#{result[:known_fields].length} of #{field_ct}"
+      subtype: :known_fields,
+      details: "#{result[:known_fields].length} of #{field_ct}"
     )
     return if result[:unknown_fields].empty?
 
     feedback_obj.add_to_warnings(
-      category: "unknown fields",
-      message: "#{result[:unknown_fields].length} of #{field_ct}",
-      detail: result[:unknown_fields].join(", ")
+      subtype: :unknown_fields,
+      details: ["#{result[:unknown_fields].length} of #{field_ct}",
+        result[:unknown_fields].join(", ")]
     )
   end
 end

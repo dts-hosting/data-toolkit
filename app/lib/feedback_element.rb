@@ -6,71 +6,62 @@ class FeedbackElement
   include ActiveModel::Model
   include ActiveModel::Serializers::JSON
 
-  attr_reader :category, :message, :detail
+  attr_reader :subtype, :message, :details
 
   # @param parent [String] class name of the instance whose Feedback this
   #   element belongs to
-  def initialize(parent:, category:, message: nil, detail: nil)
+  # @param type [:error, :warning, :message]
+  # @param subtype [Symbol]
+  def initialize(parent:, type:, subtype:, details: nil)
     @parent = parent
-    @category = category
-    @message = message
-    @detail = detail
+    @type = type
+    @subtype = subtype.to_sym
+    @details = details
     @general_categories = get_general_categories
     @msgs = get_msgs
   end
 
-  def validate
-    unless known_category?
-      raise StandardError,
-        "Unknown #{self.class} category for #{parent}: #{category}"
-    end
+  def scope
+    [parent.underscore.split("/"), "feedback", type]
+  end
 
-    unless has_message?
+  def validate
+    unless known_subtype?
       raise StandardError,
-        "No #{self.class} message given or configured for " \
-        "#{parent}: #{category}"
+        "Unknown #{type} subtype for #{parent}: #{subtype}"
     end
 
     self
   end
 
   def attributes
-    {"category" => category, "message" => message, "detail" => detail}
+    {"type" => type, "subtype" => subtype, "details" => details}
   end
 
   def to_s
     "<##{self.class}:#{object_id.to_s(8)} " \
-      "category: #{category}> " \
-      "message: #{message} " \
-      "detail: #{detail}"
+      "type: #{type} " \
+      "subtype: #{subtype} " \
+      "details: #{details}>"
   end
   alias_method :inspect, :to_s
 
   private
 
-  attr_reader :parent, :general_categories, :msgs
+  attr_reader :parent, :type, :general_categories, :msgs
 
   def get_general_categories
-    if self.class.const_defined?(:GENERAL_CATEGORIES)
-      return self.class.const_get(:GENERAL_CATEGORIES)
-    end
+    hash = I18n.t("feedback")
+    return [] unless hash.key?(type)
 
-    []
+    hash[type].keys
   end
 
-  def get_msgs
-    return self.class.const_get(:MSGS) if self.class.const_defined?(:MSGS)
+  def get_msgs = I18n.t(scope.join(".")) || {}
 
-    {}
-  end
+  def known_subtype?
+    return true if general_categories.include?(subtype)
 
-  def known_category?
-    return true if general_categories.include?(category)
-
-    msgs[parent].key?(category)
-  end
-
-  def has_message?
-    true if message || msgs.dig(parent, category)
+    msgs.key?(subtype)
   end
 end

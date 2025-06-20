@@ -115,8 +115,8 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
       data_item = @task.data_items[idx]
       feedback = data_item.feedback_for
       feedback.add_to_errors(
-        category: "required field value(s) missing",
-        detail: ["objectnumber must be populated"]
+        subtype: :required_field_missing,
+        details: ["objectnumber must be populated"]
       )
       data_item.update!(
         status: "failed",

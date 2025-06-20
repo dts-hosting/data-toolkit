@@ -29,8 +29,8 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     assert_equal "failed", @task.status
 
     feedback = @task.feedback_for
-    assert_equal feedback.errors.map(&:category), ["application error"]
-    assert_equal feedback.errors.map(&:message),
+    assert_equal feedback.errors.map(&:subtype), [:application_error]
+    assert_equal feedback.errors.map(&:details),
       ["collectionspace-client does not have a service configured " \
         "for rectype"]
   end
@@ -49,8 +49,8 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     @task.reload
     assert_equal "failed", @task.status
     feedback = @task.feedback_for
-    assert_equal feedback.errors.map(&:category), ["application error"]
-    assert_equal feedback.errors.map(&:message),
+    assert_equal feedback.errors.map(&:subtype), [:application_error]
+    assert_equal feedback.errors.map(&:details),
       ["cannot determine the unique ID field for this record type from " \
       "DataConfig"]
   end

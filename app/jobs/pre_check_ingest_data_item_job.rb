@@ -13,11 +13,7 @@ class PreCheckIngestDataItemJob < ApplicationJob
     data_item.success!
   rescue => e
     Rails.logger.error e.message
-    feedback.add_to_errors(
-      category: "application error",
-      message: e.message,
-      detail: e.backtrace.first
-    )
+    feedback.add_to_errors(subtype: :application_error, details: e)
     data_item.fail!(feedback)
   end
 end

@@ -24,7 +24,7 @@ class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
     assert_empty checker.feedback.messages
     assert_empty checker.feedback.warnings
     assert_equal 1, checker.feedback.errors.length
-    assert_equal "empty header", checker.feedback.errors.first.category
+    assert_equal :empty_header, checker.feedback.errors.first.subtype
     refute checker.ok?
   end
 
@@ -38,10 +38,10 @@ class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
     assert_empty checker.feedback.messages
     assert_empty checker.feedback.warnings
     assert_equal 2, checker.feedback.errors.length
-    assert_equal ["required field missing", "required field missing"],
-      checker.feedback.errors.map(&:category)
+    assert_equal %i[required_field_missing required_field_missing],
+      checker.feedback.errors.map(&:subtype)
     assert_equal %w[objectnumber fakerequired],
-      checker.feedback.errors.map(&:detail)
+      checker.feedback.errors.map(&:details)
     refute checker.ok?
   end
 
@@ -58,13 +58,13 @@ class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
     )
     assert_empty checker.feedback.errors
     assert_equal 1, checker.feedback.messages.length
-    assert_equal ["known fields"],
-      checker.feedback.messages.map(&:category)
+    assert_equal [:known_fields],
+      checker.feedback.messages.map(&:subtype)
     assert_equal 1, checker.feedback.warnings.length
-    assert_equal ["unknown fields"],
-      checker.feedback.warnings.map(&:category)
+    assert_equal [:unknown_fields],
+      checker.feedback.warnings.map(&:subtype)
     assert_equal ["random, blah"],
-      checker.feedback.warnings.map(&:detail)
+      checker.feedback.warnings.map(&:details)
     assert checker.ok?
   end
 
