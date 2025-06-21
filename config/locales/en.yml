@@ -29,3 +29,38 @@
 
 en:
   hello: "Hello world"
+  feedback:
+    error:
+      application_error: >-
+        Application has failed for an unexpected reason. This may not be
+        related to your data at all. The Toolkit developers will need to
+        investigate the issue. Please leave the failed Activity in the Toolkit
+        for examination. Via the support method you have been instructed to
+        use, please send us the URL of the failed Activity. If you delete the
+        failed Activity, we cannot troubleshoot it. ERROR RECEIVED: %{message}
+  tasks:
+    pre_check_ingest_data:
+      feedback:
+        error:
+          empty_header:
+            one: >-
+              A data column in your spreadsheet has a blank/empty header. Either
+              enter the correct field name for the column, or delete the column.
+            other: >-
+              Data columns in your spreadsheet have blank/empty headers. Either
+              enter the correct field names for these columns, or delete the
+              columns lacking headers.
+          required_field_missing:
+            one: "Your spreadsheet is missing a required column: %{details}."
+            other: "Your spreadsheet is missing required columns: %{details}."
+          required_field_value_missing: >-
+            One or more rows is missing a value in a required field. You will
+            need to fix your spreadsheet and start over. Filter or
+            sort columns for required fields to find rows missing values.
+            Either provide values in required fields, or delete rows missing
+            values from your CSV. Check the CSV template for this record type
+            to find out which field(s) are required.
+        message:
+          known_fields: "Field(s) that will import"
+        warning:
+          unknown_fields: "Field(s) that will <b>not</b> import"

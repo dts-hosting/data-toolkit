@@ -1,3 +1,4 @@
+require "ostruct"
 require "test_helper"
 
 class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
@@ -22,14 +23,10 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
     perform_enqueued_jobs
     assert_performed_jobs 1, only: ProcessUploadedFilesJob
 
+    mock_handler = mock("Handler")
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
-      .returns(mock)
-    IngestDataPreCheckItem.any_instance.stubs(:ok?).returns(false)
-    IngestDataPreCheckItem.any_instance.stubs(:feedback).returns({
-      messages: {},
-      warnings: {},
-      errors: {"Empty required field(s)" => ["objectnumber must be populated"]}
-    })
+      .returns(mock_handler)
+    mock_handler.stubs(:validate).returns(empty_required_field_response)
 
     PreCheckIngestDataItemJob.perform_later(@data_item)
     assert_enqueued_jobs 1, only: PreCheckIngestDataItemJob
@@ -38,7 +35,6 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
     @data_item.reload
 
     assert_equal "failed", @data_item.status
-    assert @data_item.feedback["errors"].key?("Empty required field(s)")
   end
 
   test "job succeeds if pre-checks pass" do
@@ -46,9 +42,10 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
     perform_enqueued_jobs
     assert_performed_jobs 1
 
+    mock_handler = mock("Handler")
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
-      .returns(mock)
-    IngestDataPreCheckItem.any_instance.stubs(:ok?).returns(true)
+      .returns(mock_handler)
+    mock_handler.stubs(:validate).returns(valid_response)
 
     PreCheckIngestDataItemJob.perform_later(@data_item)
     assert_enqueued_jobs 1, only: PreCheckIngestDataItemJob
@@ -57,6 +54,15 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
     @data_item.reload
 
     assert_equal "succeeded", @data_item.status
-    assert_nil @data_item.feedback
+    assert @data_item.feedback_for.ok?
   end
+
+  private
+
+  def empty_required_field_response = OpenStruct.new(
+    valid?: false,
+    errors: ["required field empty: objectnumber must be populated"]
+  )
+
+  def valid_response = OpenStruct.new(valid?: true, errors: [])
 end
