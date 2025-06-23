@@ -57,6 +57,7 @@ class ActivityTest < ActiveSupport::TestCase
 
     assert_equal current_expected, activity.current_task
     assert_equal next_expected, activity.next_task
+    activity.destroy
   end
 
   test "current_task returns first non-pending, most recently created task" do
@@ -73,5 +74,6 @@ class ActivityTest < ActiveSupport::TestCase
 
     assert_equal current_expected, activity.current_task
     assert_equal next_expected, activity.next_task
+    activity.destroy
   end
 end

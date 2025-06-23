@@ -8,19 +8,18 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
       config: {action: "create"},
       files: files
     )
-    task = @activity.tasks.create(type: "Tasks::PreCheckIngestData")
     @data_item = DataItem.create(
       data: {foo: "bar"},
       position: 0,
       activity: @activity,
-      current_task_id: task.id
+      current_task: @activity.current_task
     )
   end
 
   test "job fails if data item check is not ok" do
-    assert_performed_jobs 0
-    perform_enqueued_jobs
-    assert_performed_jobs 1, only: ProcessUploadedFilesJob
+    assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
+      perform_enqueued_jobs
+    end
 
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
       .returns(mock)
@@ -32,9 +31,11 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
     })
 
     PreCheckIngestDataItemJob.perform_later(@data_item)
-    assert_enqueued_jobs 1, only: PreCheckIngestDataItemJob
 
-    perform_enqueued_jobs
+    assert_performed_with(job: PreCheckIngestDataItemJob, args: [@data_item]) do
+      perform_enqueued_jobs
+    end
+
     @data_item.reload
 
     assert_equal "failed", @data_item.status
@@ -42,18 +43,20 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
   end
 
   test "job succeeds if pre-checks pass" do
-    assert_performed_jobs 0
-    perform_enqueued_jobs
-    assert_performed_jobs 1
+    assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
+      perform_enqueued_jobs
+    end
 
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
       .returns(mock)
     IngestDataPreCheckItem.any_instance.stubs(:ok?).returns(true)
 
     PreCheckIngestDataItemJob.perform_later(@data_item)
-    assert_enqueued_jobs 1, only: PreCheckIngestDataItemJob
 
-    perform_enqueued_jobs
+    assert_performed_with(job: PreCheckIngestDataItemJob, args: [@data_item]) do
+      perform_enqueued_jobs
+    end
+
     @data_item.reload
 
     assert_equal "succeeded", @data_item.status

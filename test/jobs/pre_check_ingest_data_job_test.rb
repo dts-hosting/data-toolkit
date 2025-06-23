@@ -15,9 +15,9 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
   end
 
   test "job fails when service not configured" do
-    assert_performed_jobs 0
-    perform_enqueued_jobs
-    assert_performed_jobs 1
+    assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
+      perform_enqueued_jobs
+    end
 
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
       .raises(CollectionSpace::Mapper::NoClientServiceError.new("rectype"))
@@ -33,16 +33,20 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
   end
 
   test "job fails when no record_type DataConfig id_field" do
-    assert_performed_jobs 0
-    perform_enqueued_jobs
-    assert_performed_jobs 1
+    assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
+      perform_enqueued_jobs
+    end
 
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
       .raises(CollectionSpace::Mapper::IdFieldNotInMapperError)
 
     assert @task.ok_to_run?
     @task.run
-    perform_enqueued_jobs
+
+    assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
+      perform_enqueued_jobs
+    end
+
     @task.reload
     assert_equal "failed", @task.status
     assert_includes @task.feedback["errors"]["application error"],
@@ -51,9 +55,9 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
   end
 
   test "job fails if first data item check is not ok" do
-    assert_performed_jobs 0
-    perform_enqueued_jobs
-    assert_performed_jobs 1
+    assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
+      perform_enqueued_jobs
+    end
 
     mock_handler = mock
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
@@ -70,7 +74,11 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
       })
 
     @task.run
-    perform_enqueued_jobs
+
+    assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
+      perform_enqueued_jobs
+    end
+
     @task.reload
     assert_equal "failed", @task.status
     assert @task.feedback["errors"].key?("One or more headers in spreadsheet " \
@@ -78,9 +86,9 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
   end
 
   test "job spawns DataItem jobs if pre-checks pass" do
-    assert_performed_jobs 0
-    perform_enqueued_jobs
-    assert_performed_jobs 1
+    assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
+      perform_enqueued_jobs
+    end
 
     CollectionSpaceMapper.stubs(:single_record_type_handler_for)
       .returns("handler")
@@ -88,7 +96,11 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
       .stubs(:ok?).returns(true)
 
     @task.run
-    perform_enqueued_jobs
-    assert_enqueued_jobs 10
+
+    assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
+      assert_performed_jobs 11, only: [PreCheckIngestDataJob, PreCheckIngestDataItemJob] do
+        perform_enqueued_jobs
+      end
+    end
   end
 end
