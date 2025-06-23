@@ -28,6 +28,19 @@ class Feedback
     self
   end
 
+  def for_display
+    return {} unless displayable?
+
+    %i[errors warnings messages].map do |type|
+      msgs = compile_display_messages(type)
+      next unless msgs
+
+      [type, msgs]
+    end
+      .compact
+      .to_h
+  end
+
   # @param [Hash] args
   # @option args [String] :subtype
   # @option args [String, nil] :message
@@ -64,4 +77,22 @@ class Feedback
   private
 
   attr_reader :parent
+
+  def compile_display_messages(type)
+    elements = send(type)
+    return if elements.empty?
+
+    elements.group_by(&:subtype)
+      .map { |subtype, elements| subtype_message(subtype, elements) }
+  end
+
+  def subtype_message(subtype, elements)
+    path = elements.first.msg_lookup_path
+    details = elements.map(&:details)
+      .compact
+      .uniq
+      .join("; ")
+    params = {count: elements.count, details: details}
+    I18n.t(path, **params)
+  end
 end

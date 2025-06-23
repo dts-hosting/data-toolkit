@@ -22,6 +22,11 @@ class FeedbackElement
     @msgs = get_msgs
   end
 
+  def msg_lookup_path
+    return "feedback.#{type}.#{subtype}" if general?
+
+    "#{parent_scope}.#{subtype}"
+  end
 
   def validate
     unless known_subtype?
