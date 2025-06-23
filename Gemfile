@@ -28,7 +28,7 @@ end
 
 group :development do
   gem "htmlbeautifier"
-  gem "kamal", "~> 2.6"
+  gem "kamal", "~> 2.7"
   gem "letter_opener"
   gem "overcommit", require: false
   gem "solargraph"
