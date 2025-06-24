@@ -9,4 +9,5 @@ servers:
       - toolkit.lyrasistechnology.org
     env:
       ADMIN_EMAILS: admin@core.collectionspace.org,admin@anthro.collectionspace.org
+      SCOUT_NAME: Data Toolkit (QA)
       SOLID_QUEUE_IN_PUMA: true
