@@ -31,5 +31,7 @@ module DataToolkit
     # Important: only include trusted user email addresses in this list.
     # It is used to provide access to restricted features.
     config.admin_emails = ENV.fetch("ADMIN_EMAILS", "").split(",")
+    config.mission_control.jobs.base_controller_class = "AdminController"
+    config.mission_control.jobs.http_basic_auth_enabled = false
   end
 end
