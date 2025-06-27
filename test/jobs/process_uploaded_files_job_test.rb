@@ -35,7 +35,8 @@ class ProcessUploadedFilesJobTest < ActiveJob::TestCase
         activity.save
 
         assert_equal "failed", activity.tasks.first.status
-        assert_equal 1, activity.tasks.first.feedback["errors"].length
+        assert_equal %i[csvlint_invalid_encoding csv_stdlib_malformed_csv],
+          activity.tasks.first.feedback_for.errors.map(&:subtype)
       end
     end
   end

@@ -6,6 +6,8 @@ class PreCheckIngestDataJob < ApplicationJob
     task.start!
     Rails.logger.info "#{self.class.name} started"
 
+    feedback = task.feedback_for
+
     begin
       handler = task.activity.data_handler
     rescue CollectionSpace::Mapper::NoClientServiceError => err
@@ -18,12 +20,13 @@ class PreCheckIngestDataJob < ApplicationJob
 
     if fail_msg
       Rails.logger.error fail_msg
-      task.fail!({errors: {"application error" => [fail_msg]}}) && return
+      feedback.add_to_errors(subtype: :application_error, details: fail_msg)
+      task.fail!(feedback) && return
     end
 
     first_data_item = task.data_items.first.data
-    checker = IngestDataPreCheckFirstItem.new(handler, first_data_item)
-    task.fail!(checker.feedback) && return unless checker.ok?
+    checker = IngestDataPreCheckFirstItem.new(handler, first_data_item, feedback)
+    task.fail!(feedback) && return unless checker.ok?
 
     task.data_items.in_batches(of: 1000) do |batch|
       jobs = batch.map { |data_item| PreCheckIngestDataItemJob.new(data_item) }

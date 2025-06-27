@@ -13,17 +13,18 @@ class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
       current_task_id: task.id
     )
     @mock_handler = Minitest::Mock.new
+    @feedback = Feedback.new(task.class.name)
   end
 
   test "fails when there is a blank header" do
     @data_hash = {objectnumber: "1", title: "t", "": "foo"}
-    checker = IngestDataPreCheckFirstItem.new(@mock_handler, @data_hash)
-    feedback = {
-      messages: {},
-      warnings: {},
-      errors: {"One or more headers in spreadsheet are empty" => []}
-    }
-    assert_equal feedback, checker.feedback
+    checker = IngestDataPreCheckFirstItem.new(
+      @mock_handler, @data_hash, @feedback
+    )
+    assert_empty checker.feedback.messages
+    assert_empty checker.feedback.warnings
+    assert_equal 1, checker.feedback.errors.length
+    assert_equal :empty_header, checker.feedback.errors.first.subtype
     refute checker.ok?
   end
 
@@ -31,13 +32,16 @@ class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
     @data_hash = {title: "t", briefdescription: "foo"}
     @mock_handler.expect(:validate, missing_required_field_response,
       [@data_hash])
-    checker = IngestDataPreCheckFirstItem.new(@mock_handler, @data_hash)
-    feedback = {
-      messages: {},
-      warnings: {},
-      errors: {"Required field(s) missing" => %w[objectnumber fakerequired]}
-    }
-    assert_equal feedback, checker.feedback
+    checker = IngestDataPreCheckFirstItem.new(
+      @mock_handler, @data_hash, @feedback
+    )
+    assert_empty checker.feedback.messages
+    assert_empty checker.feedback.warnings
+    assert_equal 2, checker.feedback.errors.length
+    assert_equal %i[required_field_missing required_field_missing],
+      checker.feedback.errors.map(&:subtype)
+    assert_equal %w[objectnumber fakerequired],
+      checker.feedback.errors.map(&:details)
     refute checker.ok?
   end
 
@@ -49,13 +53,18 @@ class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
       {known_fields: %i[objectnumber title briefdescription],
        unknown_fields: %i[random blah]},
       [@data_hash])
-    checker = IngestDataPreCheckFirstItem.new(@mock_handler, @data_hash)
-    feedback = {
-      messages: {"Fields that will import" => ["3 of 5"]},
-      warnings: {"2 field(s) will not import" => %i[random blah]},
-      errors: {}
-    }
-    assert_equal feedback, checker.feedback
+    checker = IngestDataPreCheckFirstItem.new(
+      @mock_handler, @data_hash, @feedback
+    )
+    assert_empty checker.feedback.errors
+    assert_equal 1, checker.feedback.messages.length
+    assert_equal [:known_fields],
+      checker.feedback.messages.map(&:subtype)
+    assert_equal 2, checker.feedback.warnings.length
+    assert_equal [:unknown_field],
+      checker.feedback.warnings.map(&:subtype).uniq
+    assert_equal %i[random blah],
+      checker.feedback.warnings.map(&:details)
     assert checker.ok?
   end
 

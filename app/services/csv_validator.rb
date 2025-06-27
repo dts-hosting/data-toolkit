@@ -13,31 +13,18 @@ class CsvValidator
   def call
     @filename = file.filename.to_s
     file.open do |f|
-      @csvlint = CsvlintValidator.call(f.path, dialect: dialect)
-      @stdlib = CsvStdlibValidator.call(f.path)
+      path = Pathname.new(f.path)
+      @csvlint = CsvlintValidator.call(path, filename: filename,
+        dialect: dialect)
+      @stdlib = CsvStdlibValidator.call(path, filename: filename)
     end
+
     self
   end
 
-  # @return [Boolean, NilClass]
-  def valid?
-    return true if blank_row_failure? && stdlib.valid?
+  def feedback = @feedback ||= compile_feedback
 
-    csvlint.valid?
-  end
-
-  # @return [Hash]
-  def feedback = {
-    filename: filename,
-    errors: errors,
-    warnings: csvlint.warnings
-  }
-
-  def errors
-    return [] if valid?
-
-    [csvlint.errors, stdlib.errors].flatten
-  end
+  def valid? = feedback.ok?
 
   def data = stdlib.data
 
@@ -52,7 +39,14 @@ class CsvValidator
   attr_reader :file, :dialect, :filename, :filepath, :csvlint, :stdlib
 
   def blank_row_failure?
-    csvlint.errors.length == 1 &&
-      csvlint.errors.first.match?(/^Blank Rows: /)
+    csvlint.feedback.errors.map(&:subtype) == [:csvlint_blank_rows]
+  end
+
+  def compile_feedback
+    if blank_row_failure?
+      csvlint.feedback.clear_errors
+    end
+
+    csvlint.feedback + stdlib.feedback
   end
 end

@@ -4,22 +4,15 @@
   </div>
 
   <% feedback.each do |category, entries| %>
-    <% if entries.any? %>
-      <div class="card-body">
-        <div class="mb-4">
-          <h6 class="text-muted fw-semibold border-bottom pb-2 mb-3"><%= category.titleize %></h6>
-          <ul>
-            <% entries.each do |subcategory, messages| %>
-              <li><%= subcategory.titleize %></li>
-              <ul>
-                <% messages.each do |message| %>
-                  <%= content_tag :li, message %>
-                <% end %>
-              </ul>
-            <% end %>
-          </ul>
-        </div>
+    <div class="card-body">
+      <div class="mb-4">
+        <h6 class="text-muted fw-semibold border-bottom pb-2 mb-3"><%= category.titleize %></h6>
+        <ul>
+          <% entries.each do |message| %>
+            <%= content_tag :li, message %>
+          <% end %>
+        </ul>
       </div>
-    <% end %>
+    </div>
   <% end %>
 </div>

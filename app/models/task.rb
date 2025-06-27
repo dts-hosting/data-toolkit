@@ -1,5 +1,6 @@
 class Task < ApplicationRecord
   include ActionView::RecordIdentifier
+  include Feedbackable
   include TransitionsStatus
 
   belongs_to :activity, touch: true
@@ -33,6 +34,8 @@ class Task < ApplicationRecord
   def ok_to_run?
     met_dependencies && pending? && started_at.nil?
   end
+
+  def feedback_context = self.class.name
 
   def progress
     case status
@@ -89,7 +92,7 @@ class Task < ApplicationRecord
   end
 
   def finish_up
-    data_items.where(status: "failed").exists? ? fail! : success!
+    data_items.where(status: "failed").exists? ? fail!(feedback) : success!
     finalizer&.perform_later(self)
   end
 
