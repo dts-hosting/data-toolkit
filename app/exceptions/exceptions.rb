@@ -7,3 +7,7 @@
 # - be identified or rescued by standard Ruby exception
 #   hierarchy ancestor, OR by application-specific error status
 module DataToolkitError; end
+
+class FeedbackSubtypeError < StandardError
+  include DataToolkitError
+end
