@@ -24,7 +24,11 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
 
     assert @task.ok_to_run?
     @task.run
-    perform_enqueued_jobs
+
+    assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
+      perform_enqueued_jobs
+    end
+
     @task.reload
     assert_equal "failed", @task.status
 
