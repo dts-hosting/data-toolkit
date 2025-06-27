@@ -38,8 +38,14 @@
         <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Admin</h6>
         <ul class="nav flex-column">
           <li class="nav-item">
+            <%= link_to "/jobs", class: "nav-link ps-2 py-1 rounded" do %>
+              <i class="bi bi-speedometer me-2 text-secondary"></i>
+              Jobs Dashboard
+            <% end %>
+          </li>
+          <li class="nav-item">
             <%= link_to manifest_registries_path, class: "nav-link ps-2 py-1 rounded" do %>
-              <i class="bi bi-plus-circle me-2 text-secondary"></i>
+              <i class="bi bi-journals me-2 text-secondary"></i>
               Manifest Registries
             <% end %>
           </li>

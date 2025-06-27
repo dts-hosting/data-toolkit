@@ -1,4 +1,4 @@
-class ManifestRegistriesController < ApplicationController
+class ManifestRegistriesController < AdminController
   before_action :set_manifest_registry, only: [:show, :destroy, :run]
 
   def index
