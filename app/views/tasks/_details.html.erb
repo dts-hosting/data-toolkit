@@ -15,11 +15,11 @@
 
   <div class="row mb-2">
     <div class="col-sm-3 fw-bold">Created:</div>
-    <div class="col-sm-9"><%= task.created_at.strftime("%b %d, %Y %H:%M") %></div>
+    <div class="col-sm-9"><%= local_time(task.created_at) %></div>
   </div>
 
   <div class="row mb-2">
     <div class="col-sm-3 fw-bold">Updated:</div>
-    <div class="col-sm-9"><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></div>
+    <div class="col-sm-9"><%= local_time(task.updated_at) %></div>
   </div>
 </div>

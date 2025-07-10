@@ -69,6 +69,7 @@ gem "csv"
 gem "csvlint",
   git: "https://github.com/lyrasis/csvlint.rb.git",
   tag: "1.5.0"
+gem "local_time"
 gem "mission_control-jobs"
 gem "pagy"
 gem "scout_apm"
