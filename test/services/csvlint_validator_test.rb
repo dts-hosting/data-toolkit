@@ -2,7 +2,11 @@ require "test_helper"
 
 class CsvlintValidatorTest < ActiveSupport::TestCase
   def subject(file)
-    CsvlintValidator.call(fixture_file_path(file)).feedback
+    CsvlintValidator.new(
+      filepath: fixture_file_path(file),
+      taskname: "Tasks::ProcessUploadedFiles"
+    ).call
+      .feedback
   end
 
   test "handles valid CSV" do

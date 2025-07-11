@@ -4,8 +4,6 @@ require "csv"
 #   falling over. This is necessary because Csvlint sometimes fails files
 #   that Ruby can handle with no problem.
 class CsvStdlibValidator
-  def self.call(...) = new(...).call
-
   # @return [CSV::Table]
   attr_reader :data
 
@@ -13,13 +11,14 @@ class CsvStdlibValidator
   attr_reader :feedback
 
   # @param filepath [String]
+  # @param taskname [String] feedback context for task
   # @param filename [nil, String] the user-known filename is not the basename
   #   of the Rails storage path, so this should be passed explicitly in
   #   production, so the feedback can record which file it is about
-  def initialize(filepath, filename: nil)
+  def initialize(filepath:, taskname:, filename: nil)
     @filepath = filepath
     @filename = filename || filepath.basename.to_s
-    @feedback = Feedback.new("Tasks::ProcessUploadedFiles")
+    @feedback = Feedback.new(taskname)
     @feedback_subtype_prefix = :csv_stdlib
   end
 

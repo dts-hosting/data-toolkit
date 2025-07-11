@@ -4,19 +4,18 @@ require "csvlint"
 class CsvlintValidator
   attr_reader :feedback
 
-  def self.call(...) = new(...).call
-
   # @param filepath [String]
+  # @param taskname [String] feedback context for task
   # @param filename [nil, String] the user-known filename is not the basename
   #   of the Rails storage path, so this should be passed explicitly in
   #   production, so the feedback can record which file it is about
   # @param dialect [Hash]
-  def initialize(filepath, filename: nil,
+  def initialize(filepath:, taskname:, filename: nil,
     dialect: CsvValidator::DEFAULT_DIALECT)
     @filepath = filepath
     @filename = filename || filepath.basename.to_s
     @dialect = dialect
-    @feedback = Feedback.new("Tasks::ProcessUploadedFiles")
+    @feedback = Feedback.new(taskname)
     @feedback_subtype_prefix = :csvlint
   end
 
@@ -60,7 +59,7 @@ class CsvlintValidator
     #   at the same time, and people don't notice or don't know to address
     #   the encoding issue(s) first. For this reason, if :invalid_encoding
     #   is one of the errors, we ONLY return that one, in the hopes that
-    #   fixing the encoding fixes the file.
+    #   fixing the encoding fixes the other issues reported for the file.
     errs = validator.errors
     encoding_err = errs.find { |err| err.type == :invalid_encoding }
     add_feedback(encoding_err, type: :error) && return if encoding_err

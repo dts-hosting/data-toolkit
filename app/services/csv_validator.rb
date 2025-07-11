@@ -1,12 +1,12 @@
 class CsvValidator
   DEFAULT_DIALECT = {header: true, delimiter: ","}.freeze
 
-  def self.call(...) = new(...).call
-
   # @param file [ActiveStorage::Attachment]
+  # @param taskname [String] feedback context for task
   # @param dialect [Hash]
-  def initialize(file, dialect: DEFAULT_DIALECT)
+  def initialize(file:, taskname:, dialect: DEFAULT_DIALECT)
     @file = file
+    @taskname = taskname
     @dialect = dialect
   end
 
@@ -14,9 +14,17 @@ class CsvValidator
     @filename = file.filename.to_s
     file.open do |f|
       path = Pathname.new(f.path)
-      @csvlint = CsvlintValidator.call(path, filename: filename,
-        dialect: dialect)
-      @stdlib = CsvStdlibValidator.call(path, filename: filename)
+      @csvlint = CsvlintValidator.new(
+        filepath: path,
+        taskname: taskname,
+        filename: filename,
+        dialect: dialect
+      ).call
+      @stdlib = CsvStdlibValidator.new(
+        filepath: path,
+        taskname: taskname,
+        filename: filename
+      ).call
     end
 
     self
@@ -36,7 +44,7 @@ class CsvValidator
 
   private
 
-  attr_reader :file, :dialect, :filename, :filepath, :csvlint, :stdlib
+  attr_reader :file, :taskname, :dialect, :filename, :filepath, :csvlint, :stdlib
 
   def blank_row_failure?
     csvlint.feedback.errors.map(&:subtype) == [:csvlint_blank_rows]

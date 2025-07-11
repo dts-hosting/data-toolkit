@@ -4,17 +4,21 @@ class FilesValidator
     "text/csv" => CsvValidator
   }.freeze
 
-  def self.call(...) = new(...).call
-
   # @param files [ActiveStorage::Attachment::Many]
-  def initialize(files, feedback = nil)
+  # @param taskname [String] feedback context for task
+  # @param feedback [nil, Feedback]
+  def initialize(files:, taskname:, feedback: nil)
     @files = files
-    @feedback = feedback || Feedback.new("Tasks::ProcessUploadedFiles")
+    @taskname = taskname
+    @feedback = feedback || Feedback.new(taskname)
   end
 
   def call
     begin
-      @results = files.map { |file| pick_validator(file).call(file) }
+      @results = files.map do |file|
+        pick_validator(file).new(file: file, taskname: taskname)
+          .call
+      end
     rescue => err
       @validity_status = false
       Rails.logger.error "#{err.message} -- #{err.backtrace.first(5)}"
@@ -50,7 +54,7 @@ class FilesValidator
 
   private
 
-  attr_reader :files, :results, :validity_status
+  attr_reader :files, :taskname, :results, :validity_status
 
   def pick_validator(file)
     validator = VALIDATOR_MAP[file.blob.content_type]
@@ -59,9 +63,8 @@ class FilesValidator
   end
 
   def compile_feedback
-    results.map(&:feedback)
-      .inject(@feedback) do |result, next_value|
-        result + next_value
-      end
+    results.inject(@feedback) do |result, next_value|
+      result + next_value.feedback
+    end
   end
 end

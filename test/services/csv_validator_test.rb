@@ -1,9 +1,10 @@
 require "test_helper"
 
 class CsvValidatorTest < ActiveSupport::TestCase
-  def subject(file) = CsvValidator.call(
-    fixtures_as_attachments([file]).first
-  )
+  def subject(file) = CsvValidator.new(
+    file: fixtures_as_attachments([file]).first,
+    taskname: "Tasks::ProcessUploadedFiles"
+  ).call
 
   test "handles valid CSV" do
     validator = subject("valid_lf.csv")

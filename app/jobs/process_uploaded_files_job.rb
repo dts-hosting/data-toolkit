@@ -15,7 +15,11 @@ class ProcessUploadedFilesJob < ApplicationJob
       task.fail!(feedback) && return
     end
 
-    validated = FilesValidator.call(task.activity.files, feedback)
+    validated = FilesValidator.new(
+      files: task.activity.files,
+      taskname: task.feedback_context,
+      feedback: feedback
+    ).call
     task.fail!(feedback) && return unless validated.valid?
 
     validated.data.each { |table| import_from_csv(task, table) }

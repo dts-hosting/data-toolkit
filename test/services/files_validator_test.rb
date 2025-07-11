@@ -1,9 +1,10 @@
 require "test_helper"
 
 class FilesValidatorTest < ActiveSupport::TestCase
-  def subject(files) = FilesValidator.call(
-    fixtures_as_attachments(files)
-  )
+  def subject(files) = FilesValidator.new(
+    files: fixtures_as_attachments(files),
+    taskname: "Tasks::ProcessUploadedFiles"
+  ).call
 
   test "handles missing validator" do
     validator = subject(["test.csv", "not_really_excel.xlsx"])
