@@ -9,6 +9,9 @@
 #     priority: 2
 #     schedule: at 5am every day
 production:
+  manifest_registry_import:
+    class: ManifestRegistryImportJob
+    schedule: at 8am every day
   session_expiration:
     command: "Session.sweep"
     schedule: every hour
