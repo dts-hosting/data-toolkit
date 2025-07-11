@@ -17,7 +17,7 @@
     </div>
     <div class="row mb-3">
       <div class="col-md-3 fw-bold">Last Updated:</div>
-      <div class="col-md-9"><%= manifest_registry.last_updated_at || 'Never' %></div>
+      <div class="col-md-9"><%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></div>
     </div>
     <div class="row mb-3">
       <div class="col-md-3 fw-bold">Total Manifests:</div>

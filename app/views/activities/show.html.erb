@@ -57,7 +57,7 @@
 
       <div class="row mb-3">
         <div class="col-sm-3 fw-bold">Created On:</div>
-        <div class="col-sm-9"><%= @activity.created_at.strftime("%b %d, %Y %H:%M") %></div>
+        <div class="col-sm-9"><%= local_time(@activity.created_at) %></div>
       </div>
     </div>
 

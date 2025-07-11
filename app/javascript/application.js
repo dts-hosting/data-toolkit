@@ -2,6 +2,13 @@
 import "@hotwired/turbo-rails";
 import "controllers";
 
+import LocalTime from "local-time";
+
+LocalTime.start();
+document.addEventListener("turbo:morph", () => {
+  LocalTime.run();
+});
+
 document.addEventListener("turbo:load", () => {
   const collapses = document.querySelectorAll('[data-bs-toggle="collapse"]');
   collapses.forEach((el) => {

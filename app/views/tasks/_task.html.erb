@@ -5,8 +5,8 @@
       <%= task.status.titleize %>
     </span>
   </td>
-  <td><%= task.created_at.strftime("%b %d, %Y %H:%M") %></td>
-  <td><%= task.updated_at.strftime("%b %d, %Y %H:%M") %></td>
+  <td><%= local_time(task.created_at) %></td>
+  <td><%= local_time(task.updated_at) %></td>
   <td>
     <%= button_to run_activity_task_path(task.activity, task),
                   method: :post,

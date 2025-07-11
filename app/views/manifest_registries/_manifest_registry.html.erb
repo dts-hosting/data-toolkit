@@ -16,10 +16,10 @@
   <div class="card-body">
     <div class="row">
       <div class="col-md-4">
-        <span>Date Added: <%= manifest_registry.created_at || 'Never' %></span>
+        <span>Date Added: <%= manifest_registry.created_at ? local_time(manifest_registry.created_at) : 'Never' %></span>
       </div>
       <div class="col-md-4">
-        <span>Last Updated: <%= manifest_registry.last_updated_at || 'Never' %></span>
+        <span>Last Updated: <%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></span>
       </div>
       <div class="col-md-4">
         <span>Manifests: <%= manifest_registry.manifests.count %></span>

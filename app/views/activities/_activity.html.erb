@@ -58,7 +58,7 @@
           <div class="d-flex align-items-center mb-1">
             <span class="text-muted small me-2">Last Updated</span>
           </div>
-          <span class="text-monospace fw-medium"><%= activity.updated_at.strftime("%b %d, %Y %H:%M") %></span>
+          <span class="text-monospace fw-medium"><%= local_time(activity.updated_at) %></span>
         </div>
       </div>
     </div>

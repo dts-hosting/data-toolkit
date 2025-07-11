@@ -8,7 +8,7 @@
   <div class="card-body">
     <div class="row">
       <div class="col-md-6">
-        <span>Imported: <%= manifest.created_at %></span>
+        <span>Imported: <%= local_time(manifest.created_at) %></span>
       </div>
       <div class="col-md-6">
         <span>Data Configs: <%= manifest.data_configs_count %></span>
