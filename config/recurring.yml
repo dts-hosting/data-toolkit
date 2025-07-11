@@ -9,6 +9,9 @@
 #     priority: 2
 #     schedule: at 5am every day
 production:
+  expired_activity_deletion:
+    class: ExpiredActivityDeleteJob
+    schedule: at 6am every day
   manifest_registry_import:
     class: ManifestRegistryImportJob
     schedule: at 8am every day
