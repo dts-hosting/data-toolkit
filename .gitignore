@@ -36,4 +36,5 @@
 
 /.idea/
 /node_modules
-/vendor
+/vendor/*
+!/vendor/javascript/
