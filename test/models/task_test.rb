@@ -107,12 +107,84 @@ class TaskTest < ActiveSupport::TestCase
     assert_not_nil @task.started_at
   end
 
-  test "should execute fail! method correctly" do
+  test "should execute fail! method correctly when feedback is empty Hash" do
     @task.save!
-    @task.fail!
+    @task.fail!({})
 
     assert_equal "failed", @task.status
     assert_not_nil @task.completed_at
+    feedback = @task.feedback_for
+    refute feedback.displayable?
+  end
+
+  test "should execute fail! method correctly when feedback is valid feedback Hash" do
+    feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
+                     "errors" =>
+     [{"type" => "error",
+       "subtype" => "csvlint_invalid_encoding",
+       "details" => "row 2",
+       "prefix" => "invalid_encoding.csv"},
+       {"type" => "error",
+        "subtype" => "csv_stdlib_malformed_csv",
+        "details" => "Invalid byte sequence in UTF-8 in line 2.",
+        "prefix" => "invalid_encoding.csv"}],
+                     "warnings" => [],
+                     "messages" => []}
+
+    @task.save!
+    @task.fail!(feedback_hash)
+
+    assert_equal "failed", @task.status
+    assert_not_nil @task.completed_at
+    feedback = @task.feedback_for
+    refute feedback.ok?
+  end
+
+  # Full backtrace for the expected error the following test should cause:
+  #   Error:
+  #   TaskTest#test_should_execute_fail!_method_correctly_when_feedback_is_invalid_feedback_Hash:
+  #   NoMethodError: undefined method 'underscore' for nil
+  #       App/lib/feedback_element.rb:73:in 'FeedbackElement#parent_scope'
+  #       app/lib/feedback_element.rb:66:in 'FeedbackElement#get_msgs'
+  #       app/lib/feedback_element.rb:22:in 'FeedbackElement#initialize'
+  #       app/models/feedback.rb:51:in 'Class#new'
+  #       app/models/feedback.rb:51:in 'Feedback#add_to_attribute'
+  #       app/models/feedback.rb:67:in 'Kernel#public_send'
+  #       app/models/feedback.rb:67:in 'block (2 levels) in Feedback#attributes='
+  #       app/models/feedback.rb:65:in 'Array#each'
+  #       app/models/feedback.rb:65:in 'block in Feedback#attributes='
+  #       app/models/feedback.rb:59:in 'Hash#each'
+  #       app/models/feedback.rb:59:in 'Feedback#attributes='
+  #       app/models/concerns/feedbackable.rb:8:in 'Feedbackable#feedback_for'
+  #       test/models/task_test.rb:156:in 'block in <class:TaskTest>'
+  test ":feedback_for should raise exception when invalid feedback Hash has been saved" do
+    feedback_hash = {"errors" =>
+                       [{"type" => "error",
+                         "subtype" => "csvlint_invalid_encoding",
+                         "details" => "row 2",
+                         "prefix" => "invalid_encoding.csv"}]}
+    @task.save!
+    @task.fail!(feedback_hash)
+
+    assert_equal "failed", @task.status
+    assert_not_nil @task.completed_at
+    assert_equal ["errors"], @task.feedback.keys
+    assert_raises(NoMethodError, "undefined method 'underscore' for nil") do
+      @task.feedback_for
+    end
+  end
+
+  test "should execute fail! method correctly when feedback is Feedback Object" do
+    @task.save!
+    feedback = @task.feedback_for
+    feedback.add_to_errors(subtype: :csvlint_invalid_encoding, details: "row 2",
+      prefix: "invalid_encoding.csv")
+    @task.fail!(feedback)
+
+    assert_equal "failed", @task.status
+    assert_not_nil @task.completed_at
+    refute feedback.ok?
+    assert_equal 1, @task.feedback["errors"].length
   end
 
   test "should execute success! method correctly" do

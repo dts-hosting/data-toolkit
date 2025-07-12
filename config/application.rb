@@ -35,3 +35,7 @@ module DataToolkit
     config.mission_control.jobs.http_basic_auth_enabled = false
   end
 end
+
+# See comment in config/initializers/zeitwerk.rb for why this is being
+#   explicitly required here
+require_relative "../app/exceptions/exceptions"
