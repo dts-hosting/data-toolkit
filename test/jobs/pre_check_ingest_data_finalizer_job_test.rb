@@ -7,7 +7,7 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     set_up_and_run_task
 
     # the task will have succeeded, so let's reset it to a failed state
-    fail_task(task: @task, indexes: [3, 5])
+    fail_task(task: @task, indexes: [3])
 
     assert_performed_with(job: PreCheckIngestDataFinalizerJob, args: [@task]) do
       perform_enqueued_jobs
@@ -83,7 +83,10 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     end
   end
 
+  # As is only fail one item this way otherwise we can enqueue 2 finalizer jobs.
+  # Jobs should be idempotent so that shouldn't be a problem, but worth noting.
   def fail_task(task:, indexes:)
+    task.running! # we need to be running to transition status via item processing
     indexes.each do |idx|
       data_item = @task.data_items[idx]
       feedback = data_item.feedback_for
@@ -96,8 +99,6 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
         feedback: feedback
       )
     end
-    task.running! # we need to be running to transition using update_progress
-    task.update_progress
   end
 
   def valid_response = OpenStruct.new(valid?: true, errors: [])

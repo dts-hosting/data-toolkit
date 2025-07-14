@@ -6,7 +6,10 @@ class PreCheckIngestDataFinalizerJob < ApplicationJob
     feedback = task.feedback_for
     item_failures = task.data_items.where(status: "failed")
 
-    log_finish && return if item_failures.empty?
+    if item_failures.empty?
+      task.success!
+      log_finish && return
+    end
 
     task.fail!(item_failure_feedback_for(feedback, item_failures))
   rescue => e

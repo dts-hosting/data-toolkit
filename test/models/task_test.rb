@@ -232,34 +232,4 @@ class TaskTest < ActiveSupport::TestCase
     @task.status = "running"
     assert_equal 0, @task.progress
   end
-
-  test "progress should trigger finish_up when reaching 100%" do
-    @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
-    @task.save!
-
-    @task.data_items.update_all(status: "succeeded")
-    @task.data_items.last.update(status: "succeeded")
-    @task.reload
-
-    assert_equal 100, @task.progress
-    assert_equal "succeeded", @task.status
-    assert_not_nil @task.completed_at
-  end
-
-  test "progress should set status to failed if any items failed" do
-    @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
-    @task.save!
-
-    @task.data_items.update_all(status: "succeeded")
-    @task.data_items.last.update(status: "failed")
-    @task.reload
-
-    assert_equal 100, @task.progress
-    assert_equal "failed", @task.status
-    assert_not_nil @task.completed_at
-  end
 end

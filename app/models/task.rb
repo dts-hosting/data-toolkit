@@ -62,10 +62,6 @@ class Task < ApplicationRecord
     handler.perform_later(self)
   end
 
-  def update_progress
-    finish_up if running? && calculate_progress >= 100
-  end
-
   def self.display_name
     raise NotImplementedError
   end
@@ -89,11 +85,6 @@ class Task < ApplicationRecord
 
     completed_items_ratio = data_items.where(status: ["failed", "succeeded"]).count.to_f / data_items.count
     (completed_items_ratio * 100).round(2)
-  end
-
-  def finish_up
-    data_items.where(status: "failed").exists? ? fail! : success!
-    finalizer&.perform_later(self)
   end
 
   def met_dependencies

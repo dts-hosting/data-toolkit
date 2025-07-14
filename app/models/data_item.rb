@@ -16,8 +16,11 @@ class DataItem < ApplicationRecord
   after_update_commit do
     next unless succeeded? || failed?
 
-    next current_task.update_progress if current_task.progress >= 100
-    current_task.touch if rand < 0.1 # bumps task.updated_at
+    if current_task.running? && current_task.progress >= 100
+      current_task.finalizer&.perform_later(current_task)
+    elsif rand < 0.1
+      current_task.touch # bumps task.updated_at
+    end
   end
 
   def feedback_context = current_task.class.name
