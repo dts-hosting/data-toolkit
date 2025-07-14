@@ -8,11 +8,11 @@ class PreCheckIngestDataFinalizerJob < ApplicationJob
 
     log_finish && return if item_failures.empty?
 
-    task.fail!(item_failure_feedback_for(feedback, item_failures))
+    task.update(feedback: item_failure_feedback_for(feedback, item_failures))
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.fail!(feedback)
+    task.update(feedback: feedback)
   end
 
   private
