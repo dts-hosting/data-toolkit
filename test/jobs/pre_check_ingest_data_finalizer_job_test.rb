@@ -33,22 +33,6 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     refute feedback.displayable?
   end
 
-  test "does not run if pre-item checks fail" do
-    skip "TODO: review purpose, finalizer job always runs when task complete"
-
-    IngestDataPreCheckFirstItem.any_instance
-      .stubs(:ok?).returns(false)
-    IngestDataPreCheckFirstItem.any_instance
-      .stubs(:feedback).returns({
-        messages: {},
-        warnings: {},
-        errors: {"One or more headers in spreadsheet are empty" => []}
-      })
-    set_up_and_run_task
-
-    assert_enqueued_jobs 0, only: PreCheckIngestDataFinalizerJob # finalizer job
-  end
-
   private
 
   def successful_first_item_check
