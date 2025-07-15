@@ -72,18 +72,12 @@ class TaskTest < ActiveSupport::TestCase
 
   # dependencies
   test "should handle dependencies correctly" do
-    # TODO: flexible handling of stuff like this ...
     activity = create_activity(
       {
         type: "Activities::CreateOrUpdateRecords",
         config: {action: "create"},
         data_config: create_data_config_record_type({record_type: "acquisitions"}),
-        files: [
-          Rack::Test::UploadedFile.new(
-            Rails.root.join("test/fixtures/files/test.csv"),
-            "text/csv"
-          )
-        ]
+        files: create_uploaded_files(["test.csv"]),
       }
     )
     first_task = activity.tasks[0]
@@ -199,6 +193,52 @@ class TaskTest < ActiveSupport::TestCase
 
     assert_equal "review", @task.status
     assert_not_nil @task.completed_at
+  end
+
+  test "should execute suspend! method correctly when feedback is empty Hash" do
+    @task.save!
+    @task.suspend!({})
+
+    assert_equal "review", @task.status
+    assert_not_nil @task.completed_at
+    feedback = @task.feedback_for
+    refute feedback.displayable?
+  end
+
+  test "should execute suspend! method correctly when feedback is valid feedback Hash" do
+    feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
+                     "errors" => [],
+                     "warnings" =>
+     [{"type" => "warning",
+       "subtype" => "csvlint_check_options",
+       "details" => "check not good",
+       "prefix" => "test.csv"},
+       {"type" => "warning",
+        "subtype" => "csvlint_duplicate_column_name",
+        "details" => "Duplicate header found",
+        "prefix" => "test.csv"}],
+                     "messages" => []}
+
+    @task.save!
+    @task.suspend!(feedback_hash)
+
+    assert_equal "review", @task.status
+    assert_not_nil @task.completed_at
+    feedback = @task.feedback_for
+    assert feedback.ok?
+  end
+
+  test "should execute suspend! method correctly when feedback is Feedback Object" do
+    @task.save!
+    feedback = @task.feedback_for
+    feedback.add_to_warnings(subtype: :csvlint_check_options, details: "check not good",
+      prefix: "test.csv")
+    @task.suspend!(feedback)
+
+    assert_equal "review", @task.status
+    assert_not_nil @task.completed_at
+    assert feedback.ok?
+    assert_equal 1, @task.feedback["warnings"].length
   end
 
   # progress checking

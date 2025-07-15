@@ -17,8 +17,9 @@ module TransitionsStatus
       update!(status: "succeeded", completed_at: Time.current)
     end
 
-    def suspend!
-      update!(status: "review", completed_at: Time.current)
+    def suspend!(feedback = nil)
+      params = {status: "review", completed_at: Time.current, feedback: feedback}.compact
+      update!(**params)
     end
   end
 end
