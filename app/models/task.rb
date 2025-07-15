@@ -17,8 +17,6 @@ class Task < ApplicationRecord
     failed: "failed"
   }, default: :pending
 
-  PROGRESSED_STATUSES = %w[failed review succeeded].freeze
-
   validates :type, :status, presence: true
 
   after_update_commit :broadcast_updates

@@ -77,7 +77,7 @@ class TaskTest < ActiveSupport::TestCase
         type: "Activities::CreateOrUpdateRecords",
         config: {action: "create"},
         data_config: create_data_config_record_type({record_type: "acquisitions"}),
-        files: create_uploaded_files(["test.csv"]),
+        files: create_uploaded_files(["test.csv"])
       }
     )
     first_task = activity.tasks[0]

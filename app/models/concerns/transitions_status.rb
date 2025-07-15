@@ -1,6 +1,9 @@
 module TransitionsStatus
   extend ActiveSupport::Concern
 
+  # Statuses that indicate completion (success, failure, or requiring review)
+  PROGRESSED_STATUSES = %w[failed review succeeded].freeze
+
   included do
     def fail!(feedback = nil)
       params = {status: "failed", completed_at: Time.current, feedback: feedback}.compact
