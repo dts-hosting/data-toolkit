@@ -1,14 +1,14 @@
-class PreCheckIngestDataFinalizerJob < ApplicationJob
+class GenericTaskFinalizerJob < ApplicationJob
   queue_as :default
 
   def perform(task)
     Rails.logger.info "#{self.class.name} started"
     feedback = task.feedback_for
-    item_failures = task.data_items.where(status: "failed")
+    feedback_items = task.data_items.where.not(feedback: nil)
 
-    log_finish && return if item_failures.empty?
+    log_finish && return if feedback_items.empty?
 
-    task.update(feedback: item_failure_feedback_for(feedback, item_failures))
+    task.update(feedback: item_feedback_for(feedback, feedback_items))
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
@@ -21,10 +21,13 @@ class PreCheckIngestDataFinalizerJob < ApplicationJob
     Rails.logger.info "#{self.class.name} finished"
   end
 
-  def item_failure_feedback_for(feedback, failures)
-    failures.each do |item|
+  def item_feedback_for(feedback, items)
+    items.find_each(batch_size: 500) do |item|
       item.feedback_for.errors.each do |err|
         feedback.add_to_errors(subtype: err.subtype, details: err.details)
+      end
+      item.feedback_for.warnings.each do |err|
+        feedback.add_to_warnings(subtype: err.subtype, details: err.details)
       end
     end
     feedback

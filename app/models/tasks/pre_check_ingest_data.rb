@@ -5,7 +5,7 @@ module Tasks
       [Tasks::ProcessUploadedFiles]
     end
 
-    def finalizer = PreCheckIngestDataFinalizerJob
+    def finalizer = GenericTaskFinalizerJob
 
     def handler = PreCheckIngestDataJob
 
