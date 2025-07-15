@@ -2,25 +2,28 @@ require "test_helper"
 
 class CsvStdlibValidatorTest < ActiveSupport::TestCase
   def subject(file)
-    CsvStdlibValidator.call(fixture_file_path(file))
+    CsvStdlibValidator.new(
+      filepath: fixture_file_path(file),
+      taskname: "Tasks::ProcessUploadedFiles"
+    ).call
   end
 
   test "handles valid CSV" do
     validator = subject("valid_lf.csv")
 
-    assert validator.valid?
-    assert_empty validator.errors
-    assert_empty validator.warnings
+    assert validator.feedback.ok?
+    assert_empty validator.feedback.errors
+    assert_empty validator.feedback.warnings
     assert_instance_of CSV::Table, validator.data
   end
 
   test "handles invalid CSV" do
     validator = subject("invalid_mixed_eol_blank_middle_row.csv")
 
-    refute validator.valid?
-    assert_equal 1, validator.errors.length
-    assert_instance_of String, validator.errors.first
-    assert_empty validator.warnings
+    refute validator.feedback.ok?
+    assert_equal [:csv_stdlib_malformed_csv],
+      validator.feedback.errors.map(&:subtype)
+    assert_empty validator.feedback.warnings
     assert_nil validator.data
   end
 end

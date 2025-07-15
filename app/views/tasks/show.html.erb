@@ -13,6 +13,7 @@
   </div>
 </div>
 
-<% if @task.feedback.present? %>
-  <%= render "feedback", feedback: @task.feedback %>
+<% taskfeedback = @task.feedback_for %>
+<% if taskfeedback.displayable? %>
+  <%= render "feedback", feedback: taskfeedback.for_display %>
 <% end %>

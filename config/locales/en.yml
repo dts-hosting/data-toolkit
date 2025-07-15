@@ -29,3 +29,77 @@
 
 en:
   hello: "Hello world"
+  feedback:
+    error:
+      application_error: >-
+        Application has failed for an unexpected reason. This may not be
+        related to your data at all. The Toolkit developers will need to
+        investigate the issue. Please leave the failed Activity in the Toolkit
+        for examination. Via the support method you have been instructed to
+        use, please send us the URL of the failed Activity. If you delete the
+        failed Activity, we cannot troubleshoot it. ERROR RECEIVED: %{details}
+  tasks:
+    pre_check_ingest_data:
+      feedback:
+        error:
+          empty_header:
+            one: >-
+              A data column in your spreadsheet has a blank/empty header. Either
+              enter the correct field name for the column, or delete the column.
+            other: >-
+              Data columns in your spreadsheet have blank/empty headers. Either
+              enter the correct field names for these columns, or delete the
+              columns lacking headers.
+          required_field_missing:
+            one: "Your spreadsheet is missing a required column: %{details}."
+            other: "Your spreadsheet is missing required columns: %{details}."
+          required_field_value_missing: >-
+            One or more rows is missing a value in a required field. You will
+            need to fix your spreadsheet and start over. Filter or
+            sort columns for required fields to find rows missing values.
+            Either provide values in required fields, or delete rows missing
+            values from your CSV. Check the CSV template for this record type
+            to find out which field(s) are required.
+        message:
+          known_fields: "%{details} fields will import"
+        warning:
+          unknown_field:
+            one: "Field that will <b>not</b> import: %{details}"
+            other: "%{count} fields will <b>not</b> import: %{details}"
+    process_uploaded_files:
+      feedback:
+        error:
+          csv_stdlib_malformed_csv: >-
+            Cannot be parsed. ERROR RECEIVED: %{details}
+          csvlint_blank_rows: >-
+            Blank Rows: All column values in %{details} are empty
+          csvlint_invalid_encoding: >-
+            Invalid Encoding: Invalid UTF-8 encoding in %{details}
+          csvlint_line_breaks: >-
+            Line Breaks: Different styles of end-of-line characters used in
+            file
+          csvlint_ragged_rows: >-
+            Ragged Rows: %{details} has a different number of columns than
+            the first row in the file
+          csvlint_stray_quote: >-
+            Stray Quote: Missing or stray quote in %{details}
+          csvlint_unclosed_quote: >-
+            Unclosed Quote: Unclosed quoted field in %{details}
+          csvlint_unknown_error: >-
+            Unknown Error: Things to check for include: different styles of
+            end-of-line characters used AND blank row(s) present in data
+          csvlint_whitespace: >-
+            Whitespace: A quoted value in %{details} has leading or trailing
+            whitespace
+          no_file: "You must upload a file"
+        warning:
+          csvlint_check_options: >-
+            Single Column: Ok if you are expecting only one column of data;
+            Problem with CSV format if you are expecting more than one column
+          csvlint_duplicate_column_name: >-
+            Duplicate Headers: Column headers should be unique
+          csvlint_empty_column_name: >-
+            Column Without Header: Data from %{details} will not be processed
+          csvlint_inconsistent_values: >-
+            Inconsistent Values: You may wish to double check the values in
+            %{details}

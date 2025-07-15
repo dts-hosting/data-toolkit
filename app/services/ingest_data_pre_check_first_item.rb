@@ -1,46 +1,54 @@
 class IngestDataPreCheckFirstItem
-  def initialize(handler, data)
+  # @param handler [CollectionSpace::Mapper::SingleRecordType::Handler]
+  # @param data [Hash]
+  # @param feedback [Feedback]
+  def initialize(handler, data, feedback)
     @handler = handler
     @data = data
-    @messages = {}
-    @warnings = {}
-    @errors = {}
+    @feedback_obj = feedback
     @status = :not_checked
   end
 
   def ok?
     run_checks unless @status == :checked
 
-    @errors.empty?
+    feedback_obj.ok?
   end
 
   def feedback
     run_checks unless @status == :checked
 
-    {messages: @messages, warnings: @warnings, errors: @errors}
+    feedback_obj
   end
 
   private
 
-  attr_reader :handler, :data
+  attr_reader :handler, :data, :feedback_obj
 
   def run_checks
     @status = :checked
 
-    if empty_headers?
-      @errors["One or more headers in spreadsheet are empty"] = []
+    if empty_header_ct > 0
+      empty_header_ct.times do
+        feedback_obj.add_to_errors(subtype: :empty_header)
+      end
       return self
     end
 
     unless required_fields_present?
-      @errors["Required field(s) missing"] = missing_fields
+      missing_fields.each do |field|
+        feedback_obj.add_to_errors(
+          subtype: :required_field_missing, details: field
+        )
+      end
       return self
     end
 
     report_known_and_unknown_fields
   end
 
-  def empty_headers? = data.keys.any? { |k| k.to_s.blank? }
+  def empty_header_ct = @empty_header_ct ||=
+                          data.keys.count { |k| k.to_s.blank? }
 
   def validated = @validated ||= handler.validate(data)
 
@@ -64,11 +72,17 @@ class IngestDataPreCheckFirstItem
 
   def report_known_and_unknown_fields
     result = handler.check_fields(data)
-    @messages["Fields that will import"] =
-      ["#{result[:known_fields].length} of #{field_ct}"]
+    feedback_obj.add_to_messages(
+      subtype: :known_fields,
+      details: "#{result[:known_fields].length} of #{field_ct}"
+    )
     return if result[:unknown_fields].empty?
 
-    @warnings["#{result[:unknown_fields].length} field(s) will not import"] =
-      result[:unknown_fields]
+    result[:unknown_fields].each do |field|
+      feedback_obj.add_to_warnings(
+        subtype: :unknown_field,
+        details: field
+      )
+    end
   end
 end
