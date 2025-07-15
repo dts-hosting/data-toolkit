@@ -36,9 +36,7 @@ class TaskTest < ActiveSupport::TestCase
   end
 
   test "should allow valid status values" do
-    valid_statuses = [:pending, :queued, :running, :succeeded, :review, :failed]
-
-    valid_statuses.each do |status|
+    Task.statuses.keys.each do |status|
       @task.status = status
       assert @task.valid?, "#{status} should be a valid status"
     end
