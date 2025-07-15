@@ -36,7 +36,7 @@ class TaskTest < ActiveSupport::TestCase
   end
 
   test "should allow valid status values" do
-    valid_statuses = [:pending, :queued, :running, :succeeded, :failed]
+    valid_statuses = [:pending, :queued, :running, :succeeded, :review, :failed]
 
     valid_statuses.each do |status|
       @task.status = status
@@ -195,6 +195,14 @@ class TaskTest < ActiveSupport::TestCase
     assert_not_nil @task.completed_at
   end
 
+  test "should execute suspend! method correctly" do
+    @task.save!
+    @task.suspend!
+
+    assert_equal "review", @task.status
+    assert_not_nil @task.completed_at
+  end
+
   # progress checking
   test "progress should be 0 when status is pending" do
     @task.status = "pending"
@@ -216,6 +224,11 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 100, @task.progress
   end
 
+  test "progress should be 100 when status is review" do
+    @task.status = "review"
+    assert_equal 100, @task.progress
+  end
+
   test "progress should calculate percentage when status is running" do
     @task.save!
     create_data_items_for_task(@task)
@@ -225,6 +238,18 @@ class TaskTest < ActiveSupport::TestCase
     @task.data_items.last.update(status: "succeeded")
 
     # Should be 40% complete (2 out of 5 items)
+    assert_equal 40.0, @task.progress
+  end
+
+  test "progress should include review status items in calculation" do
+    @task.save!
+    create_data_items_for_task(@task)
+    @task.status = "running"
+
+    @task.data_items[0].update(status: "succeeded")
+    @task.data_items[1].update(status: "review")
+
+    # Should be 40% complete (2 out of 5 items, both succeeded and review count as progressed)
     assert_equal 40.0, @task.progress
   end
 
@@ -260,6 +285,21 @@ class TaskTest < ActiveSupport::TestCase
 
     assert_equal 100, @task.progress
     assert_equal "failed", @task.status
+    assert_not_nil @task.completed_at
+  end
+
+  test "progress should set status to review if items are in review status" do
+    @task.save!
+    create_data_items_for_task(@task)
+    @task.status = "running"
+    @task.save!
+
+    @task.data_items.update_all(status: "succeeded")
+    @task.data_items.last.update(status: "review")
+    @task.reload
+
+    assert_equal 100, @task.progress
+    assert_equal "review", @task.status
     assert_not_nil @task.completed_at
   end
 end

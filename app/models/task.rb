@@ -48,7 +48,7 @@ class Task < ApplicationRecord
     case status
     when "pending", "queued" then 0
     when "running" then calculate_progress
-    when "succeeded", "failed" then 100
+    when "succeeded", "failed", "review" then 100
     else 0
     end
   end

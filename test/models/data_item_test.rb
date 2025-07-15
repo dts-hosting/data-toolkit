@@ -40,4 +40,12 @@ class DataItemTest < ActiveSupport::TestCase
     refute duplicate_item.valid?
     assert_includes duplicate_item.errors[:position], "has already been taken"
   end
+
+  test "should execute suspend! method correctly" do
+    @data_item.save!
+    @data_item.suspend!
+
+    assert_equal "review", @data_item.status
+    assert_not_nil @data_item.completed_at
+  end
 end
