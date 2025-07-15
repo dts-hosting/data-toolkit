@@ -103,3 +103,10 @@ en:
           csvlint_inconsistent_values: >-
             Inconsistent Values: You may wish to double check the values in
             %{details}
+    status:
+      failed: Failed
+      pending: Pending
+      queued: Queued
+      review: Review
+      running: Running
+      succeeded: Succeeded

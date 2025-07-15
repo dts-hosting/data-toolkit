@@ -16,5 +16,9 @@ module TransitionsStatus
     def success!
       update!(status: "succeeded", completed_at: Time.current)
     end
+
+    def suspend!
+      update!(status: "review", completed_at: Time.current)
+    end
   end
 end

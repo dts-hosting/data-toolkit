@@ -6,7 +6,11 @@ class DataItem < ApplicationRecord
   belongs_to :current_task, class_name: "Task"
 
   enum :status, {
-    pending: "pending", running: "running", succeeded: "succeeded", failed: "failed"
+    pending: "pending",
+    running: "running",
+    succeeded: "succeeded",
+    review: "review",
+    failed: "failed"
   }, default: :pending
 
   validates :data, presence: true

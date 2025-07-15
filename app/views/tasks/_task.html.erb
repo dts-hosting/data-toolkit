@@ -2,7 +2,7 @@
   <td><%= task.class.display_name %></td>
   <td>
     <span class="badge bg-<%= task_status_color(task.status) %>">
-      <%= task.status.titleize %>
+      <%= task_status_text(task.status) %>
     </span>
   </td>
   <td><%= local_time(task.created_at) %></td>

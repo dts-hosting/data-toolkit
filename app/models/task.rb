@@ -9,8 +9,15 @@ class Task < ApplicationRecord
   has_many_attached :files
 
   enum :status, {
-    pending: "pending", queued: "queued", running: "running", succeeded: "succeeded", failed: "failed"
+    pending: "pending",
+    queued: "queued",
+    running: "running",
+    succeeded: "succeeded",
+    review: "review",
+    failed: "failed"
   }, default: :pending
+
+  PROGRESSED_STATUSES = %w[failed review succeeded].freeze
 
   validates :type, :status, presence: true
 
@@ -87,12 +94,18 @@ class Task < ApplicationRecord
   def calculate_progress
     return 0 if data_items.empty?
 
-    completed_items_ratio = data_items.where(status: ["failed", "succeeded"]).count.to_f / data_items.count
+    completed_items_ratio = data_items.where(status: [PROGRESSED_STATUSES]).count.to_f / data_items.count
     (completed_items_ratio * 100).round(2)
   end
 
   def finish_up
-    data_items.where(status: "failed").exists? ? fail! : success!
+    if data_items.where(status: "failed").exists?
+      fail! # workflow cannot proceed beyond this point
+    elsif data_items.where(status: "review").exists?
+      suspend! # confirmation required for workflow to continue
+    else
+      success! # great, no problems
+    end
     finalizer&.perform_later(self)
   end
 
