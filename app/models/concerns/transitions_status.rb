@@ -5,6 +5,10 @@ module TransitionsStatus
   PROGRESSED_STATUSES = %w[failed review succeeded].freeze
 
   included do
+    def completed?
+      PROGRESSED_STATUSES.include?(status)
+    end
+
     def fail!(feedback = nil)
       params = {status: "failed", completed_at: Time.current, feedback: feedback}.compact
       update!(**params)

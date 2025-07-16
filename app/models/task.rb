@@ -20,6 +20,7 @@ class Task < ApplicationRecord
   validates :type, :status, presence: true
 
   after_update_commit :broadcast_updates
+  after_update_commit :handle_completion
 
   # tasks that are required to have succeeded for this task to run
   def dependencies
@@ -68,7 +69,7 @@ class Task < ApplicationRecord
   end
 
   def update_progress
-    finish_up if running? && calculate_progress >= 100
+    finalize_status if running? && calculate_progress >= 100
   end
 
   def self.display_name
@@ -96,7 +97,7 @@ class Task < ApplicationRecord
     (completed_items_ratio * 100).round(2)
   end
 
-  def finish_up
+  def finalize_status
     if data_items.where(status: "failed").exists?
       fail! # workflow cannot proceed beyond this point
     elsif data_items.where(status: "review").exists?
@@ -104,7 +105,17 @@ class Task < ApplicationRecord
     else
       success! # great, no problems
     end
-    finalizer&.perform_later(self)
+  end
+
+  def handle_completion
+    if saved_change_to_status? && completed?
+      # only run finalizer on first transitioning to a completed status
+      # not when, for example, going from review -> succeeded
+      previous_status = saved_change_to_status.first
+      unless PROGRESSED_STATUSES.include?(previous_status)
+        finalizer&.perform_later(self)
+      end
+    end
   end
 
   def met_dependencies

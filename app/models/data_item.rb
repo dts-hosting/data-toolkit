@@ -18,7 +18,7 @@ class DataItem < ApplicationRecord
   validates :position, uniqueness: {scope: :activity_id}
 
   after_update_commit do
-    next unless PROGRESSED_STATUSES.include?(status)
+    next unless completed?
 
     next current_task.update_progress if current_task.progress >= 100
     current_task.touch if rand < 0.1 # bumps task.updated_at

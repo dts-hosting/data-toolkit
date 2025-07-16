@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class TaskTest < ActiveSupport::TestCase
   def setup
@@ -339,5 +340,75 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 100, @task.progress
     assert_equal "review", @task.status
     assert_not_nil @task.completed_at
+  end
+
+  # Tests for the separation of status setting and finalizer execution
+  test "handle_completion should run finalizer when first transitioning to completed status" do
+    mock_finalizer = Minitest::Mock.new
+    mock_finalizer.expect :perform_later, nil, [@task]
+
+    @task.stub :finalizer, mock_finalizer do
+      @task.save!
+      @task.update!(status: "succeeded", completed_at: Time.current)
+    end
+
+    mock_finalizer.verify
+    assert_equal "succeeded", @task.status
+  end
+
+  test "handle_completion should not run finalizer when transitioning between completed statuses" do
+    @task.save!
+    # First get task into a completed status
+    @task.update!(status: "review", completed_at: Time.current)
+
+    # Now mock the finalizer and transition to another completed status
+    mock_finalizer = Minitest::Mock.new
+    # No expectation set - the finalizer should not be called for this transition
+
+    @task.stub :finalizer, mock_finalizer do
+      @task.update!(status: "succeeded")
+    end
+
+    mock_finalizer.verify
+    assert_equal "succeeded", @task.status
+  end
+
+  test "handle_completion should not run finalizer when status change is not to completed" do
+    mock_finalizer = Minitest::Mock.new
+    # No expectation set - the finalizer should not be called
+
+    @task.stub :finalizer, mock_finalizer do
+      @task.save!
+      @task.update!(status: "running", started_at: Time.current)
+    end
+
+    mock_finalizer.verify
+    assert_equal "running", @task.status
+  end
+
+  test "completed? method should return true for progressed statuses" do
+    @task.save!
+
+    @task.status = "succeeded"
+    assert @task.completed?
+
+    @task.status = "failed"
+    assert @task.completed?
+
+    @task.status = "review"
+    assert @task.completed?
+  end
+
+  test "completed? method should return false for non-progressed statuses" do
+    @task.save!
+
+    @task.status = "pending"
+    assert_not @task.completed?
+
+    @task.status = "queued"
+    assert_not @task.completed?
+
+    @task.status = "running"
+    assert_not @task.completed?
   end
 end
