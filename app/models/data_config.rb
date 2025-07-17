@@ -16,8 +16,6 @@ class DataConfig < ApplicationRecord
 
   validate :unique_attributes
 
-  broadcasts_refreshes_to :manifest
-
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
   scope :media_record_type, ->(user) { record_type(user).where("record_type LIKE ?", "%media") }
