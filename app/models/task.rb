@@ -19,7 +19,7 @@ class Task < ApplicationRecord
 
   validates :type, :status, presence: true
 
-  after_update_commit :broadcast_updates
+  broadcasts_refreshes
   after_update_commit :handle_completion
 
   # tasks that are required to have succeeded for this task to run
@@ -35,6 +35,10 @@ class Task < ApplicationRecord
   # the primary job associated with this task (required)
   def handler
     raise NotImplementedError, "#{self.class} must implement #handler"
+  end
+
+  def has_feedback?
+    completed? && (feedback_for.displayable? || data_items.where.not(feedback: nil).any?)
   end
 
   def ok_to_run?
@@ -77,18 +81,6 @@ class Task < ApplicationRecord
   end
 
   private
-
-  def broadcast_updates
-    broadcast_replace_to [activity, :tasks],
-      target: dom_id(self),
-      partial: "tasks/task",
-      locals: {task: self}
-
-    broadcast_update_to self,
-      target: "#{dom_id(self)}_details",
-      partial: "tasks/details",
-      locals: {task: self}
-  end
 
   def calculate_progress
     return 0 if data_items.empty?
