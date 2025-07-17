@@ -2,11 +2,11 @@ module TransitionsStatus
   extend ActiveSupport::Concern
 
   # Statuses that indicate completion (success, failure, or requiring review)
-  PROGRESSED_STATUSES = %w[failed review succeeded].freeze
+  COMPLETION_STATUSES = %w[failed review succeeded].freeze
 
   included do
     def completed?
-      PROGRESSED_STATUSES.include?(status)
+      COMPLETION_STATUSES.include?(status)
     end
 
     def fail!(feedback = nil)

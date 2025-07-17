@@ -47,7 +47,7 @@ class Task < ApplicationRecord
     case status
     when "pending", "queued" then 0
     when "running" then calculate_progress
-    when *PROGRESSED_STATUSES then 100
+    when *COMPLETION_STATUSES then 100
     else 0
     end
   end
@@ -93,7 +93,7 @@ class Task < ApplicationRecord
   def calculate_progress
     return 0 if data_items.empty?
 
-    completed_items_ratio = data_items.where(status: [PROGRESSED_STATUSES]).count.to_f / data_items.count
+    completed_items_ratio = data_items.where(status: COMPLETION_STATUSES).count.to_f / data_items.count
     (completed_items_ratio * 100).round(2)
   end
 
@@ -112,7 +112,7 @@ class Task < ApplicationRecord
       # only run finalizer on first transitioning to a completed status
       # not when, for example, going from review -> succeeded
       previous_status = saved_change_to_status.first
-      unless PROGRESSED_STATUSES.include?(previous_status)
+      unless COMPLETION_STATUSES.include?(previous_status)
         finalizer&.perform_later(self)
       end
     end
