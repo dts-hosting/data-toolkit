@@ -3,7 +3,7 @@
     <div class="col-sm-3 fw-bold">Status:</div>
     <div class="col-sm-9">
       <span class="badge bg-<%= task_status_color(task.status) %>">
-        <%= task.status.titleize %>
+        <%= task_status_text(task.status) %>
       </span>
     </div>
   </div>

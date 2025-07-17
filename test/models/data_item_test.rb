@@ -40,4 +40,31 @@ class DataItemTest < ActiveSupport::TestCase
     refute duplicate_item.valid?
     assert_includes duplicate_item.errors[:position], "has already been taken"
   end
+
+  test "should execute suspend! method correctly" do
+    @data_item.save!
+    @data_item.suspend!
+
+    assert_equal "review", @data_item.status
+    assert_not_nil @data_item.completed_at
+  end
+
+  test "should execute suspend! method correctly when feedback is valid feedback Hash" do
+    feedback_hash = {"parent" => "Tasks::PreCheckIngestData",
+                     "errors" => [],
+                     "warnings" =>
+     [{"type" => "warning",
+       "subtype" => "unknown_field",
+       "details" => "objectNumber is an unknown field",
+       "prefix" => "data_item"}],
+                     "messages" => []}
+
+    @data_item.save!
+    @data_item.suspend!(feedback_hash)
+
+    assert_equal "review", @data_item.status
+    assert_not_nil @data_item.completed_at
+    feedback = @data_item.feedback_for
+    assert feedback.ok?
+  end
 end

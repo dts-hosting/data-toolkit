@@ -46,7 +46,7 @@
             <% if activity.current_task %>
               <span class="text-monospace fw-medium me-2"><%= task_name(activity) %></span>
               <span class="badge bg-<%= task_status_color(activity.current_task.status) %>">
-                <%= activity.current_task.status %>
+                <%= task_status_text(activity.current_task.status) %>
               </span>
             <% else %>
               <span class="text-monospace fw-medium">No task is active</span>

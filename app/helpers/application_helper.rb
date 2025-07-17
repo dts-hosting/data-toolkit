@@ -43,10 +43,16 @@ module ApplicationHelper
       "warning"
     when :succeeded
       "success"
+    when :review
+      "warning"
     when :failed
       "danger"
     else
       "primary"
     end
+  end
+
+  def task_status_text(status)
+    t("tasks.status.#{status}")
   end
 end

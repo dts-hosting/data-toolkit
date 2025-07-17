@@ -1,7 +1,7 @@
 require "ostruct"
 require "test_helper"
 
-class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
+class GenericTaskFinalizerJobTest < ActiveJob::TestCase
   test "fails task and adds error to feedback if any item jobs failed" do
     successful_first_item_check
     set_up_and_run_task
@@ -9,7 +9,7 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     # the task will have succeeded, so let's reset it to a failed state
     fail_task(task: @task, indexes: [3, 5])
 
-    assert_performed_with(job: PreCheckIngestDataFinalizerJob, args: [@task]) do
+    assert_performed_with(job: GenericTaskFinalizerJob, args: [@task]) do
       perform_enqueued_jobs
     end
 
@@ -61,7 +61,7 @@ class PreCheckIngestDataFinalizerJobTest < ActiveJob::TestCase
     @task = @activity.next_task
     @task.run
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
-      assert_performed_with(job: PreCheckIngestDataFinalizerJob, args: [@task]) do
+      assert_performed_with(job: GenericTaskFinalizerJob, args: [@task]) do
         perform_enqueued_jobs
       end
     end

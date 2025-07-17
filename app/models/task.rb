@@ -9,12 +9,18 @@ class Task < ApplicationRecord
   has_many_attached :files
 
   enum :status, {
-    pending: "pending", queued: "queued", running: "running", succeeded: "succeeded", failed: "failed"
+    pending: "pending",
+    queued: "queued",
+    running: "running",
+    succeeded: "succeeded",
+    review: "review",
+    failed: "failed"
   }, default: :pending
 
   validates :type, :status, presence: true
 
   after_update_commit :broadcast_updates
+  after_update_commit :handle_completion
 
   # tasks that are required to have succeeded for this task to run
   def dependencies
@@ -41,7 +47,7 @@ class Task < ApplicationRecord
     case status
     when "pending", "queued" then 0
     when "running" then calculate_progress
-    when "succeeded", "failed" then 100
+    when *COMPLETION_STATUSES then 100
     else 0
     end
   end
@@ -63,7 +69,7 @@ class Task < ApplicationRecord
   end
 
   def update_progress
-    finish_up if running? && calculate_progress >= 100
+    finalize_status if running? && calculate_progress >= 100
   end
 
   def self.display_name
@@ -87,13 +93,29 @@ class Task < ApplicationRecord
   def calculate_progress
     return 0 if data_items.empty?
 
-    completed_items_ratio = data_items.where(status: ["failed", "succeeded"]).count.to_f / data_items.count
+    completed_items_ratio = data_items.where(status: COMPLETION_STATUSES).count.to_f / data_items.count
     (completed_items_ratio * 100).round(2)
   end
 
-  def finish_up
-    data_items.where(status: "failed").exists? ? fail! : success!
-    finalizer&.perform_later(self)
+  def finalize_status
+    if data_items.where(status: "failed").exists?
+      fail! # workflow cannot proceed beyond this point
+    elsif data_items.where(status: "review").exists?
+      suspend! # confirmation required for workflow to continue
+    else
+      success! # great, no problems
+    end
+  end
+
+  def handle_completion
+    if saved_change_to_status? && completed?
+      # only run finalizer on first transitioning to a completed status
+      # not when, for example, going from review -> succeeded
+      previous_status = saved_change_to_status.first
+      unless COMPLETION_STATUSES.include?(previous_status)
+        finalizer&.perform_later(self)
+      end
+    end
   end
 
   def met_dependencies
