@@ -411,4 +411,50 @@ class TaskTest < ActiveSupport::TestCase
     @task.status = "running"
     assert_not @task.completed?
   end
+
+  # has_feedback? method tests
+  test "has_feedback? should return false when task is not completed" do
+    @task.save!
+    @task.status = "pending"
+    assert_not @task.has_feedback?
+
+    @task.status = "running"
+    assert_not @task.has_feedback?
+  end
+
+  test "has_feedback? should return false when task is completed but no feedback" do
+    @task.save!
+    @task.status = "succeeded"
+    assert_not @task.has_feedback?
+  end
+
+  test "has_feedback? should return true when task is completed and feedback_for is displayable" do
+    feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
+                     "errors" => [],
+                     "warnings" =>
+     [{"type" => "warning",
+       "subtype" => "csvlint_check_options",
+       "details" => "check not good",
+       "prefix" => "test.csv"}],
+                     "messages" => []}
+
+    @task.save!
+    @task.fail!(feedback_hash)
+
+    assert @task.completed?
+    assert @task.feedback_for.displayable?
+    assert @task.has_feedback?
+  end
+
+  test "has_feedback? should return true when task is completed and data_items have feedback" do
+    @task.save!
+    create_data_items_for_task(@task)
+    @task.status = "succeeded"
+
+    # add feedback to a data item, no top level feedback yet
+    @task.data_items.first.update!(feedback: {"errors" => [{"type" => "error", "details" => "test error"}]})
+
+    assert @task.completed?
+    assert @task.has_feedback?
+  end
 end
