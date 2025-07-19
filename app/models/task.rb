@@ -20,6 +20,7 @@ class Task < ApplicationRecord
   validates :type, :status, presence: true
 
   broadcasts_refreshes
+  after_touch :check_progress
   after_update_commit :handle_completion
 
   # tasks that are required to have succeeded for this task to run
@@ -72,10 +73,6 @@ class Task < ApplicationRecord
     handler.perform_later(self)
   end
 
-  def update_progress
-    finalize_status if running? && calculate_progress >= 100
-  end
-
   def self.display_name
     raise NotImplementedError
   end
@@ -87,6 +84,10 @@ class Task < ApplicationRecord
 
     completed_items_ratio = data_items.where(status: COMPLETION_STATUSES).count.to_f / data_items.count
     (completed_items_ratio * 100).round(2)
+  end
+
+  def check_progress
+    finalize_status if running? && calculate_progress >= 100
   end
 
   def finalize_status
