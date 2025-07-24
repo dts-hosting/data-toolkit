@@ -80,8 +80,7 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
         feedback: feedback
       )
     end
-    task.running! # we need to be running to transition using update_progress
-    task.update_progress
+    task.fail!
   end
 
   def valid_response = OpenStruct.new(valid?: true, errors: [])
