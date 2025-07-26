@@ -22,6 +22,8 @@ class Activity < ApplicationRecord
     end
   end
 
+  after_update_commit :handle_advance
+
   broadcasts_refreshes
 
   def boolean_attributes
@@ -58,6 +60,21 @@ class Activity < ApplicationRecord
 
   def self.display_name
     raise NotImplementedError
+  end
+
+  # TODO: for the moment we're just logging, but this would be a good spot for notifications
+  def handle_advance
+    return unless config.fetch("auto_advance", true)
+
+    # if auto advanced transitioned from true -> false
+    if saved_change_to_auto_advanced? && saved_change_to_auto_advanced.first == true && !auto_advanced
+      Rails.logger.info "Activity #{id}: Auto-advance disabled"
+    end
+
+    # if the current_task is the last task and it was successful
+    if current_task == tasks.last && current_task&.succeeded?
+      Rails.logger.info "Activity #{id}: Workflow completed successfully"
+    end
   end
 
   private

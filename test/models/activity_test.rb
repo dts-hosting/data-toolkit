@@ -76,4 +76,99 @@ class ActivityTest < ActiveSupport::TestCase
     assert_equal next_expected, activity.next_task
     activity.destroy
   end
+
+  # Auto-advance tests
+  test "should have auto_advanced field defaulting to true" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    assert activity.auto_advanced?
+  end
+
+  # TODO: something for real if we're not just logging
+  test "handle_advance should log when auto_advanced changes from true to false" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: true},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    # Capture log output
+    log_output = StringIO.new
+    logger = Logger.new(log_output)
+    Rails.stub :logger, logger do
+      activity.update!(auto_advanced: false)
+    end
+
+    assert_includes log_output.string, "Auto-advance disabled"
+  end
+
+  # TODO: something for real if we're not just logging
+  test "handle_advance should log when final task completes successfully" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: true},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    final_task = activity.tasks.last
+    # skip to the end
+    final_task.update!(status: "succeeded", completed_at: Time.current)
+
+    # Capture log output
+    log_output = StringIO.new
+    logger = Logger.new(log_output)
+    Rails.stub :logger, logger do
+      activity.touch
+    end
+
+    assert_includes log_output.string, "Workflow completed successfully"
+  end
+
+  # TODO: something for real if we're not just logging
+  test "handle_advance should not run when auto_advance is disabled" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: false},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    # Capture log output
+    log_output = StringIO.new
+    logger = Logger.new(log_output)
+    Rails.stub :logger, logger do
+      activity.update!(auto_advanced: true)
+    end
+
+    # Should not contain any auto-advance related logs
+    assert_not_includes log_output.string, "Auto-advance"
+    assert_not_includes log_output.string, "Final task"
+  end
+
+  # TODO: something for real if we're not just logging
+  test "handle_advance should not log when auto_advanced changes from false to true" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: true},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    # Capture log output
+    log_output = StringIO.new
+    logger = Logger.new(log_output)
+    Rails.stub :logger, logger do
+      activity.update!(auto_advanced: true)
+    end
+
+    # Should not log when changing from false to true
+    assert_not_includes log_output.string, "Auto-advance disabled"
+  end
 end

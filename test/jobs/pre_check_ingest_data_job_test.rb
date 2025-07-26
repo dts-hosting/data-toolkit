@@ -5,7 +5,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     files = create_uploaded_files(["test.csv"])
     @activity = create_activity({
       type: Activities::CreateOrUpdateRecords,
-      config: {action: "create"},
+      config: {action: "create", auto_advance: false},
       files: files
     })
     @activity.save

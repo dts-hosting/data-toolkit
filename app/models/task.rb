@@ -102,11 +102,19 @@ class Task < ApplicationRecord
 
   def handle_completion
     if saved_change_to_status? && completed?
-      # only run finalizer on first transitioning to a completed status
-      # not when, for example, going from review -> succeeded
+      # only run finalizer or auto advance on first transitioning to a completed
+      # status and not when, for example, going from review -> succeeded
       previous_status = saved_change_to_status.first
       unless COMPLETION_STATUSES.include?(previous_status)
-        finalizer&.perform_later(self)
+        if succeeded? && activity.config.fetch("auto_advance", true)
+          # we have to skip running any defined finalizer in the
+          # case of auto-advance because item state is reset
+          activity.update(auto_advanced: true) unless activity.auto_advanced?
+          activity.next_task&.run
+        else
+          activity.update(auto_advanced: false) if activity.auto_advanced?
+          finalizer&.perform_later(self)
+        end
       end
     end
   end
