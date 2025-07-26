@@ -343,17 +343,26 @@ class TaskTest < ActiveSupport::TestCase
   end
 
   # Tests for the separation of status setting and finalizer execution
-  test "handle_completion should run finalizer when first transitioning to completed status" do
-    mock_finalizer = Minitest::Mock.new
-    mock_finalizer.expect :perform_later, nil, [@task]
+  test "handle_completion should run finalizer when first transitioning to completed status with auto_advance disabled" do
+    # Create activity with auto_advance disabled to ensure finalizer runs
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
 
-    @task.stub :finalizer, mock_finalizer do
-      @task.save!
-      @task.update!(status: "succeeded", completed_at: Time.current)
+    task = activity.tasks.first
+    mock_finalizer = Minitest::Mock.new
+    mock_finalizer.expect :perform_later, nil, [task]
+
+    task.stub :finalizer, mock_finalizer do
+      task.save!
+      task.update!(status: "succeeded", completed_at: Time.current)
     end
 
     mock_finalizer.verify
-    assert_equal "succeeded", @task.status
+    assert_equal "succeeded", task.status
   end
 
   test "handle_completion should not run finalizer when transitioning between completed statuses" do
@@ -456,5 +465,103 @@ class TaskTest < ActiveSupport::TestCase
 
     assert @task.completed?
     assert @task.has_feedback?
+  end
+
+  # Auto-advance functionality tests
+  test "handle_completion should trigger auto-advance when task succeeds and auto_advance is enabled" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: true},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.first
+    second_task = activity.tasks.second
+
+    # Set up the correct initial state:
+    # First task should be in a non-pending state (like "running") so it can transition to "succeeded"
+    # Second task should be "pending" so it can be picked up by next_task
+    first_task.update!(status: "running", started_at: Time.current)
+    second_task.update!(status: "pending")
+
+    # Verify initial state
+    assert_equal true, activity.config["auto_advance"]
+    assert_equal 2, activity.tasks.count
+    assert_equal second_task, activity.next_task
+    assert_equal "pending", second_task.status
+
+    # Trigger auto-advance by completing the first task
+    first_task.update!(status: "succeeded", completed_at: Time.current)
+
+    # Verify auto-advance occurred
+    activity.reload
+    second_task.reload
+
+    assert activity.auto_advanced?, "Activity should have auto_advanced set to true"
+    assert_equal "queued", second_task.status, "Next task should have been queued (run was called)"
+  end
+
+  test "handle_completion should not trigger auto-advance when task succeeds but auto_advance is disabled" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.first
+    mock_finalizer = Minitest::Mock.new
+    mock_finalizer.expect :perform_later, nil, [first_task]
+
+    first_task.stub :finalizer, mock_finalizer do
+      first_task.update!(status: "succeeded", completed_at: Time.current)
+    end
+
+    activity.reload
+    assert_not activity.auto_advanced?
+    mock_finalizer.verify
+  end
+
+  test "handle_completion should not trigger auto-advance when task fails" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: true},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.first
+    mock_finalizer = Minitest::Mock.new
+    mock_finalizer.expect :perform_later, nil, [first_task]
+
+    first_task.stub :finalizer, mock_finalizer do
+      first_task.update!(status: "failed", completed_at: Time.current)
+    end
+
+    activity.reload
+    assert_not activity.auto_advanced?
+    mock_finalizer.verify
+  end
+
+  test "handle_completion should set auto_advanced to false when running finalizer" do
+    activity = create_activity(
+      type: "Activities::CreateOrUpdateRecords",
+      config: {action: "create", auto_advance: true},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.first
+    mock_finalizer = Minitest::Mock.new
+    mock_finalizer.expect :perform_later, nil, [first_task]
+
+    first_task.stub :finalizer, mock_finalizer do
+      first_task.update!(status: "failed", completed_at: Time.current)
+    end
+
+    activity.reload
+    assert_not activity.auto_advanced?
+    mock_finalizer.verify
   end
 end
