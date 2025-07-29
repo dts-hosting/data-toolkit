@@ -19,10 +19,19 @@ class ManifestRegistry < ApplicationRecord
     # needs to be removed (because no longer present in the registry)
     data["manifests"].each do |manifest_url|
       manifest = Manifest.find_or_create_by(manifest_registry: self, url: manifest_url)
+      unless manifest.valid?
+        Rails.logger.debug { "Manifest could not be imported: #{manifest.errors.full_messages.join(";")}" }
+        next
+      end
+
       yield manifest if block_given?
     end
 
     update(last_updated_at: data["last_updated_at"])
+  end
+
+  def safe_to_delete?
+    !manifests.joins(data_configs: :activities).exists?
   end
 
   private

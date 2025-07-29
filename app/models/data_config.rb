@@ -2,6 +2,7 @@ class DataConfig < ApplicationRecord
   ALLOWED_CONFIG_TYPES = %i[optlist_overrides record_type term_lists].freeze
 
   include RequiresUrl
+  has_many :activities, dependent: :restrict_with_exception
   belongs_to :manifest, counter_cache: true
 
   validates :config_type, presence: true,

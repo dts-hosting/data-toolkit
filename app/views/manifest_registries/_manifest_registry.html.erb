@@ -10,6 +10,7 @@
                     manifest_registry_path(manifest_registry),
                     method: :delete,
                     class: "btn btn-sm btn-outline-danger",
+                    disabled: !manifest_registry.safe_to_delete?,
                     form: { data: { turbo_confirm: "Are you sure you want to delete this registry?" } } %>
     </div>
   </div>

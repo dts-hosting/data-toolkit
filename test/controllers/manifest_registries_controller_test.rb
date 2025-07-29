@@ -54,9 +54,11 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".alert-danger"
   end
 
-  test "should destroy manifest registry" do
+  test "should destroy manifest registry when safe to delete" do
     @manifest_registry.manifests.create!(url: "https://example.com/test-manifest")
     create_data_config_record_type(manifest: @manifest_registry.manifests.first)
+
+    assert @manifest_registry.safe_to_delete?
 
     assert_difference("ManifestRegistry.count", -1) do
       delete manifest_registry_url(@manifest_registry)
@@ -64,6 +66,21 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to manifest_registries_path
     assert_equal "Manifest registry was successfully deleted.", flash[:notice]
+  end
+
+  test "should not destroy manifest registry when data configs are in use" do
+    @manifest_registry.manifests.create!(url: "https://example.com/test-manifest")
+    data_config = create_data_config_record_type(manifest: @manifest_registry.manifests.first)
+    create_activity(data_config: data_config)
+
+    assert_not @manifest_registry.safe_to_delete?
+
+    assert_no_difference("ManifestRegistry.count") do
+      delete manifest_registry_path(@manifest_registry)
+    end
+
+    assert_redirected_to manifest_registries_path
+    assert_equal "Cannot delete manifest registry because it contains data configs that are currently in use.", flash[:alert]
   end
 
   test "should handle non-existent manifest registry" do
