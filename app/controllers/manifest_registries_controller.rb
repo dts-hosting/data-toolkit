@@ -23,6 +23,8 @@ class ManifestRegistriesController < AdminController
   def destroy
     @manifest_registry.destroy
     redirect_to manifest_registries_path, notice: "Manifest registry was successfully deleted."
+  rescue ActiveRecord::InvalidForeignKey
+    redirect_to manifest_registries_path, alert: "Cannot delete manifest registry because it contains data configs that are currently in use."
   end
 
   def run

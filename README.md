@@ -25,7 +25,7 @@ PASSWORD=Administrator
 
 # import data configs from a manifest registry
 MR_URL=https://gist.githubusercontent.com/mark-cooper/e8c7a5469ee9e365dc3265068726ed94/raw/8d1384a9172f508c326508aa86c97fa24acf4f21/meta-manifest.json
-./bin/rake crud:import:manifest_registry[$MR_URL]
+./bin/rake "crud:import:manifest_registry[$MR_URL]"
 
 # create an activity
 USER_ID=1
