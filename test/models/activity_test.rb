@@ -70,10 +70,10 @@ class ActivityTest < ActiveSupport::TestCase
 
     current_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
     current_expected.queued!
-    next_expected = nil # TODO: update when workflow fully defined
+    # TODO: update when workflow fully defined
 
     assert_equal current_expected, activity.current_task
-    assert_equal next_expected, activity.next_task
+    assert_nil activity.next_task
     activity.destroy
   end
 

@@ -14,7 +14,7 @@ class ActivitiesController < ApplicationController
     if @activity.save
       redirect_to activity_path(@activity), notice: "#{@activity.class.display_name} was successfully created."
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

@@ -16,7 +16,7 @@ class ManifestRegistriesController < AdminController
       redirect_to manifest_registries_path, notice: "Manifest registry was successfully created."
     else
       @manifest_registries = ManifestRegistry.all.order(created_at: :desc)
-      render :index, status: :unprocessable_entity
+      render :index, status: :unprocessable_content
     end
   end
 
