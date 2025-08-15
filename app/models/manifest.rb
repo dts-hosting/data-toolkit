@@ -26,12 +26,13 @@ class Manifest < ApplicationRecord
         record_type: entry["type"]
       }
       data_config = DataConfig.find_or_create_by(opts)
+      data_config.update(url: url) if url != data_config.url
+
       unless data_config.valid?
         Rails.logger.debug { "Data config could not be imported: #{data_config.errors.full_messages.join(";")}" }
         next
       end
 
-      data_config.update(url: url) if url != data_config.url
       yield data_config if block_given?
     end
   end
