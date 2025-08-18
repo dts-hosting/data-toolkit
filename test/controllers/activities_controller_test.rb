@@ -63,7 +63,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_select ".alert-danger"
   end
 
