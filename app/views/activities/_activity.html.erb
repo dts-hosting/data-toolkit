@@ -1,7 +1,7 @@
 <%= turbo_stream_from activity %>
 <%= tag.div id: dom_id(activity), class: "card mb-3" do %>
   <div class="card-header d-flex justify-content-between">
-    <div><%= file_names(activity) %></div>
+    <div><%= activity.label %></div>
     <% if activity.user != Current.user %>
       <span class="ms-auto"><%= activity.user.email_address %></span>
     <% end %>
