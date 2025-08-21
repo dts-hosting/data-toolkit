@@ -1,5 +1,6 @@
 class Activity < ApplicationRecord
   include Descendents
+  NO_FILES_LABEL = "No files"
 
   belongs_to :data_config
   belongs_to :user
@@ -34,10 +35,24 @@ class Activity < ApplicationRecord
     tasks.where.not(status: "pending").order(:created_at).last
   end
 
+  # TODO: revisit persistence options in the future
+  def label(max_files: 3)
+    @label ||= begin
+      return NO_FILES_LABEL if files.blank?
+
+      files_label = files.take(max_files).map(&:filename).join(", ")
+      if files.count > max_files
+        files_label += " etc."
+      end
+      files_label
+    end
+  end
+
   def next_task
     tasks.where(status: "pending").order(:created_at).first
   end
 
+  # TODO: these are really all class methods
   def requires_batch_config?
     raise NotImplementedError
   end
@@ -62,6 +77,8 @@ class Activity < ApplicationRecord
     raise NotImplementedError
   end
 
+  private
+
   # TODO: for the moment we're just logging, but this would be a good spot for notifications
   def handle_advance
     return unless config.fetch("auto_advance", true)
@@ -76,8 +93,6 @@ class Activity < ApplicationRecord
       Rails.logger.info "Activity #{id}: Workflow completed successfully"
     end
   end
-
-  private
 
   def is_eligible?
     return unless user

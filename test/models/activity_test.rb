@@ -44,6 +44,43 @@ class ActivityTest < ActiveSupport::TestCase
     assert @activity.files.attached?
   end
 
+  # Label method tests
+  test "label returns 'No files' when no files are attached" do
+    activity = create_activity(data_config: @data_config)
+    assert_equal "No files", activity.label
+  end
+
+  test "label returns single filename when one file is attached" do
+    activity = create_activity(data_config: @data_config)
+    activity.files.attach(
+      io: StringIO.new("test content"),
+      filename: "test.csv",
+      content_type: "text/csv"
+    )
+    assert_equal "test.csv", activity.label
+  end
+
+  test "label returns comma-separated filenames when multiple files are attached" do
+    activity = create_activity(data_config: @data_config)
+    activity.files.attach([
+      {io: StringIO.new("test content 1"), filename: "file1.csv", content_type: "text/csv"},
+      {io: StringIO.new("test content 2"), filename: "file2.csv", content_type: "text/csv"}
+    ])
+    assert_equal "file1.csv, file2.csv", activity.label
+  end
+
+  test "label limits files to max_files parameter and adds etc." do
+    activity = create_activity(data_config: @data_config)
+    activity.files.attach([
+      {io: StringIO.new("test content 1"), filename: "file1.csv", content_type: "text/csv"},
+      {io: StringIO.new("test content 2"), filename: "file2.csv", content_type: "text/csv"},
+      {io: StringIO.new("test content 3"), filename: "file3.csv", content_type: "text/csv"},
+      {io: StringIO.new("test content 4"), filename: "file4.csv", content_type: "text/csv"}
+    ])
+    result = activity.label(max_files: 2)
+    assert_equal "file1.csv, file2.csv etc.", result
+  end
+
   test "current_task returns the first task when new activity created" do
     activity = create_activity(
       type: "Activities::CreateOrUpdateRecords",
