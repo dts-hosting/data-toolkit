@@ -99,9 +99,11 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     @task.run
 
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
-      assert_performed_jobs 11, only: [PreCheckIngestDataJob, PreCheckIngestDataItemJob] do
-        perform_enqueued_jobs
-      end
+      perform_enqueued_jobs
+    end
+
+    @task.data_items.each do |data_item|
+      assert_performed_with(job: PreCheckIngestDataItemJob, args: [data_item])
     end
   end
 end
