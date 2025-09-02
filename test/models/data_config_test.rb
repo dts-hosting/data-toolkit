@@ -12,9 +12,9 @@ class DataConfigTest < ActiveSupport::TestCase
       version: "1.0.0"
     )
 
-    @term_lists_config = DataConfig.new(
+    @term_list_config = DataConfig.new(
       manifest: manifests(:v1),
-      config_type: "term_lists",
+      config_type: "term_list",
       profile: "core",
       url: "https://example.com/core-vocbalaries-1.0.0.json",
       version: "1.0.0"
@@ -22,7 +22,7 @@ class DataConfigTest < ActiveSupport::TestCase
 
     @optlist_config = DataConfig.new(
       manifest: manifests(:v1),
-      config_type: "optlist_overrides",
+      config_type: "optlist_override",
       profile: "core",
       url: "https://example.com/core-optlist.json"
     )
@@ -33,11 +33,11 @@ class DataConfigTest < ActiveSupport::TestCase
     assert @record_type_config.valid?
   end
 
-  test "valid term_lists config" do
-    assert @term_lists_config.valid?
+  test "valid term_list config" do
+    assert @term_list_config.valid?
   end
 
-  test "valid optlist_overrides config" do
+  test "valid optlist_override config" do
     assert @optlist_config.valid?
   end
 
@@ -64,12 +64,12 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_includes @record_type_config.errors[:record_type], "can't be blank"
   end
 
-  test "record_type not required and unsupported for term_lists config" do
-    @term_lists_config.record_type = nil
-    assert @term_lists_config.valid?
+  test "record_type not required and unsupported for term_list config" do
+    @term_list_config.record_type = nil
+    assert @term_list_config.valid?
 
-    @term_lists_config.record_type = "collectionobject"
-    assert_not @term_lists_config.valid?
+    @term_list_config.record_type = "collectionobject"
+    assert_not @term_list_config.valid?
   end
 
   test "invalid without url" do
@@ -90,7 +90,7 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_includes @record_type_config.errors[:version], "can't be blank"
   end
 
-  test "record_type not required and unsupported for optlist_overrides config" do
+  test "record_type not required and unsupported for optlist_override config" do
     @optlist_config.record_type = nil
     assert @optlist_config.valid?
 
@@ -98,7 +98,7 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_not @optlist_config.valid?
   end
 
-  test "version not required and unsupported for optlist_overrides config" do
+  test "version not required and unsupported for optlist_override config" do
     @optlist_config.version = nil
     assert @optlist_config.valid?
 
@@ -130,28 +130,28 @@ class DataConfigTest < ActiveSupport::TestCase
     different_record = DataConfig.new(opts.merge(record_type: "different_record_type"))
     assert different_record.valid?
 
-    # Test for term_lists config (requires config_type, profile, version)
+    # Test for term_list config (requires config_type, profile, version)
     opts = {
       manifest: manifests(:v1),
-      config_type: "term_lists",
+      config_type: "term_list",
       profile: profile_name,
       version: version_value,
       url: base_url
     }
     DataConfig.create!(opts)
 
-    duplicate_term_lists = DataConfig.new(opts)
+    duplicate_term_list = DataConfig.new(opts)
 
-    assert_not duplicate_term_lists.valid?
-    assert_includes duplicate_term_lists.errors[:data_config], "this set of attributes already exists"
+    assert_not duplicate_term_list.valid?
+    assert_includes duplicate_term_list.errors[:data_config], "this set of attributes already exists"
 
-    different_version_term_lists = DataConfig.new(opts.merge(version: "2.0"))
-    assert different_version_term_lists.valid?
+    different_version_term_list = DataConfig.new(opts.merge(version: "2.0"))
+    assert different_version_term_list.valid?
 
-    # Test for optlist_overrides config (requires config_type, profile)
+    # Test for optlist_override config (requires config_type, profile)
     opts = {
       manifest: manifests(:v1),
-      config_type: "optlist_overrides",
+      config_type: "optlist_override",
       profile: profile_name,
       url: base_url
     }
@@ -166,10 +166,10 @@ class DataConfigTest < ActiveSupport::TestCase
   end
 
   # Scope Tests
-  test "optlist_overrides scope" do
+  test "optlist_override scope" do
     @optlist_config.save!
-    assert_includes DataConfig.optlist_overrides(users(:admin)), @optlist_config
-    assert_not_includes DataConfig.optlist_overrides(users(:admin)), @record_type_config
+    assert_includes DataConfig.optlist_override(users(:admin)), @optlist_config
+    assert_not_includes DataConfig.optlist_override(users(:admin)), @record_type_config
   end
 
   test "record_type scope" do
@@ -178,16 +178,16 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_not_includes DataConfig.record_type(users(:admin)), @optlist_config
   end
 
-  test "term_lists scope" do
-    @term_lists_config.save!
-    assert_includes DataConfig.term_lists(users(:admin)), @term_lists_config
-    assert_not_includes DataConfig.term_lists(users(:admin)), @record_type_config
+  test "term_list scope" do
+    @term_list_config.save!
+    assert_includes DataConfig.term_list(users(:admin)), @term_list_config
+    assert_not_includes DataConfig.term_list(users(:admin)), @record_type_config
   end
 
   # Helper Method Tests
-  test "optlist_overrides_config?" do
-    assert @optlist_config.optlist_overrides?
-    assert_not @record_type_config.optlist_overrides?
+  test "optlist_override_config?" do
+    assert @optlist_config.optlist_override?
+    assert_not @record_type_config.optlist_override?
   end
 
   test "record_type_config?" do
@@ -195,9 +195,9 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_not @optlist_config.record_type?
   end
 
-  test "term_lists_config?" do
-    assert @term_lists_config.term_lists?
-    assert_not @record_type_config.term_lists?
+  test "term_list_config?" do
+    assert @term_list_config.term_list?
+    assert_not @record_type_config.term_list?
   end
 
   # Lookup Data Config Tests

@@ -20,7 +20,7 @@ class Manifest < ApplicationRecord
       url = entry["url"]
       opts = {
         manifest: self,
-        config_type: entry["dataConfigType"].tr(" ", "_").to_sym,
+        config_type: entry["dataConfigType"].tr(" ", "_").singularize,
         profile: entry["profile"],
         version: entry["version"],
         record_type: entry["type"]
