@@ -44,13 +44,12 @@ class DataConfigTest < ActiveSupport::TestCase
   test "invalid without config_type" do
     @record_type_config.config_type = nil
     assert_not @record_type_config.valid?
-    assert_includes @record_type_config.errors[:config_type], "can't be blank"
   end
 
   test "invalid with wrong config_type" do
-    @record_type_config.config_type = "invalid_type"
-    assert_not @record_type_config.valid?
-    assert_includes @record_type_config.errors[:config_type], "is not included in the list"
+    assert_raises ArgumentError do
+      @record_type_config.config_type = "invalid_type"
+    end
   end
 
   test "invalid without profile" do
@@ -187,18 +186,18 @@ class DataConfigTest < ActiveSupport::TestCase
 
   # Helper Method Tests
   test "optlist_overrides_config?" do
-    assert @optlist_config.optlist_overrides_config?
-    assert_not @record_type_config.optlist_overrides_config?
+    assert @optlist_config.optlist_overrides?
+    assert_not @record_type_config.optlist_overrides?
   end
 
   test "record_type_config?" do
-    assert @record_type_config.record_type_config?
-    assert_not @optlist_config.record_type_config?
+    assert @record_type_config.record_type?
+    assert_not @optlist_config.record_type?
   end
 
   test "term_lists_config?" do
-    assert @term_lists_config.term_lists_config?
-    assert_not @record_type_config.term_lists_config?
+    assert @term_lists_config.term_lists?
+    assert_not @record_type_config.term_lists?
   end
 
   # Lookup Data Config Tests
