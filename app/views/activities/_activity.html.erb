@@ -5,7 +5,7 @@
     <div class="card-title justify-between">
       <div><%= file_names(activity) %></div>
       <div class="card-actions">
-        <%= link_to activity_path(activity), class: "btn btn-primary btn-sm", title: "View activity details" do %>
+        <%= link_to activity_path(activity), class: "btn btn-info btn-sm", title: "View activity details" do %>
           <%= icon "eye", class: "size-3" %>
         <% end %>
         <% if activity.user == Current.user %>

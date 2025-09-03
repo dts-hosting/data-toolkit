@@ -5,7 +5,9 @@
     <div class="flex justify-between items-center mb-6">
       <h2 class="card-title"><%= @task.class.display_name %></h2>
       <div>
-        <%= link_to "Back to Activity", activity_path(@activity), class: "btn btn-sm btn-secondary btn-outline" %>
+        <%= link_to activity_path(@activity), class: "btn btn-info btn-sm" do %>
+          <%= icon "arrow-uturn-left", class: "size-3" %>
+        <% end %>
       </div>
     </div>
 

@@ -3,25 +3,25 @@
     <div class="flex justify-between items-center mb-6">
       <h2 class="card-title">Registry Information</h2>
       <div>
-        <%= link_to "Back", :back, class: "btn btn-sm btn-secondary btn-outline" %>
+        <%= link_to manifest_registries_path, class: "btn btn-info btn-sm" do %>
+          <%= icon "arrow-uturn-left", class: "size-3" %>
+        <% end %>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
-      <div class="sm:col-span-3 font-bold">URL:</div>
-      <div class="sm:col-span-9">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
+      <div class="font-bold">URL:</div>
+      <div class="sm:col-span-3">
         <a href="<%= manifest_registry.url %>" target="_blank" class="link link-primary break-all">
           <%= manifest_registry.url %>
         </a>
       </div>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
-      <div class="sm:col-span-3 font-bold">Last Updated:</div>
-      <div class="sm:col-span-9"><%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></div>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
-      <div class="sm:col-span-3 font-bold">Total Manifests:</div>
-      <div class="sm:col-span-9"><%= manifest_registry.manifests.count %></div>
+
+      <div class="font-bold">Last Updated:</div>
+      <div class="sm:col-span-3"><%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></div>
+
+      <div class="font-bold">Total Manifests:</div>
+      <div class="sm:col-span-3"><%= manifest_registry.manifests.count %></div>
     </div>
   </div>
 </div>

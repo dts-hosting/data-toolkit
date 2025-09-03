@@ -13,36 +13,30 @@
         <div>
           <h4 class="font-medium mb-3">Selection Options</h4>
 
-          <% BatchConfig.select_attributes.each do |attr_name| %>
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-3">
-              <div class="sm:col-span-4">
-                <span class="text-base-content/60"><%= attr_name.to_s.humanize %></span>
-              </div>
-              <div class="sm:col-span-8">
-                <span class="font-medium"><%= activity.batch_config.send(attr_name) %></span>
-              </div>
-            </div>
-          <% end %>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 space-y-3">
+            <% BatchConfig.select_attributes.each do |attr_name| %>
+              <div class="text-base-content/60"><%= attr_name.to_s.humanize %></div>
+              <div class="sm:col-span-2 font-medium"><%= activity.batch_config.send(attr_name) %></div>
+            <% end %>
+          </div>
         </div>
 
         <!-- Boolean field values column -->
         <div>
           <h4 class="font-medium mb-3">Toggle Options</h4>
 
-          <% BatchConfig.boolean_attributes.each do |attr_name| %>
-            <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-3">
-              <div class="sm:col-span-6">
-                <span class="text-base-content/60"><%= attr_name.to_s.humanize %></span>
-              </div>
-              <div class="sm:col-span-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 space-y-3">
+            <% BatchConfig.boolean_attributes.each do |attr_name| %>
+              <div class="text-base-content/60"><%= attr_name.to_s.humanize %></div>
+              <div>
                 <% if activity.batch_config.send(attr_name) %>
                   <span class="badge badge-success">Enabled</span>
                 <% else %>
                   <span class="badge badge-neutral">Disabled</span>
                 <% end %>
               </div>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>

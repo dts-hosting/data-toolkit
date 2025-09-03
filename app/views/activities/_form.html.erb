@@ -27,30 +27,24 @@
 
         <%= form.hidden_field :type %>
 
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
+          <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
           <div class="sm:col-span-3">
-            <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
-          </div>
-          <div class="sm:col-span-9">
             <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
                                        { include_blank: "Select a #{data_config_type_label(activity)}" },
                                        class: "select select-bordered w-full" %>
           </div>
-        </div>
 
-        <% if activity.requires_files? %>
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+          <% if activity.requires_files? %>
+            <%= form.label :files, activity.requires_single_file? ? "File" : "Files", class: "label-text font-medium" %>
             <div class="sm:col-span-3">
-              <%= form.label :files, activity.requires_single_file? ? "File" : "Files", class: "label-text font-medium" %>
-            </div>
-            <div class="sm:col-span-9">
               <%= form.file_field :files,
                                   multiple: !activity.requires_single_file?,
                                   name: "activity[files][]",
                                   class: "file-input file-input-bordered w-full" %>
             </div>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       </div>
 
       <% if activity.requires_config_fields? %>
