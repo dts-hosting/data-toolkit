@@ -1,41 +1,42 @@
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Profile</h5>
-    <div>
-      <%= link_to "Back", :back, class: "btn btn-sm btn-outline-secondary" %>
-    </div>
-  </div>
+<div class="card bg-base-200 shadow-lg">
   <div class="card-body">
-    <div class="row mb-3">
-      <div class="col-sm-4 fw-bold">Email Address:</div>
-      <div class="col-sm-8"><%= @user.email_address %></div>
-    </div>
-
-    <div class="row mb-3">
-      <div class="col-sm-4 fw-bold">CollectionSpace URL:</div>
-      <div class="col-sm-8">
-        <%= link_to @user.cspace_url, @user.cspace_url, target: "_blank", class: "text-decoration-none" %>
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="card-title">Profile</h2>
+      <div>
+        <%= link_to "Back", :back, class: "btn btn-secondary btn-outline btn-sm" %>
       </div>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-sm-4 fw-bold">API Version:</div>
-      <div class="col-sm-8"><%= @user.cspace_api_version %></div>
+    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+      <div class="sm:col-span-4 font-bold">Email Address:</div>
+      <div class="sm:col-span-8"><%= @user.email_address %></div>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-sm-4 fw-bold">Profile:</div>
-      <div class="col-sm-8"><%= @user.cspace_profile %></div>
+    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+      <div class="sm:col-span-4 font-bold">CollectionSpace URL:</div>
+      <div class="sm:col-span-8">
+        <%= link_to @user.cspace_url, @user.cspace_url, target: "_blank", class: "link link-primary" %>
+      </div>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-sm-4 fw-bold">UI Version:</div>
-      <div class="col-sm-8"><%= @user.cspace_ui_version %></div>
+    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+      <div class="sm:col-span-4 font-bold">API Version:</div>
+      <div class="sm:col-span-8"><%= @user.cspace_api_version %></div>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-sm-4 fw-bold">Data Toolkit Admin?</div>
-      <div class="col-sm-8"><%= @user.admin? %></div>
+    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+      <div class="sm:col-span-4 font-bold">Profile:</div>
+      <div class="sm:col-span-8"><%= @user.cspace_profile %></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+      <div class="sm:col-span-4 font-bold">UI Version:</div>
+      <div class="sm:col-span-8"><%= @user.cspace_ui_version %></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+      <div class="sm:col-span-4 font-bold">Data Toolkit Admin?</div>
+      <div class="sm:col-span-8"><%= @user.admin? %></div>
     </div>
   </div>
 </div>

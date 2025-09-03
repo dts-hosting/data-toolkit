@@ -1,51 +1,53 @@
 <%= form_with(model: activity, scope: :activity, url: activities_path, local: true) do |form| %>
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">New <%= activity.class.display_name %></h5>
-      <div>
-        <%= form.submit "Submit", class: "btn btn-sm btn-primary me-2" %>
-        <%= link_to "Cancel", :back, class: "btn btn-sm btn-outline-secondary" %>
-      </div>
-    </div>
-
+  <div class="card bg-base-200 shadow-lg">
     <div class="card-body">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="card-title">New <%= activity.class.display_name %></h2>
+        <div class="flex gap-2">
+          <%= form.submit "Submit", class: "btn btn-primary btn-sm" %>
+          <%= link_to "Cancel", :back, class: "btn btn-secondary btn-outline btn-sm" %>
+        </div>
+      </div>
+
       <% if activity.errors.any? %>
-        <div class="alert alert-danger">
-          <h6><%= pluralize(activity.errors.count, "error") %> prohibited this activity from being saved:</h6>
-          <ul>
-            <% activity.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
+        <div class="alert alert-error mb-4">
+          <div>
+            <h3 class="font-semibold"><%= pluralize(activity.errors.count, "error") %> prohibited this activity from being saved:</h3>
+            <ul class="list-disc list-inside mt-2">
+              <% activity.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
         </div>
       <% end %>
 
-      <div class="mb-4">
-        <h6 class="text-muted fw-semibold border-bottom pb-2 mb-3">Basic Information</h6>
+      <div class="mb-6">
+        <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Basic Information</h3>
 
         <%= form.hidden_field :type %>
 
-        <div class="row mb-3">
-          <div class="col-sm-3">
-            <%= form.label :data_config, data_config_type_label(activity), class: "col-form-label" %>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+          <div class="sm:col-span-3">
+            <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
           </div>
-          <div class="col-sm-9">
+          <div class="sm:col-span-9">
             <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
                                        { include_blank: "Select a #{data_config_type_label(activity)}" },
-                                       class: "form-select" %>
+                                       class: "select select-bordered w-full" %>
           </div>
         </div>
 
         <% if activity.requires_files? %>
-          <div class="row mb-3">
-            <div class="col-sm-3">
-              <%= form.label :files, activity.requires_single_file? ? "File" : "Files", class: "col-form-label" %>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+            <div class="sm:col-span-3">
+              <%= form.label :files, activity.requires_single_file? ? "File" : "Files", class: "label-text font-medium" %>
             </div>
-            <div class="col-sm-9">
+            <div class="sm:col-span-9">
               <%= form.file_field :files,
                                   multiple: !activity.requires_single_file?,
                                   name: "activity[files][]",
-                                  class: "form-control" %>
+                                  class: "file-input file-input-bordered w-full" %>
             </div>
           </div>
         <% end %>
@@ -56,8 +58,8 @@
       <% end %>
 
       <% if activity.requires_batch_config? %>
-        <div class="mb-4">
-          <h6 class="text-muted fw-semibold border-bottom pb-2 mb-3">Batch config</h6>
+        <div class="mb-6">
+          <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Batch config</h3>
 
           <%= render "batch_config_form", form: form, activity: activity %>
         </div>

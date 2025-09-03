@@ -1,64 +1,67 @@
 <%= turbo_stream_from activity %>
-<%= tag.div id: dom_id(activity), class: "card mb-3" do %>
-  <div class="card-header d-flex justify-content-between">
-    <div><%= file_names(activity) %></div>
-    <% if activity.user != Current.user %>
-      <span class="ms-auto"><%= activity.user.email_address %></span>
-    <% end %>
-  </div>
-  <div class="card-body position-relative">
-    <div class="position-absolute top-0 end-0 mt-2 me-2">
-      <div class="btn-group" role="group" aria-label="Activity actions">
-        <%= link_to activity_path(activity), class: "btn btn-outline-primary btn-sm", title: "View activity details" do %>
-          <i class="bi bi-eye"></i>
-        <% end %>
-        <% if activity.user == Current.user %>
-          <%= link_to activity_path(activity), class: "btn btn-outline-danger btn-sm", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this activity?" }, title: "Delete activity" do %>
-            <i class="bi bi-trash"></i>
-          <% end %>
-        <% end %>
-      </div>
+<%= tag.div id: dom_id(activity), class: "card bg-base-100 shadow-md mb-3" do %>
+  <div class="card-body">
+    <div class="flex justify-between items-center mb-4">
+      <div><%= file_names(activity) %></div>
+      <% if activity.user != Current.user %>
+        <span class="ml-auto"><%= activity.user.email_address %></span>
+      <% end %>
     </div>
 
-    <div class="row">
-      <div class="col-md-6">
-        <div class="mb-3">
-          <div class="d-flex align-items-center mb-1">
-            <span class="text-muted small me-2">Activity Type</span>
-          </div>
-          <span class="text-monospace fw-medium"><%= activity.class.display_name %></span>
-        </div>
-
-        <div class="mb-3">
-          <div class="d-flex align-items-center mb-1">
-            <span class="text-muted small me-2"><%= data_config_type_label(activity) %></span>
-          </div>
-          <span class="text-monospace fw-medium"><%= activity.data_config.display_name %></span>
+    <div class="relative">
+      <div class="absolute top-0 right-0 mt-2 mr-2">
+        <div class="btn-group" role="group" aria-label="Activity actions">
+          <%= link_to activity_path(activity), class: "btn btn-primary btn-outline btn-sm", title: "View activity details" do %>
+            <i class="bi bi-eye"></i>
+          <% end %>
+          <% if activity.user == Current.user %>
+            <%= link_to activity_path(activity), class: "btn btn-error btn-outline btn-sm", data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this activity?" }, title: "Delete activity" do %>
+              <i class="bi bi-trash"></i>
+            <% end %>
+          <% end %>
         </div>
       </div>
 
-      <div class="col-md-6">
-        <div class="mb-3">
-          <div class="d-flex align-items-center mb-1">
-            <span class="text-muted small me-2">Workflow Task</span>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div class="mb-3">
+            <div class="flex items-center mb-1">
+              <span class="text-base-content/60 text-sm mr-2">Activity Type</span>
+            </div>
+            <span class="font-mono font-medium"><%= activity.class.display_name %></span>
           </div>
-          <div class="d-flex align-items-center">
-            <% if activity.current_task %>
-              <span class="text-monospace fw-medium me-2"><%= task_name(activity) %></span>
-              <span class="badge bg-<%= task_status_color(activity.current_task.status) %>">
-                <%= task_status_text(activity.current_task.status) %>
-              </span>
-            <% else %>
-              <span class="text-monospace fw-medium">No task is active</span>
-            <% end %>
+
+          <div class="mb-3">
+            <div class="flex items-center mb-1">
+              <span class="text-base-content/60 text-sm mr-2"><%= data_config_type_label(activity) %></span>
+            </div>
+            <span class="font-mono font-medium"><%= activity.data_config.display_name %></span>
           </div>
         </div>
 
-        <div class="mb-3">
-          <div class="d-flex align-items-center mb-1">
-            <span class="text-muted small me-2">Last Updated</span>
+        <div>
+          <div class="mb-3">
+            <div class="flex items-center mb-1">
+              <span class="text-base-content/60 text-sm mr-2">Workflow Task</span>
+            </div>
+            <div class="flex items-center">
+              <% if activity.current_task %>
+                <span class="font-mono font-medium mr-2"><%= task_name(activity) %></span>
+                <span class="badge badge-<%= task_status_color(activity.current_task.status) %>">
+                  <%= task_status_text(activity.current_task.status) %>
+                </span>
+              <% else %>
+                <span class="font-mono font-medium">No task is active</span>
+              <% end %>
+            </div>
           </div>
-          <span class="text-monospace fw-medium"><%= local_time(activity.updated_at) %></span>
+
+          <div class="mb-3">
+            <div class="flex items-center mb-1">
+              <span class="text-base-content/60 text-sm mr-2">Last Updated</span>
+            </div>
+            <span class="font-mono font-medium"><%= local_time(activity.updated_at) %></span>
+          </div>
         </div>
       </div>
     </div>

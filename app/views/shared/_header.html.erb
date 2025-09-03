@@ -1,13 +1,13 @@
 <header>
-  <nav class="navbar bg-body-tertiary">
-    <div class="container-fluid">
-      <%= image_tag "CollectionSpace-Logo.png", alt: "CollectionSpace Logo", height: 30, class: "d-inline-block align-text-top my-2" %>
-      <div class="d-flex">
-        <% if authenticated? %>
-          <%= link_to "My profile", user_path(Current.user), class: "btn btn-outline-success me-2" %>
-          <%= button_to "Sign Out", session_path, method: :delete, class: "btn btn-outline-secondary" %>
-        <% end %>
-      </div>
+  <div class="navbar bg-base-200">
+    <div class="navbar-start">
+      <%= image_tag "CollectionSpace-Logo.png", alt: "CollectionSpace Logo", height: 30, class: "inline-block align-top my-2 max-w-48 w-auto" %>
     </div>
-  </nav>
+    <div class="navbar-end">
+      <% if authenticated? %>
+        <%= link_to "My profile", user_path(Current.user), class: "btn btn-success btn-outline mr-2" %>
+        <%= button_to "Sign Out", session_path, method: :delete, class: "btn btn-secondary btn-outline" %>
+      <% end %>
+    </div>
+  </div>
 </header>

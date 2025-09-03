@@ -1,32 +1,29 @@
-<div class="card">
-  <div class="card-header">
-    <h5 class="mb-0">Activities</h5>
-  </div>
-
+<div class="card bg-base-200 shadow-lg">
   <div class="card-body">
+    <h2 class="card-title mb-4">Activities</h2>
     <div class="mb-4">
-      <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">View</h6>
-      <ul class="nav flex-column">
-        <li class="nav-item">
-          <%= link_to my_activities_path, class: "nav-link ps-2 py-1 rounded #{'active fw-medium bg-light' if current_page?('#')}" do %>
-            <i class="bi bi-person-fill me-2 text-secondary"></i>My activities
+      <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-2">View</h3>
+      <ul class="menu menu-compact">
+        <li>
+          <%= link_to my_activities_path, class: "flex items-center px-2 py-1 rounded #{'bg-base-200 font-medium' if current_page?('#')}" do %>
+            <i class="bi bi-person-fill mr-2 text-base-content/60"></i>My activities
           <% end %>
         </li>
-        <li class="nav-item">
-          <%= link_to group_activities_path, class: "nav-link ps-2 py-1 rounded #{'active fw-medium bg-light' if current_page?('#')}" do %>
-            <i class="bi bi-list-ul me-2 text-secondary"></i>Group activities
+        <li>
+          <%= link_to group_activities_path, class: "flex items-center px-2 py-1 rounded #{'bg-base-200 font-medium' if current_page?('#')}" do %>
+            <i class="bi bi-list-ul mr-2 text-base-content/60"></i>Group activities
           <% end %>
         </li>
       </ul>
     </div>
 
     <div class="mb-4">
-      <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Perform</h6>
-      <ul class="nav flex-column">
+      <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-2">Perform</h3>
+      <ul class="menu menu-compact">
         <% Activity.display_names.each do |name| %>
-          <li class="nav-item">
-            <%= link_to new_activity_with_type_path(type: name.parameterize), class: "nav-link ps-2 py-1 rounded" do %>
-              <i class="bi bi-plus-circle me-2 text-secondary"></i><%= name %>
+          <li>
+            <%= link_to new_activity_with_type_path(type: name.parameterize), class: "flex items-center px-2 py-1 rounded" do %>
+              <i class="bi bi-plus-circle mr-2 text-base-content/60"></i><%= name %>
             <% end %>
           </li>
         <% end %>
@@ -35,17 +32,17 @@
 
     <% if admin? %>
       <div>
-        <h6 class="text-muted fw-semibold border-bottom pb-2 mb-2">Admin</h6>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <%= link_to "/jobs", class: "nav-link ps-2 py-1 rounded" do %>
-              <i class="bi bi-speedometer me-2 text-secondary"></i>
+        <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-2">Admin</h3>
+        <ul class="menu menu-compact">
+          <li>
+            <%= link_to "/jobs", class: "flex items-center px-2 py-1 rounded" do %>
+              <i class="bi bi-speedometer mr-2 text-base-content/60"></i>
               Jobs Dashboard
             <% end %>
           </li>
-          <li class="nav-item">
-            <%= link_to manifest_registries_path, class: "nav-link ps-2 py-1 rounded" do %>
-              <i class="bi bi-journals me-2 text-secondary"></i>
+          <li>
+            <%= link_to manifest_registries_path, class: "flex items-center px-2 py-1 rounded" do %>
+              <i class="bi bi-journals mr-2 text-base-content/60"></i>
               Manifest Registries
             <% end %>
           </li>
