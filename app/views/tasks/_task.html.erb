@@ -1,7 +1,7 @@
 <tr id="<%= dom_id(task) %>">
   <td><%= task.class.display_name %></td>
   <td>
-    <span class="badge bg-<%= task_status_color(task.status) %>">
+    <span class="badge badge-<%= task_status_color(task.status) %>">
       <%= task_status_text(task.status) %>
     </span>
   </td>
@@ -11,14 +11,14 @@
     <%= button_to run_activity_task_path(task.activity, task),
                   method: :post,
                   form: { "data-turbo": true },
-                  class: "btn btn-outline-success btn-sm d-inline-block",
-                  form_class: "d-inline",
+                  class: "btn btn-success btn-outline btn-sm inline-block",
+                  form_class: "inline",
                   title: task.ok_to_run? ? "Run task" : "Not eligible to run",
                   disabled: !task.ok_to_run? do %>
       <i class="bi bi-play"></i>
     <% end %>
 
-    <%= link_to activity_task_path(task.activity, task), class: "btn btn-outline-primary btn-sm", title: "View task details" do %>
+    <%= link_to activity_task_path(task.activity, task), class: "btn btn-primary btn-outline btn-sm", title: "View task details" do %>
       <i class="bi bi-eye"></i>
     <% end %>
   </td>

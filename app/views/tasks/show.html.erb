@@ -1,15 +1,17 @@
 <%= turbo_stream_from @task %>
 
-<div class="card mb-4">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="mb-0"><%= @task.class.display_name %></h5>
-    <div>
-      <%= link_to "Back to Activity", activity_path(@activity), class: "btn btn-sm btn-outline-secondary" %>
+<div class="card bg-base-200 shadow-lg mb-4">
+  <div class="card-body">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="card-title"><%= @task.class.display_name %></h2>
+      <div>
+        <%= link_to "Back to Activity", activity_path(@activity), class: "btn btn-sm btn-secondary btn-outline" %>
+      </div>
     </div>
-  </div>
 
-  <div class="card-body" id="<%= dom_id(@task) %>_details">
-    <%= render "details", task: @task %>
+    <div id="<%= dom_id(@task) %>_details">
+      <%= render "details", task: @task %>
+    </div>
   </div>
 </div>
 

@@ -1,47 +1,47 @@
 <%= form.fields_for :batch_config do |batch_form| %>
-  <div class="row">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Select fields column -->
-    <div class="col-md-6">
-      <h6 class="mb-3">Selection Options</h6>
+    <div>
+      <h4 class="font-medium mb-3">Selection Options</h4>
 
       <% if activity.select_attributes.any? %>
         <% activity.select_attributes.each do |attr_name| %>
-          <div class="row mb-3">
-            <div class="col-sm-4">
-              <%= batch_form.label attr_name, class: "col-form-label" %>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+            <div class="sm:col-span-4">
+              <%= batch_form.label attr_name, class: "label-text font-medium" %>
             </div>
-            <div class="col-sm-8">
+            <div class="sm:col-span-8">
               <%= batch_form.select attr_name,
                                     options_for_select(
                                       BatchConfig.values(attr_name),
                                       BatchConfig.default_value(attr_name)
                                     ),
                                     { include_blank: "Select option" },
-                                    class: "form-select" %>
+                                    class: "select select-bordered w-full" %>
             </div>
           </div>
         <% end %>
       <% else %>
-        <div class="row mb-3">
-          <div class="col-sm-12">
-            <%= batch_form.label "No options to select", class: "col-form-label" %>
+        <div class="grid grid-cols-1 gap-4 mb-4">
+          <div>
+            <span class="label-text font-medium">No options to select</span>
           </div>
         </div>
       <% end %>
     </div>
 
     <!-- Boolean fields column -->
-    <div class="col-md-6">
-      <h6 class="mb-3">Toggle Options</h6>
+    <div>
+      <h4 class="font-medium mb-3">Toggle Options</h4>
 
       <% activity.boolean_attributes.each do |attr_name| %>
-        <div class="row mb-3">
-          <div class="col-sm-6">
-            <%= batch_form.label attr_name, class: "col-form-label" %>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 mb-4">
+          <div class="sm:col-span-6">
+            <%= batch_form.label attr_name, class: "label-text font-medium" %>
           </div>
-          <div class="col-sm-6">
-            <div class="form-check form-switch pt-2">
-              <%= batch_form.check_box attr_name, class: "form-check-input", role: "switch" %>
+          <div class="sm:col-span-6">
+            <div class="form-control">
+              <%= batch_form.check_box attr_name, class: "toggle toggle-primary" %>
             </div>
           </div>
         </div>
