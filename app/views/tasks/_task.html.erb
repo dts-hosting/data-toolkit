@@ -11,15 +11,15 @@
     <%= button_to run_activity_task_path(task.activity, task),
                   method: :post,
                   form: { "data-turbo": true },
-                  class: "btn btn-success btn-outline btn-sm inline-block",
+                  class: "btn btn-success btn-sm inline-block",
                   form_class: "inline",
                   title: task.ok_to_run? ? "Run task" : "Not eligible to run",
                   disabled: !task.ok_to_run? do %>
-      <i class="bi bi-play"></i>
+      <%= icon "play", class: "size-3" %>
     <% end %>
 
-    <%= link_to activity_task_path(task.activity, task), class: "btn btn-primary btn-outline btn-sm", title: "View task details" do %>
-      <i class="bi bi-eye"></i>
+    <%= link_to activity_task_path(task.activity, task), class: "btn btn-primary btn-sm", title: "View task details" do %>
+      <%= icon "eye", class: "size-3" %>
     <% end %>
   </td>
 </tr>

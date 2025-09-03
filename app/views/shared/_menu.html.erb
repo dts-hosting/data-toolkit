@@ -6,12 +6,12 @@
       <ul class="menu menu-compact">
         <li>
           <%= link_to my_activities_path, class: "flex items-center px-2 py-1 rounded #{'bg-base-200 font-medium' if current_page?('#')}" do %>
-            <i class="bi bi-person-fill mr-2 text-base-content/60"></i>My activities
+            <%= icon "user", variant: "solid", class: "size-5" %>My activities
           <% end %>
         </li>
         <li>
           <%= link_to group_activities_path, class: "flex items-center px-2 py-1 rounded #{'bg-base-200 font-medium' if current_page?('#')}" do %>
-            <i class="bi bi-list-ul mr-2 text-base-content/60"></i>Group activities
+            <%= icon "list-bullet", class: "size-5" %>Group activities
           <% end %>
         </li>
       </ul>
@@ -23,7 +23,7 @@
         <% Activity.display_names.each do |name| %>
           <li>
             <%= link_to new_activity_with_type_path(type: name.parameterize), class: "flex items-center px-2 py-1 rounded" do %>
-              <i class="bi bi-plus-circle mr-2 text-base-content/60"></i><%= name %>
+              <%= icon "plus-circle", class: "size-5" %><%= name %>
             <% end %>
           </li>
         <% end %>
@@ -36,13 +36,13 @@
         <ul class="menu menu-compact">
           <li>
             <%= link_to "/jobs", class: "flex items-center px-2 py-1 rounded" do %>
-              <i class="bi bi-speedometer mr-2 text-base-content/60"></i>
+              <%= icon "chart-bar", class: "size-5" %>
               Jobs Dashboard
             <% end %>
           </li>
           <li>
             <%= link_to manifest_registries_path, class: "flex items-center px-2 py-1 rounded" do %>
-              <i class="bi bi-journals mr-2 text-base-content/60"></i>
+              <%= icon "document-duplicate", class: "size-5" %>
               Manifest Registries
             <% end %>
           </li>

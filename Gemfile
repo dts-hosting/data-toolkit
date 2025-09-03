@@ -74,3 +74,5 @@ gem "pagy"
 gem "scout_apm"
 gem "tailwindcss-ruby", "~> 4.1"
 gem "tailwindcss-rails", "~> 4.3"
+
+gem "rails_icons", "~> 1.4"
