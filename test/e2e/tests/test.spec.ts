@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-
 test('Data Toolkit CSpace', async ({ page }) => {
   await test.step('Required Configuration', async () => {
     expect(process.env.DATA_TOOLKIT_URL).toBeDefined();
@@ -10,7 +9,6 @@ test('Data Toolkit CSpace', async ({ page }) => {
   await test.step('Webpage Live', async () => {
     await page.goto(process.env.DATA_TOOLKIT_URL);
   
-    // Expect a title "to contain" a substring.
     await expect(page).toHaveTitle(/Data Toolkit/);
   }), { box: true };
 
