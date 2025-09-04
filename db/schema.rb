@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_26_163742) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_04_182205) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -98,6 +98,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_26_163742) do
     t.index ["activity_id"], name: "index_data_items_on_activity_id"
     t.index ["current_task_id"], name: "index_data_items_on_current_task_id"
     t.index ["status"], name: "index_data_items_on_status"
+  end
+
+  create_table "histories", force: :cascade do |t|
+    t.string "activity_user", null: false
+    t.string "activity_url", null: false
+    t.string "activity_type", null: false
+    t.string "activity_label", null: false
+    t.datetime "activity_created_at", null: false
+    t.string "task_type", null: false
+    t.string "task_status", null: false
+    t.json "task_feedback"
+    t.datetime "task_started_at"
+    t.datetime "task_completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_url"], name: "index_histories_on_activity_url"
+    t.index ["activity_user"], name: "index_histories_on_activity_user"
   end
 
   create_table "manifest_registries", force: :cascade do |t|
