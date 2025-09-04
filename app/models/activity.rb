@@ -5,7 +5,7 @@ class Activity < ApplicationRecord
   belongs_to :data_config
   belongs_to :user
   has_many :data_items, dependent: :delete_all
-  has_many :tasks, dependent: :destroy
+  has_many :tasks # dependent: :destroy | NOTE: we handle this in create_history
   has_many_attached :files, dependent: :destroy
   has_one :batch_config, dependent: :destroy
   accepts_nested_attributes_for :batch_config
@@ -24,6 +24,7 @@ class Activity < ApplicationRecord
   end
 
   after_update_commit :handle_advance
+  before_destroy :create_history
 
   broadcasts_refreshes
 
@@ -73,11 +74,40 @@ class Activity < ApplicationRecord
     BatchConfig.select_attributes
   end
 
+  def summary
+    return {} if tasks.empty?
+
+    task = current_task || next_task
+    {
+      activity_user: user.email_address,
+      activity_url: user.cspace_url,
+      activity_type: self.class.display_name,
+      activity_label: label,
+      activity_created_at: created_at,
+      task_type: task.class.display_name,
+      task_status: task.status,
+      task_feedback: task.feedback,
+      task_started_at: task.started_at || Time.current,
+      task_completed_at: task.completed_at
+    }
+  end
+
   def self.display_name
     raise NotImplementedError
   end
 
   private
+
+  def create_history
+    return if tasks.empty?
+
+    History.create!(summary)
+    tasks.destroy_all # we do this here to have access to task for history
+  rescue => e
+    Rails.logger.error "Failed to create history for activity #{id}: #{e.message}"
+    errors.add(:base, "Unable to create history record")
+    throw(:abort)
+  end
 
   # TODO: for the moment we're just logging, but this would be a good spot for notifications
   def handle_advance
