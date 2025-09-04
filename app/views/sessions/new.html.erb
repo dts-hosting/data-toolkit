@@ -6,7 +6,7 @@
       <%= form_with url: session_path, class: "form" do |form| %>
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text">CollectionSpace URL</span>
+            <span class="label-text mb-1">CollectionSpace URL</span>
           </label>
           <%= form.text_field :cspace_url,
                               required: true,
@@ -16,13 +16,13 @@
                               value: params[:cspace_url],
                               class: "input input-bordered w-full" %>
           <label class="label">
-            <span class="label-text-alt text-base-content/60">Example: https://core.collectionspace.org</span>
+            <span class="label-text-alt text-base-content/60 mt-1">Example: https://core.collectionspace.org</span>
           </label>
         </div>
 
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text">Email Address</span>
+            <span class="label-text mb-1">Email Address</span>
           </label>
           <%= form.email_field :email_address,
                                required: true,
@@ -34,7 +34,7 @@
 
         <div class="form-control mb-4">
           <label class="label">
-            <span class="label-text">Password</span>
+            <span class="label-text mb-1">Password</span>
           </label>
           <%= form.password_field :password,
                                   required: true,
