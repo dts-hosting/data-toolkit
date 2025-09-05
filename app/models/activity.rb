@@ -1,6 +1,5 @@
 class Activity < ApplicationRecord
   include Descendents
-  NO_FILES_LABEL = "No files"
 
   belongs_to :data_config
   belongs_to :user
@@ -14,8 +13,10 @@ class Activity < ApplicationRecord
   validate :data_config, :is_eligible?
 
   with_options presence: true do
-    validates :data_config, :type, :user
+    validates :data_config, :label, :type, :user
   end
+
+  validates :label, length: {minimum: 3}
 
   after_create_commit do
     workflow.each do |task|
@@ -34,19 +35,6 @@ class Activity < ApplicationRecord
 
   def current_task
     tasks.where.not(status: "pending").order(:created_at).last
-  end
-
-  # TODO: revisit persistence options in the future
-  def label(max_files: 3)
-    @label ||= begin
-      return NO_FILES_LABEL if files.blank?
-
-      files_label = files.take(max_files).map(&:filename).join(", ")
-      if files.count > max_files
-        files_label += " etc."
-      end
-      files_label
-    end
   end
 
   def next_task
