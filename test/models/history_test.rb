@@ -88,6 +88,7 @@ class HistoryTest < ActiveSupport::TestCase
       type: "Activities::CreateOrUpdateRecords",
       config: {action: "create"},
       data_config: data_config,
+      label: "test.csv",
       files: create_uploaded_files(["test.csv"])
     )
     created_at = activity.created_at

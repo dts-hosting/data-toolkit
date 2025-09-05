@@ -34,6 +34,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
       post activities_url, params: {
         activity: {
           type: "Activities::CreateOrUpdateRecords",
+          label: "Test Label #{SecureRandom.hex(4)}",
           config: {action: "create"},
           data_config_id: @data_config.id,
           files: [fixture_file_upload(

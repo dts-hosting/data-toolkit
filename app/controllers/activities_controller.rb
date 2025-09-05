@@ -54,6 +54,7 @@ class ActivitiesController < ApplicationController
   def activity_params
     base_params = [
       :type,
+      :label,
       :data_config_id,
       {files: []},
       config: {},
