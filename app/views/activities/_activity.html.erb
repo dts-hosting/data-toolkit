@@ -3,7 +3,7 @@
   <div class="card-body">
     <!-- Header with title and actions -->
     <div class="card-title justify-between">
-      <div><%= file_names(activity) %></div>
+      <div class="flex items-center gap-2"><%= icon "tag" %><%= activity.label %></div>
       <div class="card-actions">
         <%= link_to activity_path(activity), class: "btn btn-info btn-sm", title: "View activity details" do %>
           <%= icon "eye", class: "size-3" %>

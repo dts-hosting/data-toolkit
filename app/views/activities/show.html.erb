@@ -21,6 +21,9 @@
       <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Basic Information</h3>
 
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
+        <div class="font-bold">Label:</div>
+        <div class="sm:col-span-3"><%= @activity.label %></div>
+
         <div class="font-bold"><%= data_config_type_label(@activity) %>:</div>
         <div class="sm:col-span-3"><%= @activity.data_config.display_name %></div>
 

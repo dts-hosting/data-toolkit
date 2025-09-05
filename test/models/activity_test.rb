@@ -9,7 +9,8 @@ class ActivityTest < ActiveSupport::TestCase
     @activity = Activity.new(
       user: @user,
       data_config: @data_config,
-      type: "Activities::ExportRecordIds"
+      type: "Activities::ExportRecordIds",
+      label: "Test Activity Label"
     )
   end
 
@@ -42,6 +43,29 @@ class ActivityTest < ActiveSupport::TestCase
       content_type: "text/csv"
     )
     assert @activity.files.attached?
+  end
+
+  # Label validation tests
+  test "should require a label" do
+    @activity.label = nil
+    refute @activity.valid?
+    assert_not_nil @activity.errors[:label]
+  end
+
+  test "should require label to be at least 3 characters" do
+    @activity.label = "ab"
+    refute @activity.valid?
+    assert_not_nil @activity.errors[:label]
+  end
+
+  test "should accept label with exactly 3 characters" do
+    @activity.label = "abc"
+    assert @activity.valid?
+  end
+
+  test "should accept label with more than 3 characters" do
+    @activity.label = "Valid Activity Label"
+    assert @activity.valid?
   end
 
   test "current_task returns the first task when new activity created" do

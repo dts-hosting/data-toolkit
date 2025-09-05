@@ -10,6 +10,7 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
       config: {action: "create"},
       data_config: data_config,
       type: "Activities::CreateOrUpdateRecords",
+      label: "Test Label #{SecureRandom.hex(4)}",
       files: files
     )
     @activity.build_batch_config
