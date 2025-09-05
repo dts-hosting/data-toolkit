@@ -28,6 +28,14 @@
         <%= form.hidden_field :type %>
 
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
+          <%= form.label :label, "Label", class: "label-text font-medium" %>
+          <div class="sm:col-span-3">
+            <%= form.text_field :label,
+                                 required: true,
+                                 placeholder: "Enter a reference label i.e. record-batch1",
+                                 class: "input input-bordered w-full" %>
+          </div>
+
           <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
           <div class="sm:col-span-3">
             <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
