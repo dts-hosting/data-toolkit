@@ -11,14 +11,14 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
   test "should get index" do
     get manifest_registries_url
     assert_response :success
-    assert_select "h5", "Manifest Registries"
+    assert_select "h2", "Manifest Registries"
     assert_select "form[action=?]", manifest_registries_path
   end
 
   test "should show manifest_registry" do
     get manifest_registry_url(@manifest_registry)
     assert_response :success
-    assert_select "h5", "Registry Information"
+    assert_select "h2", "Registry Information"
   end
 
   test "should create manifest_registry" do
@@ -40,7 +40,7 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_content
-    assert_select ".alert-danger"
+    assert_select ".alert-error"
   end
 
   test "should not create duplicate manifest_registry" do
@@ -51,7 +51,7 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_content
-    assert_select ".alert-danger"
+    assert_select ".alert-error"
   end
 
   test "should destroy manifest registry when safe to delete" do

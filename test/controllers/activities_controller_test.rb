@@ -19,7 +19,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     get new_activity_with_type_url(type: "create-or-update-records")
     assert_response :success
 
-    assert_select "h5", text: /New Create or Update Records/
+    assert_select "h2", text: /New Create or Update Records/
     assert_select "input[name='activity[type]'][value='Activities::CreateOrUpdateRecords']"
   end
 
@@ -64,21 +64,21 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_content
-    assert_select ".alert-danger"
+    assert_select ".alert-error"
   end
 
   test "should show user's own activity" do
     get activity_url(@admin_activity)
     assert_response :success
 
-    assert_select "h5", /#{@admin_activity.class.display_name}/
+    assert_select "h2", /#{@admin_activity.class.display_name}/
   end
 
   test "should show activity from same organization" do
     get activity_url(@reader_activity)
     assert_response :success
 
-    assert_select "h5", /#{@reader_activity.class.display_name}/
+    assert_select "h2", /#{@reader_activity.class.display_name}/
   end
 
   test "should not show activity from different organization" do
@@ -125,7 +125,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     get new_activity_with_type_url(type: "create-or-update-records")
     assert_response :success
 
-    assert_select "h6", text: "Batch config"
+    assert_select "h3", text: "Batch config"
     assert_select "input[name*='batch_config_attributes']", minimum: 1
   end
 end
