@@ -2,7 +2,7 @@ module Activities
   class ImportTerms < Activity
     validates :files, presence: true, length: {is: 1, message: "must have exactly one file"}
 
-    def data_config_type = "term_lists"
+    def data_config_type = "term_list"
 
     def requires_batch_config?
       false

@@ -1,58 +1,40 @@
 class DataConfig < ApplicationRecord
-  ALLOWED_CONFIG_TYPES = %i[optlist_overrides record_type term_lists].freeze
-
   include RequiresUrl
   has_many :activities, dependent: :restrict_with_exception
   belongs_to :manifest, counter_cache: true
 
-  validates :config_type, presence: true,
-    inclusion: {in: ALLOWED_CONFIG_TYPES.map(&:to_s)}
+  enum :config_type, {optlist_override: "optlist_override", record_type: "record_type", term_list: "term_list"}
+
+  validates :config_type, presence: true
   validates :profile, presence: true
 
-  validates :record_type, absence: true, if: -> { optlist_overrides_config? || term_lists_config? }
-  validates :record_type, presence: true, if: :record_type_config?
+  validates :record_type, absence: true, if: -> { optlist_override? || term_list? }
+  validates :record_type, presence: true, if: :record_type?
 
-  validates :version, absence: true, if: :optlist_overrides_config?
-  validates :version, presence: true, if: -> { record_type_config? || term_lists_config? }
+  validates :version, absence: true, if: :optlist_override?
+  validates :version, presence: true, if: -> { record_type? || term_list? }
 
   validate :unique_attributes
 
+  before_save -> { self.config_type = config_type.singularize }
+
+  scope :by_config_type, ->(config_type) { where(config_type: config_type.to_s) }
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
   scope :media_record_type, ->(user) { record_type(user).where("record_type LIKE ?", "%media") }
-  scope :optlist_overrides, ->(user) { by_profile(user).with_config_type(:optlist_overrides) }
-  scope :record_type, ->(user) { by_profile(user).by_version(user).with_config_type(:record_type) }
-  scope :term_lists, ->(user) { by_profile(user).by_version(user).with_config_type(:term_lists) }
+  scope :optlist_override, ->(user) { by_profile(user).by_config_type(:optlist_override) }
+  scope :record_type, ->(user) { by_profile(user).by_version(user).by_config_type(:record_type) }
+  scope :term_list, ->(user) { by_profile(user).by_version(user).by_config_type(:term_list) }
 
   def display_name
     "#{profile} #{version} #{record_type}".strip
-  end
-
-  def optlist_overrides_config?
-    matches_config_type?(:optlist_overrides)
-  end
-
-  def record_type_config?
-    matches_config_type?(:record_type)
-  end
-
-  def term_lists_config?
-    matches_config_type?(:term_lists)
   end
 
   def self.for(user, activity)
     send(activity.data_config_type.to_sym, user)
   end
 
-  def self.with_config_type(type)
-    where(config_type: type.to_s)
-  end
-
   private
-
-  def matches_config_type?(type)
-    config_type == type.to_s
-  end
 
   def unique_attributes
     query = DataConfig.where(

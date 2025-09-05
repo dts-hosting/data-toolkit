@@ -38,10 +38,10 @@ module FactoryHelpers
     DataConfig.create(attributes)
   end
 
-  def create_data_config_term_lists(attributes = {})
+  def create_data_config_term_list(attributes = {})
     attributes = {
       manifest: manifests(:v1),
-      config_type: "term_lists",
+      config_type: "term_list",
       profile: "core",
       version: "1.0.0",
       url: "https://example.com/vocabularies-1.0.0.json"
@@ -49,10 +49,10 @@ module FactoryHelpers
     DataConfig.create(attributes)
   end
 
-  def create_data_config_optlist_overrides(attributes = {})
+  def create_data_config_optlist_override(attributes = {})
     attributes = {
       manifest: manifests(:v1),
-      config_type: "optlist_overrides",
+      config_type: "optlist_override",
       profile: "core",
       url: "https://example.com/optlist.json"
     }.merge(attributes)
