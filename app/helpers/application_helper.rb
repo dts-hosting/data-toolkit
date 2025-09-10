@@ -46,7 +46,7 @@ module ApplicationHelper
     when :review
       "warning"
     when :failed
-      "danger"
+      "error"
     else
       "primary"
     end

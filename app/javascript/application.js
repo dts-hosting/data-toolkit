@@ -8,13 +8,3 @@ LocalTime.start();
 document.addEventListener("turbo:morph", () => {
   LocalTime.run();
 });
-
-document.addEventListener("turbo:load", () => {
-  const collapses = document.querySelectorAll('[data-bs-toggle="collapse"]');
-  collapses.forEach((el) => {
-    const target = document.querySelector(el.getAttribute("href"));
-    if (target && !bootstrap.Collapse.getInstance(target)) {
-      new bootstrap.Collapse(target, { toggle: false });
-    }
-  });
-});

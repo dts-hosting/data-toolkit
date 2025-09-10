@@ -1,29 +1,33 @@
 <%= turbo_stream_from manifest_registry %>
-<div id="<%= dom_id(manifest_registry) %>" class="card mb-3">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h6 class="mb-0 text-break">
-      <a href="<%= manifest_registry.url %>" target="_blank"><%= manifest_registry.name_for_url %></a>
-    </h6>
-    <div class="d-flex gap-2">
-      <%= link_to "View Details", manifest_registry_path(manifest_registry), class: "btn btn-sm btn-outline-primary" %>
-      <%= button_to "Delete",
-                    manifest_registry_path(manifest_registry),
-                    method: :delete,
-                    class: "btn btn-sm btn-outline-danger",
-                    disabled: !manifest_registry.safe_to_delete?,
-                    form: { data: { turbo_confirm: "Are you sure you want to delete this registry?" } } %>
-    </div>
-  </div>
+<div id="<%= dom_id(manifest_registry) %>" class="card bg-base-100 shadow-md mb-3">
   <div class="card-body">
-    <div class="row">
-      <div class="col-md-4">
-        <span>Date Added: <%= manifest_registry.created_at ? local_time(manifest_registry.created_at) : 'Never' %></span>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-medium break-all">
+        <a href="<%= manifest_registry.url %>" target="_blank" class="link link-primary"><%= manifest_registry.name_for_url %></a>
+      </h3>
+      <div class="flex gap-2">
+        <%= link_to "View Details", manifest_registry_path(manifest_registry), class: "btn btn-sm btn-primary btn-outline" %>
+        <%= button_to "Delete",
+                      manifest_registry_path(manifest_registry),
+                      method: :delete,
+                      class: "btn btn-sm btn-error btn-outline",
+                      disabled: !manifest_registry.safe_to_delete?,
+                      form: { data: { turbo_confirm: "Are you sure you want to delete this registry?" } } %>
       </div>
-      <div class="col-md-4">
-        <span>Last Updated: <%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <span class="text-base-content/60 text-sm">Date Added:</span>
+        <div><%= manifest_registry.created_at ? local_time(manifest_registry.created_at) : 'Never' %></div>
       </div>
-      <div class="col-md-4">
-        <span>Manifests: <%= manifest_registry.manifests.count %></span>
+      <div>
+        <span class="text-base-content/60 text-sm">Last Updated:</span>
+        <div><%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></div>
+      </div>
+      <div>
+        <span class="text-base-content/60 text-sm">Manifests:</span>
+        <div><%= manifest_registry.manifests.count %></div>
       </div>
     </div>
   </div>

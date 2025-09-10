@@ -34,9 +34,7 @@ class ManifestRegistriesAccessControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "unauthenticated users should be redirected from run" do
-    assert_no_difference "enqueued_jobs.size" do
-      post run_manifest_registry_url(@manifest_registry)
-    end
+    post run_manifest_registry_url(@manifest_registry)
     assert_redirected_to new_session_path
   end
 

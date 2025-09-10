@@ -1,24 +1,30 @@
-<div class="mb-4">
+<div class="mb-6">
   <%= form.fields_for :config do |config_form| %>
-    <div class="mb-3">
-      <h6>Transfer mode</h6>
-      <div>
-        <div class="form-check form-check-inline">
-          <%= config_form.radio_button :action, "create", class: "form-check-input",
-                                       checked: config_checked?(activity, "action", "create", true) %>
-          <%= config_form.label :action_create, "Create", class: "form-check-label" %>
+    <div class="mb-4">
+      <h4 class="font-medium mb-3">Transfer mode</h4>
+      <div class="flex flex-wrap gap-4">
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <%= config_form.radio_button :action, "create", class: "radio radio-primary",
+                                         checked: config_checked?(activity, "action", "create", true) %>
+            <span class="label-text ml-2">Create</span>
+          </label>
         </div>
 
-        <div class="form-check form-check-inline">
-          <%= config_form.radio_button :action, "update", class: "form-check-input",
-                                       checked: config_checked?(activity, "action", "update") %>
-          <%= config_form.label :action_update, "Update", class: "form-check-label" %>
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <%= config_form.radio_button :action, "update", class: "radio radio-primary",
+                                         checked: config_checked?(activity, "action", "update") %>
+            <span class="label-text ml-2">Update</span>
+          </label>
         </div>
 
-        <div class="form-check form-check-inline">
-          <%= config_form.radio_button :action, "create_and_update", class: "form-check-input",
-                                       checked: config_checked?(activity, "action", "create_and_update") %>
-          <%= config_form.label :action_create_and_update, "Create and Update", class: "form-check-label" %>
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <%= config_form.radio_button :action, "create_and_update", class: "radio radio-primary",
+                                         checked: config_checked?(activity, "action", "create_and_update") %>
+            <span class="label-text ml-2">Create and Update</span>
+          </label>
         </div>
       </div>
     </div>
