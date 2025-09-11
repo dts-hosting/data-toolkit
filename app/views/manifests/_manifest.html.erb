@@ -8,12 +8,12 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <span class="text-base-content/60 text-sm">Imported:</span>
-        <div><%= local_time(manifest.created_at) %></div>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Imported", value: local_time(manifest.created_at) } %>
       </div>
       <div>
-        <span class="text-base-content/60 text-sm">Data Configs:</span>
-        <div><%= manifest.data_configs_count %></div>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Data Configs", value: manifest.data_configs_count } %>
       </div>
     </div>
   </div>

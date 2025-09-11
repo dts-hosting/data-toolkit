@@ -1,0 +1,44 @@
+<%= tag.div id: dom_id(history), class: "card bg-base-100 shadow-md mb-3" do %>
+  <div class="card-body">
+    <div class="collapse collapse-arrow">
+      <input type="checkbox" />
+      <div class="collapse-title font-bold">
+        <div class="card-title justify-between">
+          <%= render partial: "shared/card/title",
+                     locals: { title: history.activity_label } %>
+        </div>
+      </div>
+      <div class="collapse-content px-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "User", value: history.activity_user } %>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Type", value: history.activity_type } %>
+          </div>
+
+          <div>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Label", value: history.activity_label } %>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Created at", value: local_time(history.activity_created_at) } %>
+          </div>
+
+          <div>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Task type", value: history.task_type } %>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Task status", value: history.task_status } %>
+          </div>
+
+          <div>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Task started", value: local_time(history.task_started_at) } %>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Task completed", value: local_time(history.task_completed_at) } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
