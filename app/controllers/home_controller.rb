@@ -14,10 +14,11 @@ class HomeController < ApplicationController
   end
 
   def history
-    @pagy, @history = pagy(
+    @pagy, @activities = pagy(
       History.where(
         activity_url: Current.user.cspace_url
       ).order(activity_created_at: :desc)
     )
+    render :index
   end
 end
