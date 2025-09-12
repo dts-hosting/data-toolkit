@@ -8,6 +8,10 @@ class ProcessUploadedFilesJob < ApplicationJob
     task.start!
     Rails.logger.info "File upload job started"
 
+    if task.activity.files.empty? && !task.activity.class.requires_files?
+      task.success! && return
+    end
+
     feedback = task.feedback_for
 
     if task.activity.files.empty?
@@ -24,7 +28,6 @@ class ProcessUploadedFilesJob < ApplicationJob
 
     validated.data.each { |table| import_from_csv(task, table) }
 
-    # Can update status directly as it's not spawning other jobs
     task.success!
   rescue => e
     Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"

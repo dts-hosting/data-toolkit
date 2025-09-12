@@ -11,13 +11,22 @@ class TasksControllerAccessTest < ActionDispatch::IntegrationTest
     sign_in(@admin)
 
     @admin_activity = create_activity(
-      type: "Activities::CheckMediaDerivatives", user: @admin, data_config: @data_config
+      type: "Activities::CheckMediaDerivatives",
+      user: @admin,
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
     )
     @reader_activity = create_activity(
-      type: "Activities::CheckMediaDerivatives", user: @reader, data_config: @data_config
+      type: "Activities::CheckMediaDerivatives",
+      user: @reader,
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
     )
     @external_activity = create_activity(
-      type: "Activities::CheckMediaDerivatives", user: @external_user, data_config: @data_config
+      type: "Activities::CheckMediaDerivatives",
+      user: @external_user,
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
     )
 
     @admin_task = @admin_activity.tasks.first

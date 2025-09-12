@@ -9,7 +9,7 @@ class Activity < ApplicationRecord
   has_one :batch_config, dependent: :destroy
   accepts_nested_attributes_for :batch_config
 
-  validates :batch_config, presence: true, if: -> { requires_batch_config? }
+  validates :batch_config, presence: true, if: -> { self.class.has_batch_config? }
   validate :data_config, :is_eligible?
 
   with_options presence: true do
@@ -41,23 +41,6 @@ class Activity < ApplicationRecord
     tasks.where(status: "pending").order(:created_at).first
   end
 
-  # TODO: these are really all class methods
-  def requires_batch_config?
-    raise NotImplementedError
-  end
-
-  def requires_config_fields?
-    raise NotImplementedError
-  end
-
-  def requires_files?
-    raise NotImplementedError
-  end
-
-  def requires_single_file?
-    raise NotImplementedError
-  end
-
   def select_attributes
     BatchConfig.select_attributes
   end
@@ -84,6 +67,24 @@ class Activity < ApplicationRecord
 
   def self.display_name
     raise NotImplementedError
+  end
+
+  # Subclasses should implement one of:
+  # :none, :required_single, :required_multiple, :optional_multiple
+  def self.file_requirement
+    raise NotImplementedError
+  end
+
+  def self.has_batch_config?
+    raise NotImplementedError
+  end
+
+  def self.has_config_fields?
+    raise NotImplementedError
+  end
+
+  def self.requires_files?
+    [:required_single, :required_multiple].include?(file_requirement)
   end
 
   private

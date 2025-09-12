@@ -43,11 +43,11 @@
                                        class: "select select-bordered w-full" %>
           </div>
 
-          <% if activity.requires_files? %>
-            <%= form.label :files, activity.requires_single_file? ? "File" : "Files", class: "label-text font-medium" %>
+          <% if activity.class.file_requirement != :none %>
+            <%= form.label :files, activity.class.file_requirement == :required_single ? "File" : "Files", class: "label-text font-medium" %>
             <div class="sm:col-span-3">
               <%= form.file_field :files,
-                                  multiple: !activity.requires_single_file?,
+                                  multiple: activity.class.file_requirement != :required_single,
                                   name: "activity[files][]",
                                   class: "file-input file-input-bordered w-full" %>
             </div>
@@ -55,11 +55,11 @@
         </div>
       </div>
 
-      <% if activity.requires_config_fields? %>
+      <% if activity.class.has_config_fields? %>
         <%= render "#{activity.class.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
       <% end %>
 
-      <% if activity.requires_batch_config? %>
+      <% if activity.class.has_batch_config? %>
         <div class="mb-6">
           <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Batch config</h3>
 
