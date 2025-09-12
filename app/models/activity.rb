@@ -71,6 +71,8 @@ class Activity < ApplicationRecord
       activity_url: user.cspace_url,
       activity_type: self.class.display_name,
       activity_label: label,
+      activity_data_config_type: data_config.config_type,
+      activity_data_config_record_type: data_config.record_type,
       activity_created_at: created_at,
       task_type: task.class.display_name,
       task_status: task.status,

@@ -6,6 +6,9 @@
         <div class="card-title justify-between">
           <%= render partial: "shared/card/title",
                      locals: { title: history.activity_label } %>
+          <span class="badge badge-<%= task_status_color(history.task_status) %>">
+            <%= task_status_text(history.task_status) %>
+          </span>
         </div>
       </div>
       <div class="collapse-content px-0">
@@ -22,6 +25,16 @@
                        locals: { property: "Label", value: history.activity_label } %>
             <%= render partial: "shared/card/item",
                        locals: { property: "Created at", value: local_time(history.activity_created_at) } %>
+          </div>
+
+          <div>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Config Type", value: history.activity_data_config_type } %>
+          </div>
+
+          <div>
+            <%= render partial: "shared/card/item",
+                       locals: { property: "Record Type", value: history.activity_data_config_record_type || "N/A" } %>
           </div>
 
           <div>

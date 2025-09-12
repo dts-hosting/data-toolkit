@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_05_023308) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_12_182237) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -114,6 +114,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_05_023308) do
     t.datetime "task_completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "activity_data_config_type", null: false
+    t.string "activity_data_config_record_type"
     t.index ["activity_url"], name: "index_histories_on_activity_url"
     t.index ["activity_user"], name: "index_histories_on_activity_user"
   end

@@ -25,6 +25,12 @@ class HistoryTest < ActiveSupport::TestCase
     assert_includes history.errors[:activity_label], "can't be blank"
   end
 
+  test "should require activity_data_config_type" do
+    history = History.new
+    assert_not history.valid?
+    assert_includes history.errors[:activity_data_config_type], "can't be blank"
+  end
+
   test "should require activity_created_at" do
     history = History.new
     assert_not history.valid?
@@ -50,6 +56,8 @@ class HistoryTest < ActiveSupport::TestCase
       activity_url: "https://test.org/cspace-services",
       activity_type: "Test Activity",
       activity_label: "test.csv",
+      activity_data_config_type: "record_type",
+      activity_data_config_record_type: "collectionobject",
       activity_created_at: Time.current,
       task_type: "Test Task",
       task_status: "succeeded",
@@ -68,6 +76,8 @@ class HistoryTest < ActiveSupport::TestCase
       activity_url: "https://test.org/cspace-services",
       activity_type: "Test Activity",
       activity_label: "test.csv",
+      activity_data_config_type: "record_type",
+      activity_data_config_record_type: "collectionobject",
       activity_created_at: Time.current,
       task_type: "Test Task",
       task_status: "succeeded",
