@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "_data_toolkit_session",
+      "value": "5rUmsQFxaEx%2FcGh9WXKrQscx2edi0qi6cMSeNw50duGqE4sILTBNvHWunGPdLVBQ11pkTazsiIPGjxMcd6BCyaJnixtdRqTzIgy1c4ZFAKED39ipof%2BmoGg08hL29I5syZnvBzkFWssXB0SIV1Rwup4oURmHkhZQuvLS90npPs0Pp%2BtUaoUpJP20JFaggF%2BE%2FYqFNujIGmAcoYZg1CYX7gXUT%2BnCcRQhW920ChrJ1S7vZ94BdYcGRU2oPkTnW2KKklCxXVC%2BXbmeVvdgB5E8gJPfutKX6Uatb4dPlag%3D--OKt8gp%2FDAPQ5oCpk--DplGB4szCWo9Y3gOQK9YUg%3D%3D",
+      "domain": "toolkit.lyrasistechnology.org",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "session_id",
+      "value": "eyJfcmFpbHMiOnsibWVzc2FnZSI6Ik1qRXoiLCJleHAiOiIyMDQ1LTA5LTIxVDIzOjM2OjI5LjEyNFoiLCJwdXIiOiJjb29raWUuc2Vzc2lvbl9pZCJ9fQ%3D%3D--8c4744b1e2df553136b13d1b3521b65dc7cb71f9",
+      "domain": "toolkit.lyrasistechnology.org",
+      "path": "/",
+      "expires": 1793057789,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}
