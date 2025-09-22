@@ -26,15 +26,7 @@ class GenericTaskFinalizerJob < ApplicationJob
       item_feedback = item.feedback_for
       next unless item_feedback.displayable?
 
-      item_feedback.errors.each do |e|
-        feedback.add_to_errors(subtype: e.subtype, details: e.details)
-      end
-      item_feedback.warnings.each do |w|
-        feedback.add_to_warnings(subtype: w.subtype, details: w.details)
-      end
-      item_feedback.messages.each do |m|
-        feedback.add_to_messages(subtype: m.subtype, details: m.details)
-      end
+      feedback + item_feedback
     end
     feedback
   end
