@@ -3,7 +3,7 @@ name: Deployment
 on:
   push:
     branches:
-      # - main
+      - main
       - qa
   workflow_dispatch:
 
@@ -43,7 +43,7 @@ jobs:
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: prod
+    environment: qa # TODO: "prod" (we don't have one currently)
 
     env:
       ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${{ secrets.ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY }}
@@ -70,4 +70,4 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Kamal deploy
-        run: bundle exec kamal deploy -d prod
+        run: bundle exec kamal deploy -d qa # TODO: "prod" (we don't have one currently)
