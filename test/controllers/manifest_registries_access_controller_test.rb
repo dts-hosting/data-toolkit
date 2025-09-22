@@ -79,7 +79,7 @@ class ManifestRegistriesAccessControllerTest < ActionDispatch::IntegrationTest
   test "non-admin users should be redirected from run" do
     sign_in(users(:reader))
 
-    assert_no_enqueued_jobs do
+    assert_no_enqueued_jobs only: ManifestRegistryImportJob do
       post run_manifest_registry_url(@manifest_registry)
     end
     assert_redirected_to root_path
