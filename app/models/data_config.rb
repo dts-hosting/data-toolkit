@@ -1,5 +1,6 @@
 class DataConfig < ApplicationRecord
   include RequiresUrl
+
   has_many :activities, dependent: :restrict_with_exception
   belongs_to :manifest, counter_cache: true
 
