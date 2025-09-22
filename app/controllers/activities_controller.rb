@@ -4,7 +4,7 @@ class ActivitiesController < ApplicationController
 
   def new
     @activity = @activity_type.new
-    @activity.build_batch_config if @activity.requires_batch_config?
+    @activity.build_batch_config if @activity.class.has_batch_config?
   end
 
   def create

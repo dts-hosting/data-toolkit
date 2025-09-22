@@ -1,24 +1,8 @@
 module Activities
   class CheckMediaDerivatives < Activity
-    # Takes 0 to many files. Runs on all site media of record_type if no file given
+    validates :files, presence: true, length: {minimum: 1, message: "must have at least one file"}
 
     def data_config_type = "media_record_type"
-
-    def requires_batch_config?
-      false
-    end
-
-    def requires_config_fields?
-      false
-    end
-
-    def requires_files?
-      true
-    end
-
-    def requires_single_file?
-      false
-    end
 
     def workflow
       [Tasks::ProcessUploadedFiles]
@@ -26,6 +10,18 @@ module Activities
 
     def self.display_name
       "Check Media Derivatives"
+    end
+
+    def self.file_requirement
+      :required_multiple
+    end
+
+    def self.has_batch_config?
+      false
+    end
+
+    def self.has_config_fields?
+      false
     end
   end
 end

@@ -4,22 +4,6 @@ module Activities
 
     def data_config_type = "record_type"
 
-    def requires_batch_config?
-      true
-    end
-
-    def requires_config_fields?
-      false
-    end
-
-    def requires_files?
-      true
-    end
-
-    def requires_single_file?
-      true
-    end
-
     def select_attributes
       # TODO: [:record_matchpoint]
       []
@@ -32,6 +16,18 @@ module Activities
 
     def self.display_name
       "Delete Records"
+    end
+
+    def self.file_requirement
+      :required_single
+    end
+
+    def self.has_batch_config?
+      true
+    end
+
+    def self.has_config_fields?
+      false
     end
   end
 end

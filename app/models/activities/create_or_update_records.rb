@@ -8,22 +8,6 @@ module Activities
     def data_handler = @data_handler ||=
                          CollectionSpaceMapper.single_record_type_handler_for(self)
 
-    def requires_batch_config?
-      true
-    end
-
-    def requires_config_fields?
-      true
-    end
-
-    def requires_files?
-      true
-    end
-
-    def requires_single_file?
-      true
-    end
-
     def workflow
       # Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData,
       #   Tasks::ProcessTask, Tasks::TransferTask
@@ -32,6 +16,18 @@ module Activities
 
     def self.display_name
       "Create or Update Records"
+    end
+
+    def self.file_requirement
+      :required_single
+    end
+
+    def self.has_batch_config?
+      true
+    end
+
+    def self.has_config_fields?
+      true
     end
   end
 end

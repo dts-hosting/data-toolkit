@@ -19,7 +19,7 @@ module FactoryHelpers
     attributes[:data_config] = create_data_config_record_type unless attributes[:data_config]
     activity = Activity.new(attributes)
 
-    if activity.requires_batch_config? && !activity.batch_config
+    if activity.class.has_batch_config? && !activity.batch_config
       activity.build_batch_config
     end
 
