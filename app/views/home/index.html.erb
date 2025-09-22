@@ -10,7 +10,11 @@
             <span>No activities found.</span>
           </div>
         <% else %>
-          <%= render partial: "activities/activity", collection: @activities, locals: {inline: true} %>
+          <% if @activities.first.is_a?(Activity) %>
+            <%= render partial: "activities/activity", collection: @activities, locals: {inline: true} %>
+          <% else %>
+            <%= render partial: "history", collection: @activities, locals: {inline: true} %>
+          <% end %>
         <% end %>
 
         <% if @pagy.next %>

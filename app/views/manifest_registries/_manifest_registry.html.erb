@@ -18,16 +18,16 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <span class="text-base-content/60 text-sm">Date Added:</span>
-        <div><%= manifest_registry.created_at ? local_time(manifest_registry.created_at) : 'Never' %></div>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Data Added", value: manifest_registry.created_at ? local_time(manifest_registry.created_at) : 'Never' } %>
       </div>
       <div>
-        <span class="text-base-content/60 text-sm">Last Updated:</span>
-        <div><%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></div>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Last Updated", value: manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' } %>
       </div>
       <div>
-        <span class="text-base-content/60 text-sm">Manifests:</span>
-        <div><%= manifest_registry.manifests.count %></div>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Manifests", value: manifest_registry.manifests.count } %>
       </div>
     </div>
   </div>

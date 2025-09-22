@@ -1,9 +1,9 @@
 <%= turbo_stream_from activity %>
 <%= tag.div id: dom_id(activity), class: "card bg-base-100 shadow-md mb-3" do %>
   <div class="card-body">
-    <!-- Header with title and actions -->
     <div class="card-title justify-between">
-      <div><%= file_names(activity) %></div>
+      <%= render partial: "shared/card/title",
+                 locals: { title: activity.label } %>
       <div class="card-actions">
         <%= link_to activity_path(activity), class: "btn btn-info btn-sm", title: "View activity details" do %>
           <%= icon "eye", class: "size-3" %>
@@ -25,17 +25,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <div class="mb-3">
-          <div class="flex items-center mb-1">
-            <span class="text-base-content/60 text-sm mr-2">Activity Type</span>
-          </div>
-          <span class="font-mono font-medium"><%= activity.class.display_name %></span>
+          <%= render partial: "shared/card/item",
+                     locals: { property: "Activity Type", value: activity.class.display_name } %>
         </div>
 
         <div class="mb-3">
-          <div class="flex items-center mb-1">
-            <span class="text-base-content/60 text-sm mr-2"><%= data_config_type_label(activity) %></span>
-          </div>
-          <span class="font-mono font-medium"><%= activity.data_config.display_name %></span>
+          <%= render partial: "shared/card/item",
+                     locals: { property: data_config_type_label(activity), value: activity.data_config.display_name } %>
         </div>
       </div>
 
@@ -57,10 +53,8 @@
         </div>
 
         <div class="mb-3">
-          <div class="flex items-center mb-1">
-            <span class="text-base-content/60 text-sm mr-2">Last Updated</span>
-          </div>
-          <span class="font-mono font-medium"><%= local_time(activity.updated_at) %></span>
+          <%= render partial: "shared/card/item",
+                     locals: { property: "Last Updated", value: local_time(activity.updated_at) } %>
         </div>
       </div>
     </div>

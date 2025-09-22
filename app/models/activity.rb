@@ -4,7 +4,7 @@ class Activity < ApplicationRecord
   belongs_to :data_config
   belongs_to :user
   has_many :data_items, dependent: :delete_all
-  has_many :tasks, dependent: :destroy
+  has_many :tasks # dependent: :destroy | NOTE: we handle this in create_history
   has_many_attached :files, dependent: :destroy
   has_one :batch_config, dependent: :destroy
   accepts_nested_attributes_for :batch_config
@@ -13,8 +13,10 @@ class Activity < ApplicationRecord
   validate :data_config, :is_eligible?
 
   with_options presence: true do
-    validates :data_config, :type, :user
+    validates :data_config, :label, :type, :user
   end
+
+  validates :label, length: {minimum: 3}
 
   after_create_commit do
     workflow.each do |task|
@@ -23,6 +25,7 @@ class Activity < ApplicationRecord
   end
 
   after_update_commit :handle_advance
+  before_destroy :create_history
 
   broadcasts_refreshes
 
@@ -38,6 +41,7 @@ class Activity < ApplicationRecord
     tasks.where(status: "pending").order(:created_at).first
   end
 
+  # TODO: these are really all class methods
   def requires_batch_config?
     raise NotImplementedError
   end
@@ -58,8 +62,41 @@ class Activity < ApplicationRecord
     BatchConfig.select_attributes
   end
 
+  def summary
+    return {} if tasks.empty?
+
+    task = current_task || next_task
+    {
+      activity_user: user.email_address,
+      activity_url: user.cspace_url,
+      activity_type: self.class.display_name,
+      activity_label: label,
+      activity_data_config_type: data_config.config_type,
+      activity_data_config_record_type: data_config.record_type,
+      activity_created_at: created_at,
+      task_type: task.class.display_name,
+      task_status: task.status,
+      task_feedback: task.feedback,
+      task_started_at: task.started_at || Time.current,
+      task_completed_at: task.completed_at
+    }
+  end
+
   def self.display_name
     raise NotImplementedError
+  end
+
+  private
+
+  def create_history
+    return if tasks.empty?
+
+    History.create!(summary)
+    tasks.destroy_all # we do this here to have access to task for history
+  rescue => e
+    Rails.logger.error "Failed to create history for activity #{id}: #{e.message}"
+    errors.add(:base, "Unable to create history record")
+    throw(:abort)
   end
 
   # TODO: for the moment we're just logging, but this would be a good spot for notifications
@@ -76,8 +113,6 @@ class Activity < ApplicationRecord
       Rails.logger.info "Activity #{id}: Workflow completed successfully"
     end
   end
-
-  private
 
   def is_eligible?
     return unless user
