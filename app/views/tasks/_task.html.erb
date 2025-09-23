@@ -1,10 +1,10 @@
 <tr id="<%= dom_id(task) %>">
-  <td><%= task.class.display_name %></td>
   <td>
-    <span class="badge badge-<%= task_status_color(task.status) %>">
-      <%= task_status_text(task.status) %>
-    </span>
+    <%= link_to task.class.display_name,
+                activity_task_path(task.activity, task),
+                class: "link link-info" %>
   </td>
+  <td><%= format_task_status_badge(task.status) %></td>
   <td><%= local_time(task.created_at) %></td>
   <td><%= local_time(task.updated_at) %></td>
   <td>
@@ -16,10 +16,6 @@
                   title: task.ok_to_run? ? "Run task" : "Not eligible to run",
                   disabled: !task.ok_to_run? do %>
       <%= icon "play", class: "size-3" %>
-    <% end %>
-
-    <%= link_to activity_task_path(task.activity, task), class: "btn btn-info btn-sm", title: "View task details" do %>
-      <%= icon "eye", class: "size-3" %>
     <% end %>
   </td>
 </tr>

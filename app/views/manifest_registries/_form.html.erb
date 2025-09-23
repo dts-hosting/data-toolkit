@@ -1,35 +1,34 @@
 <%= form_with(model: manifest_registry, local: true) do |form| %>
-  <div class="card bg-base-200 shadow-lg mb-4">
-    <div class="card-body">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="card-title">Add New Manifest Registry</h2>
+  <%= render "shared/card/base",
+             card_class: "bg-base-300 shadow-lg mb-4" do %>
+    <% actions_content = capture do %>
+      <%= form.submit "Add Registry", class: "btn btn-sm btn-primary" %>
+    <% end %>
+    <%= render "shared/card/header",
+               title: "Add New Manifest Registry",
+               actions: actions_content %>
+
+    <% if manifest_registry.errors.any? %>
+      <div class="alert alert-error mb-4">
         <div>
-          <%= form.submit "Add Registry", class: "btn btn-sm btn-primary" %>
+          <h3 class="font-semibold"><%= pluralize(manifest_registry.errors.count, "error") %> prohibited this registry from being saved:</h3>
+          <ul class="list-disc list-inside mt-2">
+            <% manifest_registry.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
         </div>
       </div>
+    <% end %>
 
-      <% if manifest_registry.errors.any? %>
-        <div class="alert alert-error mb-4">
-          <div>
-            <h3 class="font-semibold"><%= pluralize(manifest_registry.errors.count, "error") %> prohibited this registry from being saved:</h3>
-            <ul class="list-disc list-inside mt-2">
-              <% manifest_registry.errors.full_messages.each do |message| %>
-                <li><%= message %></li>
-              <% end %>
-            </ul>
-          </div>
-        </div>
-      <% end %>
-
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">URL</span>
-        </label>
-        <%= form.url_field :url, class: "input input-bordered w-full", placeholder: "https://example.com/manifest-registry.json" %>
-        <label class="label">
-          <span class="label-text-alt text-base-content/60">Enter the URL for the manifest registry</span>
-        </label>
-      </div>
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">URL</span>
+      </label>
+      <%= form.url_field :url, class: "input input-bordered w-full", placeholder: "https://example.com/manifest-registry.json" %>
+      <label class="label">
+        <span class="label-text-alt text-base-content/60">Enter the URL for the manifest registry</span>
+      </label>
     </div>
-  </div>
+  <% end %>
 <% end %>

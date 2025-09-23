@@ -1,71 +1,67 @@
 <%= form_with(model: activity, scope: :activity, url: activities_path, local: true) do |form| %>
-  <div class="card bg-base-200 shadow-lg">
-    <div class="card-body">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="card-title">New <%= activity.class.display_name %></h2>
-        <div class="flex gap-2">
-          <%= form.submit "Submit", class: "btn btn-primary btn-sm" %>
-          <%= link_to "Cancel", :back, class: "btn btn-secondary btn-outline btn-sm" %>
+  <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
+    <% actions_content = capture do %>
+      <%= form.submit "Submit", class: "btn btn-primary btn-sm" %>
+      <%= link_to "Cancel", :back, class: "btn btn-secondary btn-outline btn-sm" %>
+    <% end %>
+    <%= render "shared/card/header",
+               title: "New #{activity.class.display_name}",
+               actions: actions_content %>
+
+    <% if activity.errors.any? %>
+      <div class="alert alert-error mb-4">
+        <div>
+          <h3 class="font-semibold"><%= pluralize(activity.errors.count, "error") %> prohibited this activity from being saved:</h3>
+          <ul class="list-disc list-inside mt-2">
+            <% activity.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
         </div>
       </div>
+    <% end %>
 
-      <% if activity.errors.any? %>
-        <div class="alert alert-error mb-4">
-          <div>
-            <h3 class="font-semibold"><%= pluralize(activity.errors.count, "error") %> prohibited this activity from being saved:</h3>
-            <ul class="list-disc list-inside mt-2">
-              <% activity.errors.full_messages.each do |message| %>
-                <li><%= message %></li>
-              <% end %>
-            </ul>
-          </div>
+    <div class="mb-6">
+      <%= render partial: "shared/card/subtitle", locals: { title: "Basic Information" } %>
+      <%= form.hidden_field :type %>
+
+      <%= render "shared/card/property_grid" do %>
+        <%= form.label :label, "Label", class: "label-text font-medium" %>
+        <div class="sm:col-span-3">
+          <%= form.text_field :label,
+                               required: true,
+                               placeholder: "Enter a reference label i.e. record-batch1",
+                               class: "input input-bordered w-full" %>
         </div>
-      <% end %>
 
-      <div class="mb-6">
-        <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Basic Information</h3>
+        <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
+        <div class="sm:col-span-3">
+          <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
+                                     { include_blank: "Select a #{data_config_type_label(activity)}" },
+                                     class: "select select-bordered w-full" %>
+        </div>
 
-        <%= form.hidden_field :type %>
-
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
-          <%= form.label :label, "Label", class: "label-text font-medium" %>
+        <% if activity.class.file_requirement != :none %>
+          <%= form.label :files, activity.class.file_requirement == :required_single ? "File" : "Files", class: "label-text font-medium" %>
           <div class="sm:col-span-3">
-            <%= form.text_field :label,
-                                 required: true,
-                                 placeholder: "Enter a reference label i.e. record-batch1",
-                                 class: "input input-bordered w-full" %>
+            <%= form.file_field :files,
+                                multiple: activity.class.file_requirement != :required_single,
+                                name: "activity[files][]",
+                                class: "file-input file-input-bordered w-full" %>
           </div>
-
-          <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
-          <div class="sm:col-span-3">
-            <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
-                                       { include_blank: "Select a #{data_config_type_label(activity)}" },
-                                       class: "select select-bordered w-full" %>
-          </div>
-
-          <% if activity.class.file_requirement != :none %>
-            <%= form.label :files, activity.class.file_requirement == :required_single ? "File" : "Files", class: "label-text font-medium" %>
-            <div class="sm:col-span-3">
-              <%= form.file_field :files,
-                                  multiple: activity.class.file_requirement != :required_single,
-                                  name: "activity[files][]",
-                                  class: "file-input file-input-bordered w-full" %>
-            </div>
-          <% end %>
-        </div>
-      </div>
-
-      <% if activity.class.has_config_fields? %>
-        <%= render "#{activity.class.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
-      <% end %>
-
-      <% if activity.class.has_batch_config? %>
-        <div class="mb-6">
-          <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Batch config</h3>
-
-          <%= render "batch_config_form", form: form, activity: activity %>
-        </div>
+        <% end %>
       <% end %>
     </div>
-  </div>
+
+    <% if activity.class.has_config_fields? %>
+      <%= render "#{activity.class.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
+    <% end %>
+
+    <% if activity.class.has_batch_config? %>
+      <div class="mb-6">
+        <%= render partial: "shared/card/subtitle", locals: { title: "Batch config" } %>
+        <%= render "batch_config_form", form: form, activity: activity %>
+      </div>
+    <% end %>
+  <% end %>
 <% end %>

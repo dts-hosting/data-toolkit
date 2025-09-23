@@ -1,18 +1,16 @@
-<div class="card bg-base-200 shadow-lg">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-base-content/70 font-semibold mb-3">Manifests</h3>
-    </div>
-    <% if manifests.any? %>
-      <div id="manifests">
-        <%= render manifests %>
-      </div>
-    <% else %>
-      <div class="alert alert-info">
-        <%= icon "information-circle", class: "stroke-current shrink-0 w-6 h-6" %>
-        <span>No manifests have been loaded from this registry yet.</span>
-      </div>
-    <% end %>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-base-content/70 font-semibold mb-3">Manifests</h3>
   </div>
-</div>
+  <% if manifests.any? %>
+    <div id="manifests">
+      <%= render manifests %>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      <%= icon "information-circle", class: "stroke-current shrink-0 w-6 h-6" %>
+      <span>No manifests have been loaded from this registry yet.</span>
+    </div>
+  <% end %>
+<% end %>
 

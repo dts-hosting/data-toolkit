@@ -1,0 +1,16 @@
+<%
+  columns = local_assigns[:columns] || 4
+  grid_class = case columns
+    when 2
+      "grid grid-cols-1 sm:grid-cols-2 gap-4"
+    when 3
+      "grid grid-cols-1 sm:grid-cols-3 gap-4"
+    when 4
+      "grid grid-cols-1 sm:grid-cols-4 gap-4"
+    else
+      "grid grid-cols-1 sm:grid-cols-4 gap-4"
+  end
+%>
+<div class="<%= grid_class %>">
+  <%= yield %>
+</div>
