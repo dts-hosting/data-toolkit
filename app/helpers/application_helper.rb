@@ -16,6 +16,23 @@ module ApplicationHelper
     label
   end
 
+  def format_attached_files(files)
+    content_tag :ul, class: "list-none" do
+      files.map do |file|
+        content_tag :li, class: "mb-1" do
+          link_to(file.filename.to_s, rails_blob_path(file, disposition: "attachment"), class: "link link-info") +
+            content_tag(:span, number_to_human_size(file.byte_size), class: "text-base-content/60 ml-2")
+        end
+      end.join.html_safe
+    end
+  end
+
+  def format_task_status_badge(task_status)
+    content_tag :span, class: "badge badge-#{task_status_color(task_status)}" do
+      task_status_text(task_status)
+    end
+  end
+
   def task_name(activity)
     return activity.current_task.class.display_name if activity.current_task
     return activity.next_task.class.display_name if activity.next_task

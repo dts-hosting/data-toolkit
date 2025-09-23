@@ -1,27 +1,26 @@
 <%= render "form", manifest_registry: @manifest_registry %>
 
-<div class="card bg-base-200 shadow-lg">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="card-title">Manifest Registries</h2>
-      <div class="flex gap-2">
-        <% if @manifest_registries.any? %>
-          <%= button_to "Update Registries",
-                        run_manifest_registry_path(@manifest_registries.first),
-                        method: :post,
-                        class: "btn btn-sm btn-success btn-outline" %>
-        <% end %>
-      </div>
-    </div>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
+  <% actions_content = capture do %>
     <% if @manifest_registries.any? %>
-      <div id="manifest_registries">
-        <%= render @manifest_registries %>
-      </div>
-    <% else %>
-      <div class="alert alert-info">
-        <%= icon "information-circle", class: "stroke-current shrink-0 w-6 h-6" %>
-        <span>No manifest registries have been added yet.</span>
-      </div>
+      <%= button_to "Update Registries",
+                    run_manifest_registry_path(@manifest_registries.first),
+                    method: :post,
+                    class: "btn btn-sm btn-success btn-outline" %>
     <% end %>
-  </div>
-</div>
+  <% end %>
+  <%= render "shared/card/header",
+             title: "Manifest Registries",
+             actions: actions_content %>
+
+  <% if @manifest_registries.any? %>
+    <div id="manifest_registries">
+      <%= render @manifest_registries %>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      <%= icon "information-circle", class: "stroke-current shrink-0 w-6 h-6" %>
+      <span>No manifest registries have been added yet.</span>
+    </div>
+  <% end %>
+<% end %>

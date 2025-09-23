@@ -1,0 +1,5 @@
+<div class="card <%= card_class %> <%= local_assigns[:custom_class] %>"<%= " id=\"#{local_assigns[:id]}\"".html_safe if local_assigns[:id] %>>
+  <div class="card-body">
+    <%= yield %>
+  </div>
+</div>

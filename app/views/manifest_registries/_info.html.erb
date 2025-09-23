@@ -1,27 +1,30 @@
-<div class="card bg-base-200 shadow-lg mb-4">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="card-title">Registry Information</h2>
-      <div>
-        <%= link_to manifest_registries_path, class: "btn btn-info btn-sm" do %>
-          <%= icon "arrow-uturn-left", class: "size-3" %>
-        <% end %>
-      </div>
-    </div>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+  <% actions_content = capture do %>
+    <%= link_to manifest_registries_path, class: "btn btn-info btn-sm" do %>
+      <%= icon "arrow-uturn-left", class: "size-3" %>
+    <% end %>
+  <% end %>
+  <%= render "shared/card/header",
+             title: "Registry Information",
+             actions: actions_content %>
 
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
-      <div class="font-bold">URL:</div>
-      <div class="sm:col-span-3">
-        <a href="<%= manifest_registry.url %>" target="_blank" class="link link-primary break-all">
-          <%= manifest_registry.url %>
-        </a>
-      </div>
+  <%= render "shared/card/property_grid" do %>
+    <%= render partial: "shared/card/info",
+               locals: {
+                 property: "Url",
+                 value: link_to(manifest_registry.url, manifest_registry.url, target: "_blank", class: "link link-info")
+               } %>
 
-      <div class="font-bold">Last Updated:</div>
-      <div class="sm:col-span-3"><%= manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never' %></div>
+    <%= render partial: "shared/card/info",
+               locals: {
+                 property: "Last Updated",
+                 value: manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never'
+               } %>
 
-      <div class="font-bold">Total Manifests:</div>
-      <div class="sm:col-span-3"><%= manifest_registry.manifests.count %></div>
-    </div>
-  </div>
-</div>
+    <%= render partial: "shared/card/info",
+               locals: {
+                 property: "Total Manifests",
+                 value: manifest_registry.manifests.count
+               } %>
+  <% end %>
+<% end %>

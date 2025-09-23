@@ -1,7 +1,5 @@
 <div class="mb-6">
-  <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">
-    Activity Config
-  </h3>
+  <%= render partial: "shared/card/subtitle", locals: { title: "Activity Config" } %>
 
   <div>
     <% @activity.config.each do |key, value| %>

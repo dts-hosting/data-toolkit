@@ -1,57 +1,47 @@
 <%= turbo_stream_from @activity %>
 
-<div id="<%= dom_id(@activity) %>" class="card bg-base-200 shadow-lg mb-6">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="card-title"><%= @activity.class.display_name %></h2>
-      <div class="flex gap-2">
-        <% if @activity.user == Current.user %>
-          <%= button_to activity_path(@activity),
-                        method: :delete,
-                        data: { turbo_confirm: "Are you sure you want to delete this activity?" },
-                        form_class: "inline",
-                        class: "btn btn-error btn-sm" do %>
-            <%= icon "trash", class: "size-3" %>
-          <% end %>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-6" do %>
+  <div id="<%= dom_id(@activity) %>">
+    <% actions_content = capture do %>
+      <% if @activity.user == Current.user %>
+        <%= button_to activity_path(@activity),
+                      method: :delete,
+                      data: { turbo_confirm: "Are you sure you want to delete this activity?" },
+                      form_class: "inline",
+                      class: "btn btn-error btn-sm" do %>
+          <%= icon "trash", class: "size-3" %>
         <% end %>
-      </div>
-    </div>
+      <% end %>
+    <% end %>
+    <%= render "shared/card/header",
+               title: @activity.class.display_name,
+               actions: actions_content %>
 
     <div class="mb-6">
-      <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4">Basic Information</h3>
+      <%= render partial: "shared/card/subtitle", locals: { title: "Basic Information" } %>
 
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 space-y-4">
-        <div class="font-bold">Label:</div>
-        <div class="sm:col-span-3"><%= @activity.label %></div>
-
-        <div class="font-bold"><%= data_config_type_label(@activity) %>:</div>
-        <div class="sm:col-span-3"><%= @activity.data_config.display_name %></div>
-
+      <%= render "shared/card/property_grid" do %>
+        <%= render partial: "shared/card/info",
+                   locals: { property: "Label", value: @activity.label } %>
+        <%= render partial: "shared/card/info",
+                   locals: {
+                     property: data_config_type_label(@activity),
+                     value: @activity.data_config.display_name
+                   } %>
         <% if @activity.files.attached? %>
-          <div class="font-bold">Attached Files:</div>
-          <div class="sm:col-span-3">
-            <ul class="list-none">
-              <% @activity.files.each do |file| %>
-                <li class="mb-1">
-                  <%= link_to file.filename.to_s, rails_blob_path(file, disposition: "attachment"), class: "link link-primary" %>
-                  <span class="text-base-content/60 ml-2"><%= number_to_human_size(file.byte_size) %></span>
-                </li>
-              <% end %>
-            </ul>
-          </div>
+          <%= render partial: "shared/card/info",
+                     locals: {
+                       property: "Attached Files",
+                       value: format_attached_files(@activity.files)
+                     } %>
         <% end %>
-
-        <% if @activity.data_items.any? %>
-          <div class="font-bold">Total Rows:</div>
-          <div class="sm:col-span-3"><%= @activity.data_items_count %></div>
-        <% end %>
-
-        <div class="font-bold">Created By:</div>
-        <div class="sm:col-span-3"><%= @activity.user.email_address %></div>
-
-        <div class="font-bold">Created On:</div>
-        <div class="sm:col-span-3"><%= local_time(@activity.created_at) %></div>
-      </div>
+        <%= render partial: "shared/card/info",
+                    locals: { property: "Total Rows", value: @activity.data_items_count } %>
+        <%= render partial: "shared/card/info",
+                   locals: { property: "Created By", value: @activity.user.email_address } %>
+        <%= render partial: "shared/card/info",
+                   locals: { property: "Created On", value: local_time(@activity.created_at) } %>
+      <% end %>
     </div>
 
     <% if @activity.config.any? %>
@@ -62,26 +52,25 @@
       <%= render partial: "batch_config", locals: { activity: @activity } %>
     <% end %>
   </div>
-</div>
+<% end %>
 
-<div class="card bg-base-200 shadow-lg">
-  <div class="card-body">
-    <h2 class="card-title mb-4">Workflow Tasks</h2>
-    <div class="overflow-x-auto">
-      <table class="table table-hover">
-        <thead>
-        <tr>
-          <th>Task</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Updated</th>
-          <th></th>
-        </tr>
-        </thead>
-        <tbody id="activity_<%= @activity.id %>_tasks">
-        <%= render partial: "tasks/task", collection: @activity.tasks.order(:created_at) %>
-        </tbody>
-      </table>
-    </div>
+<%= render "shared/card/base",
+           card_class: "bg-base-300 shadow-lg" do %>
+  <h2 class="card-title mb-4">Workflow Tasks</h2>
+  <div class="overflow-x-auto">
+    <table class="table table-hover bg-base-100">
+      <thead>
+      <tr>
+        <th>Task</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th>Updated</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody id="activity_<%= @activity.id %>_tasks">
+      <%= render partial: "tasks/task", collection: @activity.tasks.order(:created_at) %>
+      </tbody>
+    </table>
   </div>
-</div>
+<% end %>
