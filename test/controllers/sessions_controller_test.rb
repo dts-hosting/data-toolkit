@@ -26,6 +26,28 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Failed to authenticate with CollectionSpace.", flash[:alert]
   end
 
+  test "should fail to create session with invalid URL format" do
+    post session_url, params: {
+      cspace_url: "invalid-url-format",
+      email_address: @user.email_address,
+      password: @user.password
+    }
+
+    assert_redirected_to new_session_path
+    assert_equal "Failed to authenticate with CollectionSpace.", flash[:alert]
+  end
+
+  test "should fail to create session with non-http URL" do
+    post session_url, params: {
+      cspace_url: "ftp://example.com/cspace-services",
+      email_address: @user.email_address,
+      password: @user.password
+    }
+
+    assert_redirected_to new_session_path
+    assert_equal "Failed to authenticate with CollectionSpace.", flash[:alert]
+  end
+
   test "should destroy session" do
     setup_successful_auth
     delete session_url
