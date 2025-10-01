@@ -39,7 +39,9 @@ class Task < ApplicationRecord
   end
 
   def has_feedback?
-    completed? && (feedback_for.displayable? || data_items.where.not(feedback: nil).any?)
+    completed? && (feedback_for.displayable? ||
+      (data_items.first&.current_task == self &&
+      data_items.where.not(feedback: nil).any?))
   end
 
   def ok_to_run?
