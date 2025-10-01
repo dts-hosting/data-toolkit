@@ -20,6 +20,8 @@
   <% if taskfeedback.displayable? %>
     <%= render "feedback", feedback: taskfeedback.for_display %>
   <% else %>
-    <p>We are busily generating feedback ... stand by!</p>
+    <%= render "feedback", feedback: {
+      messages: ["We are busily generating feedback ... stand by!"]}
+    %>
   <% end %>
 <% end %>
