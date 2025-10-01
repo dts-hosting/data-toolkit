@@ -21,16 +21,28 @@ class DataItem < ApplicationRecord
     next unless completed?
 
     next current_task.touch if current_task.progress >= 100
-    current_task.touch if rand < checkin_frequency # bumps task.updated_at
+    broadcast_task_progress if rand < checkin_frequency
+  end
+
+  def feedback_context = current_task.class.name
+
+  private
+
+  def broadcast_task_progress
+    current_task.broadcast_action_to(
+      current_task,
+      action: :update,
+      partial: "shared/card/progress",
+      locals: {property: "Progress", value: current_task.progress},
+      target: "task_#{current_task.id}_progress"
+    )
   end
 
   def checkin_frequency
     item_count = activity.data_items_count
     return 0 if item_count.zero?
 
-    # cap 5% checkin, but lower as item count increases
-    [Math.sqrt(item_count) / item_count, 0.05].min
+    # cap 10% checkin, but lower as item count increases
+    [Math.sqrt(item_count) / item_count, 0.1].min
   end
-
-  def feedback_context = current_task.class.name
 end

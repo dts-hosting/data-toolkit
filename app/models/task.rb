@@ -69,6 +69,7 @@ class Task < ApplicationRecord
         started_at: nil,
         completed_at: nil
       )
+      activity.class.reset_counters(activity_id, :data_items)
     end
     handler.perform_later(self)
   end
@@ -83,7 +84,7 @@ class Task < ApplicationRecord
     return 0 if data_items.empty?
 
     completed_items_ratio = data_items.where(status: COMPLETION_STATUSES).count.to_f / data_items.count
-    (completed_items_ratio * 100).round(2)
+    (completed_items_ratio * 100).round
   end
 
   def check_progress
