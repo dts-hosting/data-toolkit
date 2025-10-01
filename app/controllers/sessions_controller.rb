@@ -19,7 +19,7 @@ class SessionsController < ApplicationController
   def authenticate_user
     client = build_client
 
-    if client.can_authenticate?
+    if client&.can_authenticate?
       handle_authentication(client)
     else
       authentication_failed
@@ -27,6 +27,8 @@ class SessionsController < ApplicationController
   end
 
   def build_client
+    return nil unless session_params[:cspace_url]&.match?(RequiresUrl::URL_FORMAT)
+
     CollectionSpaceApi.client_for(
       session_params[:cspace_url],
       session_params[:email_address],
