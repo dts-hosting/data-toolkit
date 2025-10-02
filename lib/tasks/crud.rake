@@ -22,6 +22,8 @@ namespace :crud do
         user_id: args.fetch(:user_id),
         data_config_id: args.fetch(:data_config_id),
         type: args.fetch(:type),
+        label: SecureRandom.hex,
+        config: {action: "create"},
         files: [file].compact
       }
 
