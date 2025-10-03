@@ -5,17 +5,13 @@ class DataItem < ApplicationRecord
   belongs_to :activity, counter_cache: true
   belongs_to :current_task, class_name: "Task"
 
-  enum :status, {
-    pending: "pending",
-    running: "running",
-    succeeded: "succeeded",
-    review: "review",
-    failed: "failed"
-  }, default: :pending
-
   validates :data, presence: true
   validates :position, presence: true
   validates :position, uniqueness: {scope: :activity_id}
+
+  scope :without_errors, -> { where.not(status: "failed") }
+  # TODO: if refactor data item status w/o outcomes when without_errors would look like (SQLite)
+  # scope :without_errors, -> { where("feedback IS NOT NULL AND json_array_length(feedback, '$.errors') = 0") }
 
   after_update_commit do
     next unless completed?

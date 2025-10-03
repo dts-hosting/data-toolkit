@@ -312,7 +312,22 @@ class TaskTest < ActiveSupport::TestCase
     assert_not_nil @task.completed_at
   end
 
-  test "progress should set status to failed if any items failed" do
+  test "progress should set status to failed if all items failed" do
+    @task.save!
+    create_data_items_for_task(@task)
+    @task.status = "running"
+    @task.save!
+
+    @task.data_items.update_all(status: "failed")
+    @task.data_items.last.update(status: "failed")
+    @task.reload
+
+    assert_equal 100, @task.progress
+    assert_equal "failed", @task.status
+    assert_not_nil @task.completed_at
+  end
+
+  test "progress should set status to review if any (not all) items failed" do
     @task.save!
     create_data_items_for_task(@task)
     @task.status = "running"
@@ -323,11 +338,11 @@ class TaskTest < ActiveSupport::TestCase
     @task.reload
 
     assert_equal 100, @task.progress
-    assert_equal "failed", @task.status
+    assert_equal "review", @task.status
     assert_not_nil @task.completed_at
   end
 
-  test "progress should set status to review if items are in review status" do
+  test "progress should set status to review if any items are in review status" do
     @task.save!
     create_data_items_for_task(@task)
     @task.status = "running"
