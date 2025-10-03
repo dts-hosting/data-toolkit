@@ -1,7 +1,6 @@
 class PreCheckIngestDataJob < ApplicationJob
   queue_as :default
 
-  # This job spawns a sub-job for each data item
   def perform(task)
     task.start!
     Rails.logger.info "#{self.class.name} started"
@@ -29,7 +28,7 @@ class PreCheckIngestDataJob < ApplicationJob
     task.fail!(feedback) && return unless checker.ok?
 
     task.data_items.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |data_item| PreCheckIngestDataItemJob.new(data_item) }
+      jobs = batch.map { |data_item| task.data_item_handler.new(data_item) }
       ActiveJob.perform_all_later(jobs)
     end
 
