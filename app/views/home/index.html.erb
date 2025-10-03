@@ -17,7 +17,7 @@
       <% end %>
 
       <% if @pagy.next %>
-        <%= turbo_frame_tag :activities_page, @pagy.next, src: root_path(page: @pagy.next), loading: :lazy, target: :_top do %>
+        <%= turbo_frame_tag :activities_page, @pagy.next, src: url_for(page: @pagy.next), loading: :lazy, target: :_top do %>
           <%= tag.div "Loading...", class: "text-center p-4" %>
         <% end %>
       <% end %>
