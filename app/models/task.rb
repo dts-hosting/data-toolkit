@@ -33,7 +33,7 @@ class Task < ApplicationRecord
     nil
   end
 
-  # the primary job associated with this task (required)
+  # the entrypoint job associated with this task (required)
   def handler
     raise NotImplementedError, "#{self.class} must implement #handler"
   end
@@ -42,6 +42,11 @@ class Task < ApplicationRecord
     completed? && (feedback_for.displayable? ||
       (data_items.first&.current_task == self &&
       data_items.where.not(feedback: nil).any?))
+  end
+
+  # the data item level job associated with this task
+  def data_item_handler
+    raise NotImplementedError, "#{self.class} must implement #data_item_handler"
   end
 
   def ok_to_run?
