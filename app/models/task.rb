@@ -8,15 +8,6 @@ class Task < ApplicationRecord
   has_many :data_items, through: :activity
   has_many_attached :files
 
-  enum :status, {
-    pending: "pending",
-    queued: "queued",
-    running: "running",
-    succeeded: "succeeded",
-    review: "review",
-    failed: "failed"
-  }, default: :pending
-
   validates :type, :status, presence: true
 
   broadcasts_refreshes
@@ -67,16 +58,17 @@ class Task < ApplicationRecord
   def run
     return unless ok_to_run?
 
+    # Reset data item state: data items are shared by tasks
+    # Items with errors are not reset so can be handled specifically (or ignored)
+    # Feedback is not reset so can be carried through workflows
     transaction do
-      update!(status: "queued")
-      data_items.update_all(
+      update!(status: "queued", processable_count: data_items.without_errors.count)
+      data_items.without_errors.update_all(
         current_task_id: id,
         status: "pending",
-        feedback: nil,
         started_at: nil,
         completed_at: nil
       )
-      activity.class.reset_counters(activity_id, :data_items)
     end
     handler.perform_later(self)
   end
@@ -99,9 +91,9 @@ class Task < ApplicationRecord
   end
 
   def finalize_status
-    if data_items.where(status: "failed").exists?
-      fail! # workflow cannot proceed beyond this point
-    elsif data_items.where(status: "review").exists?
+    if data_items.where(current_task: self, status: "failed").count == processable_count
+      fail! # everything has failed, cannot proceed beyond this point
+    elsif data_items.where(current_task: self, status: "failed").exists? || data_items.where(status: "review").exists?
       suspend! # confirmation required for workflow to continue
     else
       success! # great, no problems

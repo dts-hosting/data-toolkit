@@ -68,6 +68,7 @@ module FactoryHelpers
         data: {content: "Data #{i + 1}"}
       )
     end
+    task.update(processable_count: n)
   end
 
   def valid_user_attributes

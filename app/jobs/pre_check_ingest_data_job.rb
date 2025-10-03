@@ -27,7 +27,7 @@ class PreCheckIngestDataJob < ApplicationJob
     checker = IngestDataPreCheckFirstItem.new(handler, first_data_item, feedback)
     task.fail!(feedback) && return unless checker.ok?
 
-    task.data_items.in_batches(of: 1000) do |batch|
+    task.data_items.without_errors.in_batches(of: 1000) do |batch|
       jobs = batch.map { |data_item| task.data_item_handler.new(data_item) }
       ActiveJob.perform_all_later(jobs)
     end
