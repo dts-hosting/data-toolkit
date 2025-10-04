@@ -5,6 +5,7 @@ class Task < ApplicationRecord
 
   belongs_to :activity, touch: true
   delegate :user, to: :activity
+  has_many :current_data_items, foreign_key: :current_task_id, class_name: "DataItem"
   has_many :data_items, through: :activity
   has_many_attached :files
 
@@ -91,9 +92,9 @@ class Task < ApplicationRecord
   end
 
   def finalize_status
-    if data_items.where(current_task: self, status: "failed").count == processable_count
+    if current_data_items.where(status: "failed").count == current_data_items.count
       fail! # everything has failed, cannot proceed beyond this point
-    elsif data_items.where(current_task: self, status: "failed").exists? || data_items.where(status: "review").exists?
+    elsif current_data_items.where(status: "failed").exists? || current_data_items.where(status: "review").exists?
       suspend! # confirmation required for workflow to continue
     else
       success! # great, no problems
