@@ -15,7 +15,8 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
 
     @task.reload
 
-    assert_equal "failed", @task.status
+    assert_equal "failed", @task.outcome_status
+    assert_equal "completed", @task.progress_status
     feedback = @task.feedback_for
     errtypes = feedback.errors.map(&:subtype).uniq
     assert_equal [:required_field_value_missing], errtypes
@@ -26,7 +27,8 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
     set_up_and_run_task
     @task.reload
 
-    assert_equal "succeeded", @task.status
+    assert_equal "succeeded", @task.outcome_status
+    assert_equal "completed", @task.progress_status
 
     feedback = @task.feedback_for
     assert feedback.ok?
@@ -69,18 +71,16 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
 
   def fail_task(task:, indexes:)
     indexes.each do |idx|
-      data_item = @task.data_items[idx]
-      feedback = data_item.feedback_for
+      action = task.actions[idx]
+      feedback = action.feedback_for
       feedback.add_to_errors(
         subtype: :required_field_value_missing,
         details: ["objectnumber must be populated"]
       )
-      data_item.update!(
-        status: "failed",
-        feedback: feedback
-      )
+      action.finish!(feedback)
     end
-    task.fail!
+    task.update(progress_status: "pending")
+    task.finish!("failed")
   end
 
   def valid_response = OpenStruct.new(valid?: true, errors: [])

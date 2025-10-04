@@ -74,7 +74,7 @@ class TasksControllerAccessTest < ActionDispatch::IntegrationTest
   end
 
   test "owner should be able to run their own task" do
-    @admin_task.update!(status: "pending", started_at: nil)
+    @admin_task.update!(progress_status: "pending", started_at: nil)
     post run_activity_task_url(@admin_activity, @admin_task)
 
     assert_redirected_to activity_path(@admin_activity)
@@ -85,7 +85,7 @@ class TasksControllerAccessTest < ActionDispatch::IntegrationTest
   end
 
   test "user from same organization cannot run another user's task" do
-    @reader_task.update!(status: "pending", started_at: nil)
+    @reader_task.update!(progress_status: "pending", started_at: nil)
     post run_activity_task_url(@reader_activity, @reader_task)
 
     assert_redirected_to my_activities_url

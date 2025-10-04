@@ -3,12 +3,10 @@ require "test_helper"
 class DataItemTest < ActiveSupport::TestCase
   setup do
     activity = create_activity
-    task = activity.tasks.create(type: "Tasks::PreCheckIngestData")
     @data_item = DataItem.new(
       data: {objectNumber: "123"},
       position: 0,
-      activity: activity,
-      current_task_id: task.id
+      activity: activity
     )
   end
 
@@ -41,30 +39,29 @@ class DataItemTest < ActiveSupport::TestCase
     assert_includes duplicate_item.errors[:position], "has already been taken"
   end
 
-  test "should execute suspend! method correctly" do
+  test "should have many actions" do
     @data_item.save!
-    @data_item.suspend!
+    task1 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::PreCheckIngestData")
+    task2 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::ProcessUploadedFiles")
 
-    assert_equal "review", @data_item.status
-    assert_not_nil @data_item.completed_at
+    action1 = Action.find_or_create_by!(task: task1, data_item: @data_item)
+    action2 = Action.find_or_create_by!(task: task2, data_item: @data_item)
+
+    assert_equal 2, @data_item.actions.count
+    assert_includes @data_item.actions, action1
+    assert_includes @data_item.actions, action2
   end
 
-  test "should execute suspend! method correctly when feedback is valid feedback Hash" do
-    feedback_hash = {"parent" => "Tasks::PreCheckIngestData",
-                     "errors" => [],
-                     "warnings" =>
-     [{"type" => "warning",
-       "subtype" => "unknown_field",
-       "details" => "objectNumber is an unknown field",
-       "prefix" => "data_item"}],
-                     "messages" => []}
-
+  test "should have many tasks through actions" do
     @data_item.save!
-    @data_item.suspend!(feedback_hash)
+    task1 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::PreCheckIngestData")
+    task2 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::ProcessUploadedFiles")
 
-    assert_equal "review", @data_item.status
-    assert_not_nil @data_item.completed_at
-    feedback = @data_item.feedback_for
-    assert feedback.ok?
+    Action.find_or_create_by!(task: task1, data_item: @data_item)
+    Action.find_or_create_by!(task: task2, data_item: @data_item)
+
+    assert_equal 2, @data_item.tasks.count
+    assert_includes @data_item.tasks, task1
+    assert_includes @data_item.tasks, task2
   end
 end

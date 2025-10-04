@@ -6,9 +6,10 @@ class GenericQueueActionJob < ApplicationJob
     Rails.logger.info "#{self.class.name} started"
 
     feedback = task.feedback_for
+    activity = task.activity
 
     task.actions.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |action| task.action_handler.new(action) }
+      jobs = batch.map { |action| task.action_handler.new(activity, action) }
       ActiveJob.perform_all_later(jobs)
     end
 

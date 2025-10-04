@@ -1,14 +1,13 @@
 class PreCheckIngestActionJob < ApplicationJob
   queue_as :default
 
-  def perform(action)
+  def perform(activity, action)
     action.start!
-    data_item = action.data_item
-    feedback = data_item.feedback_for
+    feedback = action.feedback_for
+    handler = activity.data_handler
+    data = action.data_item.data
 
-    checker = IngestDataPreCheckItem.new(
-      data_item.activity.data_handler, data_item.data, feedback
-    )
+    checker = IngestDataPreCheckItem.new(handler, data, feedback)
     action.finish!(checker.feedback) && return unless checker.ok?
 
     action.finish!

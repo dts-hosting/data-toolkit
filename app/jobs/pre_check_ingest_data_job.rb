@@ -6,9 +6,10 @@ class PreCheckIngestDataJob < ApplicationJob
     Rails.logger.info "#{self.class.name} started"
 
     feedback = task.feedback_for
+    activity = task.activity
 
     begin
-      handler = task.activity.data_handler
+      handler = activity.data_handler
     rescue CollectionSpace::Mapper::NoClientServiceError => err
       fail_msg = "collectionspace-client does not have a service configured " \
         "for #{err.message}"
@@ -28,7 +29,7 @@ class PreCheckIngestDataJob < ApplicationJob
     task.finish!("failed", feedback) && return unless checker.ok?
 
     task.actions.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |action| task.action_handler.new(action) }
+      jobs = batch.map { |action| task.action_handler.new(activity, action) }
       ActiveJob.perform_all_later(jobs)
     end
 

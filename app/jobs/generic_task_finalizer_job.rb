@@ -4,11 +4,11 @@ class GenericTaskFinalizerJob < ApplicationJob
   def perform(task)
     Rails.logger.info "#{self.class.name} started"
     feedback = task.feedback_for
-    feedback_items = task.data_items.where.not(feedback: nil)
+    feedback_actions = task.actions.where.not(feedback: nil)
 
-    log_finish && return if feedback_items.empty?
+    log_finish && return if feedback_actions.empty?
 
-    task.update(feedback: item_feedback_for(feedback, feedback_items))
+    task.update(feedback: item_feedback_for(feedback, feedback_actions))
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)

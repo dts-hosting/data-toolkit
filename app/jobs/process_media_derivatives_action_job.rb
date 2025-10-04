@@ -1,22 +1,21 @@
-class ProcessMediaDerivativesDataItemJob < ApplicationJob
+class ProcessMediaDerivativesActionJob < ApplicationJob
   queue_as :default
 
-  def perform(action)
+  def perform(activity, action)
     action.start!
-    data_item = action.data_item
-    feedback = data_item.feedback_for
-
-    activity = data_item.activity
-    client = activity.data_handler.client
+    feedback = action.feedback_for
+    handler = activity.data_handler
+    data = action.data_item.data
 
     cfg = Rails.cache.fetch("rm_cfg_for_activity_#{activity.id}", expires_in: 24.hours) do
-      activity.data_handler.recordmapper.send(:hash)[:config]
+      handler.recordmapper.send(:hash)[:config]
     end
 
     type = cfg["service_path"]
     field = cfg["identifier_field"]
-    identifier = data_item.data[cfg["identifier_field"].downcase]
+    identifier = data[cfg["identifier_field"].downcase]
 
+    client = handler.client
     response = client.find(
       type: type,
       field: field,
