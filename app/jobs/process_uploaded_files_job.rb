@@ -28,6 +28,12 @@ class ProcessUploadedFilesJob < ApplicationJob
 
     validated.data.each { |table| import_from_csv(task, table) }
 
+    task.reload
+    if task.activity.data_items_count.zero?
+      feedback.add_to_errors(subtype: :no_data)
+      task.fail!(feedback) && return
+    end
+
     task.success!
   rescue => e
     Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"

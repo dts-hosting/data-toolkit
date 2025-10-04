@@ -5,17 +5,9 @@ class Task < ApplicationRecord
 
   belongs_to :activity, touch: true
   delegate :user, to: :activity
+  has_many :current_data_items, foreign_key: :current_task_id, class_name: "DataItem"
   has_many :data_items, through: :activity
   has_many_attached :files
-
-  enum :status, {
-    pending: "pending",
-    queued: "queued",
-    running: "running",
-    succeeded: "succeeded",
-    review: "review",
-    failed: "failed"
-  }, default: :pending
 
   validates :type, :status, presence: true
 
@@ -33,7 +25,7 @@ class Task < ApplicationRecord
     nil
   end
 
-  # the primary job associated with this task (required)
+  # the entrypoint job associated with this task (required)
   def handler
     raise NotImplementedError, "#{self.class} must implement #handler"
   end
@@ -42,6 +34,11 @@ class Task < ApplicationRecord
     completed? && (feedback_for.displayable? ||
       (data_items.first&.current_task == self &&
       data_items.where.not(feedback: nil).any?))
+  end
+
+  # the data item level job associated with this task
+  def data_item_handler
+    raise NotImplementedError, "#{self.class} must implement #data_item_handler"
   end
 
   def ok_to_run?
@@ -62,16 +59,17 @@ class Task < ApplicationRecord
   def run
     return unless ok_to_run?
 
+    # Reset data item state: data items are shared by tasks
+    # Items with errors are not reset so can be handled specifically (or ignored)
+    # Feedback is not reset so can be carried through workflows
     transaction do
-      update!(status: "queued")
-      data_items.update_all(
+      update!(status: "queued", processable_count: data_items.without_errors.count)
+      data_items.without_errors.update_all(
         current_task_id: id,
         status: "pending",
-        feedback: nil,
         started_at: nil,
         completed_at: nil
       )
-      activity.class.reset_counters(activity_id, :data_items)
     end
     handler.perform_later(self)
   end
@@ -94,9 +92,9 @@ class Task < ApplicationRecord
   end
 
   def finalize_status
-    if data_items.where(status: "failed").exists?
-      fail! # workflow cannot proceed beyond this point
-    elsif data_items.where(status: "review").exists?
+    if current_data_items.where(status: "failed").count == current_data_items.count
+      fail! # everything has failed, cannot proceed beyond this point
+    elsif current_data_items.where(status: "failed").exists? || current_data_items.where(status: "review").exists?
       suspend! # confirmation required for workflow to continue
     else
       success! # great, no problems

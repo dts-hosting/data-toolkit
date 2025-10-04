@@ -5,6 +5,15 @@ module TransitionsStatus
   COMPLETION_STATUSES = %w[failed review succeeded].freeze
 
   included do
+    enum :status, {
+      pending: "pending",
+      queued: "queued",
+      running: "running",
+      succeeded: "succeeded",
+      review: "review",
+      failed: "failed"
+    }, default: :pending
+
     def completed?
       COMPLETION_STATUSES.include?(status)
     end

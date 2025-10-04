@@ -4,8 +4,15 @@ module Activities
 
     def data_config_type = "media_record_type"
 
+    def data_handler = @data_handler ||=
+                         CollectionSpaceMapper.single_record_type_handler_for(self)
+
     def workflow
-      [Tasks::ProcessUploadedFiles]
+      [
+        Tasks::ProcessUploadedFiles,
+        Tasks::PreCheckIngestData,
+        Tasks::ProcessMediaDerivatives
+      ]
     end
 
     def self.display_name

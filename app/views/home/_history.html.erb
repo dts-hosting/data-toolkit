@@ -29,7 +29,8 @@
         <%= render partial: "shared/card/item",
                    locals: { property: "Task started", value: local_time(history.task_started_at) } %>
         <%= render partial: "shared/card/item",
-                   locals: { property: "Task completed", value: local_time(history.task_completed_at) } %>
+                   locals: { property: "Task completed",
+                             value: history.task_completed_at ? local_time(history.task_completed_at) : "N/A" } %>
       <% end %>
     </div>
   </div>
