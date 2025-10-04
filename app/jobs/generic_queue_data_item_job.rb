@@ -7,7 +7,7 @@ class GenericQueueDataItemJob < ApplicationJob
 
     feedback = task.feedback_for
 
-    task.data_items.without_errors.in_batches(of: 1000) do |batch|
+    task.current_data_items.in_batches(of: 1000) do |batch|
       jobs = batch.map { |data_item| task.data_item_handler.new(data_item) }
       ActiveJob.perform_all_later(jobs)
     end
