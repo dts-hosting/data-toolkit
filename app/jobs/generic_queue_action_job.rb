@@ -1,4 +1,4 @@
-class GenericQueueDataItemJob < ApplicationJob
+class GenericQueueActionJob < ApplicationJob
   queue_as :default
 
   def perform(task)
@@ -7,8 +7,8 @@ class GenericQueueDataItemJob < ApplicationJob
 
     feedback = task.feedback_for
 
-    task.current_data_items.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |data_item| task.data_item_handler.new(data_item) }
+    task.actions.in_batches(of: 1000) do |batch|
+      jobs = batch.map { |action| task.action_handler.new(action) }
       ActiveJob.perform_all_later(jobs)
     end
 
@@ -16,6 +16,6 @@ class GenericQueueDataItemJob < ApplicationJob
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.fail!(feedback)
+    task.finish!("failed", feedback)
   end
 end
