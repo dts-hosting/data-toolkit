@@ -9,7 +9,6 @@ class BatchImporter
   def process_row(row)
     @data_items << {
       activity_id: @task.activity_id,
-      current_task_id: @task.id,
       position: @current_position,
       data: row,
       created_at: Time.current,

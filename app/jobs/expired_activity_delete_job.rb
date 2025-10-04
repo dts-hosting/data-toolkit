@@ -26,14 +26,14 @@ class ExpiredActivityDeleteJob < ApplicationJob
 
   def failed_activities
     Activity.joins(:tasks)
-      .where(tasks: {status: "failed"})
+      .where(tasks: {outcome_status: "failed"})
       .where(updated_at: ...FAILED_EXPIRATION_DAYS.days.ago)
       .distinct
   end
 
   def non_failed_activities
     failed_activity_ids = Activity.joins(:tasks)
-      .where(tasks: {status: "failed"})
+      .where(tasks: {outcome_status: "failed"})
       .select(:id)
 
     Activity.where(updated_at: ...NON_FAILED_EXPIRATION_DAYS.days.ago)

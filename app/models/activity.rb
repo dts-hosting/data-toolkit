@@ -34,11 +34,11 @@ class Activity < ApplicationRecord
   end
 
   def current_task
-    tasks.where.not(status: "pending").order(:created_at).last
+    tasks.where.not(progress_status: "pending").order(:created_at).last
   end
 
   def next_task
-    tasks.where(status: "pending").order(:created_at).first
+    tasks.where(progress_status: "pending").order(:created_at).first
   end
 
   def select_attributes
@@ -110,7 +110,7 @@ class Activity < ApplicationRecord
     end
 
     # if the current_task is the last task and it was successful
-    if current_task == tasks.last && current_task&.succeeded?
+    if current_task == tasks.last && current_task&.outcome_succeeded?
       Rails.logger.info "Activity #{id}: Workflow completed successfully"
     end
   end

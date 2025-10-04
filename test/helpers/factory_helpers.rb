@@ -62,12 +62,16 @@ module FactoryHelpers
 
   def create_data_items_for_task(task, n = 5)
     n.times do |i|
-      task.activity.data_items.create!(
-        current_task_id: task.id,
+      data_item = task.activity.data_items.create!(
         position: i,
         data: {content: "Data #{i + 1}"}
       )
+      task.actions.create!(data_item: data_item)
     end
+  end
+
+  def create_actions_for_task(task, n = 5)
+    create_data_items_for_task(task, n)
   end
 
   def valid_user_attributes

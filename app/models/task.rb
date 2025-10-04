@@ -26,6 +26,22 @@ class Task < ApplicationRecord
     raise NotImplementedError, "#{self.class} must implement #action_handler"
   end
 
+  def create_actions_for_data_items
+    all_data_items = activity.data_items # initially scope to all possible data items
+
+    # Filter out items that have errors in ANY previous action
+    data_item_ids_with_errors = Action.with_errors
+      .where(data_item_id: all_data_items.select(:id))
+      .distinct
+      .pluck(:data_item_id)
+
+    processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
+
+    processable_items.find_each do |data_item|
+      actions.create!(data_item: data_item)
+    end
+  end
+
   # tasks that are required to have succeeded for this task to run
   def dependencies
     []
@@ -74,13 +90,15 @@ class Task < ApplicationRecord
   def run
     return unless ok_to_run?
 
-    # Create actions for data items that don't have errors from previous tasks
-    # Actions track the relationship between this task and the data items it processes
     transaction do
       create_actions_for_data_items
       update!(progress_status: "queued")
     end
     handler.perform_later(self)
+  end
+
+  def status
+    progress_completed? ? outcome_status : progress_status
   end
 
   def self.display_name
@@ -100,43 +118,26 @@ class Task < ApplicationRecord
     finalize_status if progress_running? && calculate_progress >= 100
   end
 
-  def create_actions_for_data_items
-    all_data_items = activity.data_items # initially scope to all possible data items
-
-    # Filter out items that have errors in ANY previous action
-    data_item_ids_with_errors = Action.with_errors
-      .where(data_item_id: all_data_items.select(:id))
-      .distinct
-      .pluck(:data_item_id)
-
-    processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
-
-    processable_items.find_each do |data_item|
-      actions.create!(data_item: data_item)
-    end
-  end
-
   def finalize_status
     if actions.with_errors.count == actions.count
-      update!(outcome_status: "failed", progress_status: "completed", completed_at: Time.current)
+      finish!("failed")
     elsif actions.with_errors.exists? || actions.with_warnings.exists?
-      update!(outcome_status: "review", progress_status: "completed", completed_at: Time.current)
+      finish!("review")
     else
-      update!(outcome_status: "succeeded", progress_status: "completed", completed_at: Time.current)
+      finish!("succeeded")
     end
   end
 
   def handle_completion
     # only run finalizer or auto advance when transitioning to a completed status
     # and not when updating outcome status, for example, going from review -> succeeded
-    return unless progress_status_changed? && progress_completed?
-
-    finalizer&.perform_later(self)
+    return unless saved_change_to_progress_status? && progress_completed?
 
     if outcome_succeeded? && activity.config.fetch("auto_advance", true)
-      activity.update(auto_advanced: true) unless activity.auto_advanced?
       activity.next_task&.run
-    elsif activity.auto_advanced?
+      activity.update(auto_advanced: true)
+    else
+      finalizer&.perform_later(self)
       activity.update(auto_advanced: false)
     end
   end
