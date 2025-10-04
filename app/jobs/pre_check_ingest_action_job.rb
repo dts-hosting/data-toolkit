@@ -1,19 +1,20 @@
-class PreCheckIngestDataItemJob < ApplicationJob
+class PreCheckIngestActionJob < ApplicationJob
   queue_as :default
 
-  def perform(data_item)
-    data_item.start!
+  def perform(action)
+    action.start!
+    data_item = action.data_item
     feedback = data_item.feedback_for
 
     checker = IngestDataPreCheckItem.new(
       data_item.activity.data_handler, data_item.data, feedback
     )
-    data_item.fail!(checker.feedback) && return unless checker.ok?
+    action.finish!(checker.feedback) && return unless checker.ok?
 
-    data_item.success!
+    action.finish!
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    data_item.fail!(feedback)
+    action.finish!(feedback)
   end
 end

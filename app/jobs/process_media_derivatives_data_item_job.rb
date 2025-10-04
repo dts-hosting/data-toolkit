@@ -1,8 +1,9 @@
 class ProcessMediaDerivativesDataItemJob < ApplicationJob
   queue_as :default
 
-  def perform(data_item)
-    data_item.start!
+  def perform(action)
+    action.start!
+    data_item = action.data_item
     feedback = data_item.feedback_for
 
     activity = data_item.activity
@@ -23,7 +24,7 @@ class ProcessMediaDerivativesDataItemJob < ApplicationJob
     )
     unless response.result.success?
       feedback.add_to_errors(subtype: :request_error, details: response.result.errors)
-      data_item.fail!(feedback) && return
+      action.finish!(feedback) && return
     end
 
     begin
@@ -33,16 +34,16 @@ class ProcessMediaDerivativesDataItemJob < ApplicationJob
       feedback.add_to_warnings(
         subtype: :blob_not_found, details: "#{type} #{field} #{identifier}"
       )
-      data_item.suspend!(feedback) && return
+      action.finish!(feedback) && return
     end
 
     # TODO: continue
     Rails.logger.info "blob_csid: #{blob_csid}"
 
-    data_item.success!
+    action.finish!
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    data_item.fail!(feedback)
+    action.finish!(feedback)
   end
 end
