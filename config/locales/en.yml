@@ -97,6 +97,7 @@ en:
           csvlint_whitespace: >-
             Whitespace: A quoted value in %{details} has leading or trailing
             whitespace
+          no_data: "No data found in file"
           no_file: "You must upload a file"
         warning:
           csvlint_check_options: >-
