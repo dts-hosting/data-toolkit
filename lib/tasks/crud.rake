@@ -14,7 +14,7 @@ namespace :crud do
     end
 
     desc "Create a new Activity"
-    task :activity, [:user_id, :data_config_id, :type, :file] => :environment do |_t, args|
+    task :activity, [:user_id, :label, :type, :data_config_id, :file] => :environment do |_t, args|
       file = args.fetch(:file, nil)
       file = Rack::Test::UploadedFile.new(file, "text/csv") if file && File.exist?(file)
 
@@ -22,8 +22,7 @@ namespace :crud do
         user_id: args.fetch(:user_id),
         data_config_id: args.fetch(:data_config_id),
         type: args.fetch(:type),
-        label: SecureRandom.hex,
-        config: {action: "create"},
+        label: args.fetch(:label),
         files: [file].compact
       }
 
@@ -55,12 +54,32 @@ namespace :crud do
     end
   end
 
+  namespace :read do
+    desc "Find data configs by user"
+    task :data_configs, [:user_id, :data_config_type, :record_type] => :environment do |_t, args|
+      user = User.find(args.fetch(:user_id))
+      data_config_type = args.fetch(:data_config_type)
+      record_type = args.fetch(:record_type, nil)
+
+      data_configs = DataConfig.send(data_config_type.to_sym, user)
+      data_configs = data_configs.where(record_type: record_type) if record_type
+      puts data_configs.to_json
+    end
+
+    desc "List tasks for activity"
+    task :tasks, [:activity_id] => :environment do |_t, args|
+      activity = Activity.find(args.fetch(:activity_id))
+      puts activity.tasks.to_json
+    end
+  end
+
   namespace :import do
     desc "Import DataConfigs from a ManifestRegistry"
     task :manifest_registry, [:url] => :environment do |t, args|
       registry = ManifestRegistry.find_or_create_by(url: args.fetch(:url))
       registry.update(last_updated_at: nil)
       ManifestRegistryImportJob.perform_now
+      puts ManifestRegistry.last.manifests.to_json
     end
   end
 end

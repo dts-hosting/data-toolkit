@@ -18,6 +18,7 @@ class Activity < ApplicationRecord
 
   validates :label, length: {minimum: 3}
 
+  after_initialize :set_config_defaults, if: :new_record?
   after_create_commit do
     workflow.each do |task|
       tasks.create(type: task)
@@ -121,5 +122,11 @@ class Activity < ApplicationRecord
     if DataConfig.for(user, self).empty?
       errors.add(:data_config, "is not eligible for this activity")
     end
+  end
+
+  def set_config_defaults
+    self.config = {
+      auto_advance: true
+    }.merge(config.symbolize_keys || {})
   end
 end
