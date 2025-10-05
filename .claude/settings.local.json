@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//home/mark/.config/JetBrains/RubyMine2025.2/scratches/**)"
-    ],
-    "deny": [],
-    "ask": []
-  }
-}

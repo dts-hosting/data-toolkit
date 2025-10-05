@@ -15,6 +15,11 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
     field = cfg["identifier_field"]
     identifier = data[cfg["identifier_field"].downcase]
 
+    # TODO: something like ... (will need module to handle generalized response parsing)
+    # cms = CollectionSpace::CheckMediaService.new(client, opts) # checks type is media/restrictedmedia
+    # cms.retrieve
+    # cms.verify
+
     client = handler.client
     response = client.find(
       type: type,
@@ -27,13 +32,26 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
     end
 
     begin
-      # TODO: what does it look like when media record is found but there is no blob?
+      items_in_page = response.parsed["abstract_common_list"].fetch("itemsInPage", 0).to_i
+      if items_in_page.zero?
+        feedback.add_to_errors(subtype: :record_not_found, details: "#{type} #{field} #{identifier}")
+        action.done!(feedback) && return
+      elsif items_in_page > 1
+        feedback.add_to_errors(subtype: :duplicate_id_found, details: "#{type} #{field} #{identifier}")
+        action.done!(feedback) && return
+      end
+
       blob_csid = response.parsed["abstract_common_list"]["list_item"]["blobCsid"]
     rescue
-      feedback.add_to_warnings(
-        subtype: :blob_not_found, details: "#{type} #{field} #{identifier}"
+      feedback.add_to_errors(
+        subtype: :response_error, details: response.parsed
       )
       action.done!(feedback) && return
+    end
+
+    unless blob_csid
+      # this record does not have a blob so there's nothing to do
+      action.done! && return
     end
 
     # TODO: continue

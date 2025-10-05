@@ -4,7 +4,7 @@ module Tasks
       [Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData]
     end
 
-    def action_handler = ProcessMediaDerivativesDataItemJob
+    def action_handler = ProcessMediaDerivativesActionJob
     def finalizer = nil # ProcessMediaDerivativesReportJob
     def handler = GenericQueueActionJob
 

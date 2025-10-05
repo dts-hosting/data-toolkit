@@ -38,8 +38,12 @@ en:
         for examination. Via the support method you have been instructed to
         use, please send us the URL of the failed Activity. If you delete the
         failed Activity, we cannot troubleshoot it. ERROR RECEIVED: %{details}
+      duplicate_id_found: >-
+        Duplicate ID found: %{details}
       request_error: >-
         Request has failed for an unexpected reason: %{details}
+      response_error: >-
+        Response has failed for an unexpected reason: %{details}
   tasks:
     pre_check_ingest_data:
       feedback:
