@@ -10,7 +10,7 @@ bundle install
 ./bin/setup
 ```
 
-Restart dev server without re-installing, etc:
+Restart dev server without re-installing, etc.:
 
 ```bash
 ./bin/dev

@@ -134,20 +134,20 @@ class ActionTest < ActiveSupport::TestCase
     assert_not_nil @action.started_at
   end
 
-  test "finish! should update progress_status and completed_at" do
+  test "done! should update progress_status and completed_at" do
     @action.save!
-    @action.finish!
+    @action.done!
 
     assert_equal "completed", @action.progress_status
     assert_not_nil @action.completed_at
   end
 
-  test "finish! should accept feedback" do
+  test "done! should accept feedback" do
     feedback_hash = {
       "errors" => [{"type" => "error", "details" => "test error"}]
     }
     @action.save!
-    @action.finish!(feedback_hash)
+    @action.done!(feedback_hash)
 
     assert_equal "completed", @action.progress_status
     assert_not_nil @action.completed_at

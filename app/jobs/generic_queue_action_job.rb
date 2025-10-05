@@ -17,6 +17,6 @@ class GenericQueueActionJob < ApplicationJob
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.finish!("failed", feedback)
+    task.done!("failed", feedback)
   end
 end

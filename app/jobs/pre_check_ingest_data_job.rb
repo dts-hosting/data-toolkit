@@ -21,12 +21,12 @@ class PreCheckIngestDataJob < ApplicationJob
     if fail_msg
       Rails.logger.error fail_msg
       feedback.add_to_errors(subtype: :application_error, details: fail_msg)
-      task.finish!("failed", feedback) && return
+      task.done!("failed", feedback) && return
     end
 
     first_data_item = task.data_items.first.data
     checker = IngestDataPreCheckFirstItem.new(handler, first_data_item, feedback)
-    task.finish!("failed", feedback) && return unless checker.ok?
+    task.done!("failed", feedback) && return unless checker.ok?
 
     task.actions.in_batches(of: 1000) do |batch|
       jobs = batch.map { |action| task.action_handler.new(activity, action) }
@@ -37,6 +37,6 @@ class PreCheckIngestDataJob < ApplicationJob
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.finish!("failed", feedback)
+    task.done!("failed", feedback)
   end
 end

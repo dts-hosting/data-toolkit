@@ -77,10 +77,10 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
         subtype: :required_field_value_missing,
         details: ["objectnumber must be populated"]
       )
-      action.finish!(feedback)
+      action.done!(feedback)
     end
     task.update(progress_status: "pending")
-    task.finish!("failed")
+    task.done!("failed")
   end
 
   def valid_response = OpenStruct.new(valid?: true, errors: [])

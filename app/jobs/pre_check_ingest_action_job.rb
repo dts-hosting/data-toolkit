@@ -8,12 +8,12 @@ class PreCheckIngestActionJob < ApplicationJob
     data = action.data_item.data
 
     checker = IngestDataPreCheckItem.new(handler, data, feedback)
-    action.finish!(checker.feedback) && return unless checker.ok?
+    action.done!(checker.feedback) && return unless checker.ok?
 
-    action.finish!
+    action.done!
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    action.finish!(feedback)
+    action.done!(feedback)
   end
 end

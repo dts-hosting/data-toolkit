@@ -20,7 +20,7 @@ class Action < ApplicationRecord
   scope :without_errors, -> { where("feedback IS NOT NULL AND json_array_length(feedback, '$.errors') = 0") }
   scope :with_warnings, -> { where("feedback IS NOT NULL AND json_array_length(feedback, '$.warnings') > 0") }
 
-  def finish!(feedback = nil)
+  def done!(feedback = nil)
     params = {
       progress_status: "completed",
       completed_at: Time.current,

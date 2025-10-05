@@ -52,7 +52,7 @@ class Task < ApplicationRecord
     nil
   end
 
-  def finish!(outcome_status, feedback = nil)
+  def done!(outcome_status, feedback = nil)
     params = {
       progress_status: "completed",
       outcome_status: outcome_status,
@@ -120,11 +120,11 @@ class Task < ApplicationRecord
 
   def finalize_status
     if actions.with_errors.count == actions.count
-      finish!("failed")
+      done!("failed")
     elsif actions.with_errors.exists? || actions.with_warnings.exists?
-      finish!("review")
+      done!("review")
     else
-      finish!("succeeded")
+      done!("succeeded")
     end
   end
 

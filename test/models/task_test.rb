@@ -57,7 +57,7 @@ class TaskTest < ActiveSupport::TestCase
     assert_not_nil @task.started_at
     assert_equal "running", @task.progress_status
 
-    @task.finish!("succeeded")
+    @task.done!("succeeded")
     assert_equal "succeeded", @task.outcome_status
     assert_equal "completed", @task.progress_status
     assert_not_nil @task.completed_at
@@ -93,7 +93,7 @@ class TaskTest < ActiveSupport::TestCase
     assert_includes dependent_task.dependencies, first_task.class
     assert_not dependent_task.ok_to_run?
 
-    first_task.finish!("succeeded")
+    first_task.done!("succeeded")
     assert dependent_task.ok_to_run?
   end
 
@@ -106,16 +106,16 @@ class TaskTest < ActiveSupport::TestCase
     assert_not_nil @task.started_at
   end
 
-  test "should execute finish! method correctly with outcome" do
+  test "should execute done! method correctly with outcome" do
     @task.save!
-    @task.finish!("succeeded")
+    @task.done!("succeeded")
 
     assert_equal "succeeded", @task.outcome_status
     assert_equal "completed", @task.progress_status
     assert_not_nil @task.completed_at
   end
 
-  test "should execute finish! method correctly with feedback" do
+  test "should execute done! method correctly with feedback" do
     feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
                      "errors" =>
      [{"type" => "error",
@@ -126,7 +126,7 @@ class TaskTest < ActiveSupport::TestCase
                      "messages" => []}
 
     @task.save!
-    @task.finish!("failed", feedback_hash)
+    @task.done!("failed", feedback_hash)
 
     assert_equal "failed", @task.outcome_status
     assert_equal "completed", @task.progress_status
@@ -312,7 +312,7 @@ class TaskTest < ActiveSupport::TestCase
                      "messages" => []}
 
     @task.save!
-    @task.finish!("review", feedback_hash)
+    @task.done!("review", feedback_hash)
 
     assert @task.progress_completed?
     assert @task.feedback_for.displayable?

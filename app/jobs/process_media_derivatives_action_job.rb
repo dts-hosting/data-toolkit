@@ -23,7 +23,7 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
     )
     unless response.result.success?
       feedback.add_to_errors(subtype: :request_error, details: response.result.errors)
-      action.finish!(feedback) && return
+      action.done!(feedback) && return
     end
 
     begin
@@ -33,16 +33,16 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
       feedback.add_to_warnings(
         subtype: :blob_not_found, details: "#{type} #{field} #{identifier}"
       )
-      action.finish!(feedback) && return
+      action.done!(feedback) && return
     end
 
     # TODO: continue
     Rails.logger.info "blob_csid: #{blob_csid}"
 
-    action.finish!
+    action.done!
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    action.finish!(feedback)
+    action.done!(feedback)
   end
 end
