@@ -29,5 +29,14 @@ module Activities
     def self.has_config_fields?
       true
     end
+
+    private
+
+    def set_config_defaults
+      self.config = {
+        action: "create",
+        auto_advance: true
+      }.merge(config.symbolize_keys || {})
+    end
   end
 end

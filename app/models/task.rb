@@ -1,27 +1,46 @@
 class Task < ApplicationRecord
   include ActionView::RecordIdentifier
   include Feedbackable
-  include TransitionsStatus
+  include Progressable
 
   belongs_to :activity, touch: true
   delegate :user, to: :activity
-  has_many :data_items, through: :activity
+  has_many :actions
+  has_many :data_items, through: :actions
   has_many_attached :files
 
-  enum :status, {
-    pending: "pending",
-    queued: "queued",
-    running: "running",
-    succeeded: "succeeded",
+  enum :outcome_status, {
     review: "review",
-    failed: "failed"
-  }, default: :pending
+    failed: "failed",
+    succeeded: "succeeded"
+  }, prefix: :outcome
 
-  validates :type, :status, presence: true
+  validates :type, :progress_status, presence: true
 
   broadcasts_refreshes
   after_touch :check_progress
   after_update_commit :handle_completion
+
+  # the action level job associated with this task
+  def action_handler
+    raise NotImplementedError, "#{self.class} must implement #action_handler"
+  end
+
+  def create_actions_for_data_items
+    all_data_items = activity.data_items # initially scope to all possible data items
+
+    # Filter out items that have errors in ANY previous action
+    data_item_ids_with_errors = Action.with_errors
+      .where(data_item_id: all_data_items.select(:id))
+      .distinct
+      .pluck(:data_item_id)
+
+    processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
+
+    processable_items.find_each do |data_item|
+      actions.create!(data_item: data_item)
+    end
+  end
 
   # tasks that are required to have succeeded for this task to run
   def dependencies
@@ -33,28 +52,37 @@ class Task < ApplicationRecord
     nil
   end
 
-  # the primary job associated with this task (required)
+  def done!(outcome_status, feedback = nil)
+    params = {
+      progress_status: "completed",
+      outcome_status: outcome_status,
+      completed_at: Time.current,
+      feedback: feedback
+    }.compact
+    update!(**params)
+  end
+
+  # the entrypoint job associated with this task (required)
   def handler
     raise NotImplementedError, "#{self.class} must implement #handler"
   end
 
   def has_feedback?
-    completed? && (feedback_for.displayable? ||
-      (data_items.first&.current_task == self &&
-      data_items.where.not(feedback: nil).any?))
+    progress_completed? &&
+      (feedback_for.displayable? || actions.where.not(feedback: nil).any?)
   end
 
   def ok_to_run?
-    met_dependencies && pending? && started_at.nil?
+    met_dependencies && progress_pending? && started_at.nil?
   end
 
   def feedback_context = self.class.name
 
   def progress
-    case status
+    case progress_status
     when "pending", "queued" then 0
     when "running" then calculate_progress
-    when *COMPLETION_STATUSES then 100
+    when "completed" then 100
     else 0
     end
   end
@@ -63,17 +91,14 @@ class Task < ApplicationRecord
     return unless ok_to_run?
 
     transaction do
-      update!(status: "queued")
-      data_items.update_all(
-        current_task_id: id,
-        status: "pending",
-        feedback: nil,
-        started_at: nil,
-        completed_at: nil
-      )
-      activity.class.reset_counters(activity_id, :data_items)
+      create_actions_for_data_items
+      update!(progress_status: "queued")
     end
     handler.perform_later(self)
+  end
+
+  def status
+    progress_completed? ? outcome_status : progress_status
   end
 
   def self.display_name
@@ -83,42 +108,37 @@ class Task < ApplicationRecord
   private
 
   def calculate_progress
-    return 0 if data_items.empty?
+    return 0 if actions.empty?
 
-    completed_items_ratio = data_items.where(status: COMPLETION_STATUSES).count.to_f / data_items.count
-    (completed_items_ratio * 100).round
+    completed_actions_ratio = actions.progress_completed.count.to_f / actions.count
+    (completed_actions_ratio * 100).round
   end
 
   def check_progress
-    finalize_status if running? && calculate_progress >= 100
+    finalize_status if progress_running? && calculate_progress >= 100
   end
 
   def finalize_status
-    if data_items.where(status: "failed").exists?
-      fail! # workflow cannot proceed beyond this point
-    elsif data_items.where(status: "review").exists?
-      suspend! # confirmation required for workflow to continue
+    if actions.with_errors.count == actions.count
+      done!("failed")
+    elsif actions.with_errors.exists? || actions.with_warnings.exists?
+      done!("review")
     else
-      success! # great, no problems
+      done!("succeeded")
     end
   end
 
   def handle_completion
-    if saved_change_to_status? && completed?
-      # only run finalizer or auto advance on first transitioning to a completed
-      # status and not when, for example, going from review -> succeeded
-      previous_status = saved_change_to_status.first
-      unless COMPLETION_STATUSES.include?(previous_status)
-        if succeeded? && activity.config.fetch("auto_advance", true)
-          # we have to skip running any defined finalizer in the
-          # case of auto-advance because item state is reset
-          activity.update(auto_advanced: true) unless activity.auto_advanced?
-          activity.next_task&.run
-        else
-          activity.update(auto_advanced: false) if activity.auto_advanced?
-          finalizer&.perform_later(self)
-        end
-      end
+    # only run finalizer or auto advance when transitioning to a completed status
+    # and not when updating outcome status, for example, going from review -> succeeded
+    return unless saved_change_to_progress_status? && progress_completed?
+
+    if outcome_succeeded? && activity.config.fetch("auto_advance", true)
+      activity.next_task&.run
+      activity.update(auto_advanced: true)
+    else
+      finalizer&.perform_later(self)
+      activity.update(auto_advanced: false)
     end
   end
 
@@ -126,7 +146,7 @@ class Task < ApplicationRecord
     return true if dependencies.empty?
 
     dependencies.all? do |dependency|
-      activity.tasks.exists?(type: dependency.to_s, status: "succeeded")
+      activity.tasks.exists?(type: dependency.to_s, outcome_status: "succeeded")
     end
   end
 end

@@ -1,15 +1,15 @@
 class PreCheckIngestDataJob < ApplicationJob
   queue_as :default
 
-  # This job spawns a sub-job for each data item
   def perform(task)
     task.start!
     Rails.logger.info "#{self.class.name} started"
 
     feedback = task.feedback_for
+    activity = task.activity
 
     begin
-      handler = task.activity.data_handler
+      handler = activity.data_handler
     rescue CollectionSpace::Mapper::NoClientServiceError => err
       fail_msg = "collectionspace-client does not have a service configured " \
         "for #{err.message}"
@@ -21,15 +21,15 @@ class PreCheckIngestDataJob < ApplicationJob
     if fail_msg
       Rails.logger.error fail_msg
       feedback.add_to_errors(subtype: :application_error, details: fail_msg)
-      task.fail!(feedback) && return
+      task.done!("failed", feedback) && return
     end
 
     first_data_item = task.data_items.first.data
     checker = IngestDataPreCheckFirstItem.new(handler, first_data_item, feedback)
-    task.fail!(feedback) && return unless checker.ok?
+    task.done!("failed", feedback) && return unless checker.ok?
 
-    task.data_items.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |data_item| PreCheckIngestDataItemJob.new(data_item) }
+    task.actions.in_batches(of: 1000) do |batch|
+      jobs = batch.map { |action| task.action_handler.new(activity, action) }
       ActiveJob.perform_all_later(jobs)
     end
 
@@ -37,6 +37,6 @@ class PreCheckIngestDataJob < ApplicationJob
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.fail!(feedback)
+    task.done!("failed", feedback)
   end
 end

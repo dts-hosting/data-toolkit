@@ -5,15 +5,14 @@ require "test_helper"
 class IngestDataPreCheckFirstItemTest < ActiveJob::TestCase
   setup do
     activity = create_activity
-    task = activity.tasks.create(type: "Tasks::PreCheckIngestData")
+    @task = activity.tasks.create(type: "Tasks::PreCheckIngestData")
     @data_item = DataItem.new(
       data: @data_hash,
       position: 0,
-      activity: activity,
-      current_task_id: task.id
+      activity: activity
     )
     @mock_handler = Minitest::Mock.new
-    @feedback = Feedback.new(task.class.name)
+    @feedback = Feedback.new(@task.class.name)
   end
 
   test "fails when there is a blank header" do

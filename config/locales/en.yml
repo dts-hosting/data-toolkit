@@ -38,6 +38,12 @@ en:
         for examination. Via the support method you have been instructed to
         use, please send us the URL of the failed Activity. If you delete the
         failed Activity, we cannot troubleshoot it. ERROR RECEIVED: %{details}
+      duplicate_id_found: >-
+        Duplicate ID found: %{details}
+      request_error: >-
+        Request has failed for an unexpected reason: %{details}
+      response_error: >-
+        Response has failed for an unexpected reason: %{details}
   tasks:
     pre_check_ingest_data:
       feedback:
@@ -66,6 +72,10 @@ en:
           unknown_field:
             one: "Field that will <b>not</b> import: %{details}"
             other: "%{count} fields will <b>not</b> import: %{details}"
+    process_media_derivatives:
+      feedback:
+        warning:
+          blob_not_found: "Blob not found: %{details}"
     process_uploaded_files:
       feedback:
         error:
@@ -91,6 +101,7 @@ en:
           csvlint_whitespace: >-
             Whitespace: A quoted value in %{details} has leading or trailing
             whitespace
+          no_data: "No data found in file"
           no_file: "You must upload a file"
         warning:
           csvlint_check_options: >-

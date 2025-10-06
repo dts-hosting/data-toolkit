@@ -18,6 +18,7 @@ class Activity < ApplicationRecord
 
   validates :label, length: {minimum: 3}
 
+  after_initialize :set_config_defaults, if: :new_record?
   after_create_commit do
     workflow.each do |task|
       tasks.create(type: task)
@@ -34,11 +35,11 @@ class Activity < ApplicationRecord
   end
 
   def current_task
-    tasks.where.not(status: "pending").order(:created_at).last
+    tasks.where.not(progress_status: "pending").order(:created_at).last
   end
 
   def next_task
-    tasks.where(status: "pending").order(:created_at).first
+    tasks.where(progress_status: "pending").order(:created_at).first
   end
 
   def select_attributes
@@ -110,7 +111,7 @@ class Activity < ApplicationRecord
     end
 
     # if the current_task is the last task and it was successful
-    if current_task == tasks.last && current_task&.succeeded?
+    if current_task == tasks.last && current_task&.outcome_succeeded?
       Rails.logger.info "Activity #{id}: Workflow completed successfully"
     end
   end
@@ -121,5 +122,11 @@ class Activity < ApplicationRecord
     if DataConfig.for(user, self).empty?
       errors.add(:data_config, "is not eligible for this activity")
     end
+  end
+
+  def set_config_defaults
+    self.config = {
+      auto_advance: true
+    }.merge(config.symbolize_keys || {})
   end
 end
