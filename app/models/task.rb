@@ -5,7 +5,7 @@ class Task < ApplicationRecord
 
   belongs_to :activity, touch: true
   delegate :user, to: :activity
-  has_many :actions
+  has_many :actions, dependent: :destroy
   has_many :data_items, through: :actions
   has_many_attached :files
 
