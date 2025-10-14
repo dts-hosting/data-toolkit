@@ -22,7 +22,7 @@ class Action < ApplicationRecord
 
   def done!(feedback = nil)
     params = {
-      progress_status: "completed",
+      progress_status: COMPLETED,
       completed_at: Time.current,
       feedback: feedback
     }.compact

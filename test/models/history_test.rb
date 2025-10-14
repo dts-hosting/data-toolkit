@@ -60,7 +60,7 @@ class HistoryTest < ActiveSupport::TestCase
       activity_data_config_record_type: "collectionobject",
       activity_created_at: Time.current,
       task_type: "Test Task",
-      task_status: "succeeded",
+      task_status: Task::SUCCEEDED,
       task_feedback: feedback_data
     )
 
@@ -80,7 +80,7 @@ class HistoryTest < ActiveSupport::TestCase
       activity_data_config_record_type: "collectionobject",
       activity_created_at: Time.current,
       task_type: "Test Task",
-      task_status: "succeeded",
+      task_status: Task::SUCCEEDED,
       task_feedback: {},
       task_started_at: Time.current,
       task_completed_at: Time.current

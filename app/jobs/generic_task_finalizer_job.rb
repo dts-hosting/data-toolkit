@@ -8,7 +8,7 @@ class GenericTaskFinalizerJob < ApplicationJob
 
     log_finish && return if feedback_actions.empty?
 
-    task.update(feedback: item_feedback_for(feedback, feedback_actions))
+    task.update(feedback: action_feedback_for(feedback, feedback_actions))
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
@@ -17,16 +17,12 @@ class GenericTaskFinalizerJob < ApplicationJob
 
   private
 
-  def log_finish
-    Rails.logger.info "#{self.class.name} finished"
-  end
+  def action_feedback_for(feedback, actions)
+    actions.find_each(batch_size: 500) do |action|
+      action_feedback = action.feedback_for
+      next unless action_feedback.displayable?
 
-  def item_feedback_for(feedback, items)
-    items.find_each(batch_size: 500) do |item|
-      item_feedback = item.feedback_for
-      next unless item_feedback.displayable?
-
-      feedback + item_feedback
+      feedback + action_feedback
     end
     feedback
   end

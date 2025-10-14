@@ -30,7 +30,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     end
 
     @task.reload
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.status
 
     feedback = @task.feedback_for
     assert_equal feedback.errors.map(&:subtype), [:application_error]
@@ -55,7 +55,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     end
 
     @task.reload
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.status
     feedback = @task.feedback_for
     assert_equal feedback.errors.map(&:subtype), [:application_error]
     assert_equal feedback.errors.map(&:details),
@@ -83,7 +83,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     end
 
     @task.reload
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.status
   end
 
   test "job spawns Action jobs if pre-checks pass" do

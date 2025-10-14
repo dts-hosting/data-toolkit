@@ -5,7 +5,7 @@ module Tasks
     end
 
     def action_handler = ProcessMediaDerivativesActionJob
-    def finalizer = nil # ProcessMediaDerivativesReportJob
+    def finalizer = GenericFeedbackReportJob
     def handler = GenericQueueActionJob
 
     def self.display_name

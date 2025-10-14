@@ -35,11 +35,11 @@ class Activity < ApplicationRecord
   end
 
   def current_task
-    tasks.where.not(progress_status: "pending").order(:created_at).last
+    tasks.where.not(progress_status: Task::PENDING).order(:created_at).last
   end
 
   def next_task
-    tasks.where(progress_status: "pending").order(:created_at).first
+    tasks.where(progress_status: Task::PENDING).order(:created_at).first
   end
 
   def select_attributes

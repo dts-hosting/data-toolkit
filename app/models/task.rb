@@ -9,10 +9,14 @@ class Task < ApplicationRecord
   has_many :data_items, through: :actions
   has_many_attached :files
 
+  SUCCEEDED = "succeeded"
+  FAILED = "failed"
+  REVIEW = "review"
+
   enum :outcome_status, {
-    review: "review",
-    failed: "failed",
-    succeeded: "succeeded"
+    review: REVIEW,
+    failed: FAILED,
+    succeeded: SUCCEEDED
   }, prefix: :outcome
 
   validates :type, :progress_status, presence: true
@@ -24,22 +28,6 @@ class Task < ApplicationRecord
   # the action level job associated with this task
   def action_handler
     raise NotImplementedError, "#{self.class} must implement #action_handler"
-  end
-
-  def create_actions_for_data_items
-    all_data_items = activity.data_items # initially scope to all possible data items
-
-    # Filter out items that have errors in ANY previous action
-    data_item_ids_with_errors = Action.with_errors
-      .where(data_item_id: all_data_items.select(:id))
-      .distinct
-      .pluck(:data_item_id)
-
-    processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
-
-    processable_items.find_each do |data_item|
-      actions.create!(data_item: data_item)
-    end
   end
 
   # tasks that are required to have succeeded for this task to run
@@ -54,7 +42,7 @@ class Task < ApplicationRecord
 
   def done!(outcome_status, feedback = nil)
     params = {
-      progress_status: "completed",
+      progress_status: COMPLETED,
       outcome_status: outcome_status,
       completed_at: Time.current,
       feedback: feedback
@@ -80,9 +68,9 @@ class Task < ApplicationRecord
 
   def progress
     case progress_status
-    when "pending", "queued" then 0
-    when "running" then calculate_progress
-    when "completed" then 100
+    when PENDING, QUEUED then 0
+    when RUNNING then calculate_progress
+    when COMPLETED then 100
     else 0
     end
   end
@@ -92,7 +80,7 @@ class Task < ApplicationRecord
 
     transaction do
       create_actions_for_data_items
-      update!(progress_status: "queued")
+      update!(progress_status: QUEUED)
     end
     handler.perform_later(self)
   end
@@ -103,6 +91,10 @@ class Task < ApplicationRecord
 
   def self.display_name
     raise NotImplementedError
+  end
+
+  def self.report_name
+    display_name.parameterize(separator: "_")
   end
 
   private
@@ -118,13 +110,29 @@ class Task < ApplicationRecord
     finalize_status if progress_running? && calculate_progress >= 100
   end
 
+  def create_actions_for_data_items
+    all_data_items = activity.data_items # initially scope to all possible data items
+
+    # Filter out items that have errors in ANY previous action
+    data_item_ids_with_errors = Action.with_errors
+      .where(data_item_id: all_data_items.select(:id))
+      .distinct
+      .pluck(:data_item_id)
+
+    processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
+
+    processable_items.find_each do |data_item|
+      actions.create!(data_item: data_item)
+    end
+  end
+
   def finalize_status
     if actions.with_errors.count == actions.count
-      done!("failed")
+      done!(FAILED)
     elsif actions.with_errors.exists? || actions.with_warnings.exists?
-      done!("review")
+      done!(REVIEW)
     else
-      done!("succeeded")
+      done!(SUCCEEDED)
     end
   end
 
@@ -146,7 +154,7 @@ class Task < ApplicationRecord
     return true if dependencies.empty?
 
     dependencies.all? do |dependency|
-      activity.tasks.exists?(type: dependency.to_s, outcome_status: "succeeded")
+      activity.tasks.exists?(type: dependency.to_s, outcome_status: SUCCEEDED)
     end
   end
 end

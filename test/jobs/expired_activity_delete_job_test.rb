@@ -21,13 +21,13 @@ class ExpiredActivityDeleteJobTest < ActiveJob::TestCase
 
   test "deletes expired failed activities" do
     # Update so it's old enough to be expired when "failed"
-    @expired_activity.tasks.last&.update(outcome_status: "failed", progress_status: "completed")
+    @expired_activity.tasks.last&.update(outcome_status: Task::FAILED, progress_status: Task::COMPLETED)
     @expired_activity.update(
       updated_at: (ExpiredActivityDeleteJob::FAILED_EXPIRATION_DAYS + 1).days.ago
     )
 
     # Update so it's older than allowed for non-failed activities expiry
-    @recent_activity.tasks.last&.update(outcome_status: "failed", progress_status: "completed")
+    @recent_activity.tasks.last&.update(outcome_status: Task::FAILED, progress_status: Task::COMPLETED)
     @recent_activity.update(
       updated_at: (ExpiredActivityDeleteJob::FAILED_EXPIRATION_DAYS - 1).days.ago
     )

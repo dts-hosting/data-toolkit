@@ -93,7 +93,7 @@ class ActivityTest < ActiveSupport::TestCase
     )
 
     current_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
-    current_expected.update!(progress_status: "queued")
+    current_expected.update!(progress_status: Task::QUEUED)
     # TODO: update when workflow fully defined
 
     assert_equal current_expected, activity.current_task
@@ -143,7 +143,7 @@ class ActivityTest < ActiveSupport::TestCase
 
     final_task = activity.tasks.last
     # skip to the end
-    final_task.update!(outcome_status: "succeeded", progress_status: "completed", completed_at: Time.current)
+    final_task.update!(outcome_status: Task::SUCCEEDED, progress_status: Task::COMPLETED, completed_at: Time.current)
 
     # Capture log output
     log_output = StringIO.new

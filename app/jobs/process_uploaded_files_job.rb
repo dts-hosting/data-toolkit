@@ -9,14 +9,14 @@ class ProcessUploadedFilesJob < ApplicationJob
     Rails.logger.info "File upload job started"
 
     if task.activity.files.empty? && !task.activity.class.requires_files?
-      task.done!("succeeded") && return
+      task.done!(Task::SUCCEEDED) && return
     end
 
     feedback = task.feedback_for
 
     if task.activity.files.empty?
       feedback.add_to_errors(subtype: :no_file)
-      task.done!("failed", feedback) && return
+      task.done!(Task::FAILED, feedback) && return
     end
 
     validated = FilesValidator.new(
@@ -25,7 +25,7 @@ class ProcessUploadedFilesJob < ApplicationJob
       feedback: feedback
     ).call
     unless validated.valid?
-      task.done!("failed", feedback) && return
+      task.done!(Task::FAILED, feedback) && return
     end
 
     validated.data.each { |table| import_from_csv(task, table) }
@@ -33,14 +33,14 @@ class ProcessUploadedFilesJob < ApplicationJob
     task.reload
     if task.activity.data_items_count.zero?
       feedback.add_to_errors(subtype: :no_data)
-      task.done!("failed", feedback) && return
+      task.done!(Task::FAILED, feedback) && return
     end
 
-    task.done!("succeeded")
+    task.done!(Task::SUCCEEDED)
   rescue => e
     Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.done!("failed", feedback) && return
+    task.done!(Task::FAILED, feedback) && return
   end
 
   def import_from_csv(task, table)
