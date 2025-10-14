@@ -36,7 +36,7 @@ class PreCheckIngestActionJobTest < ActiveJob::TestCase
 
     @action.reload
 
-    assert_equal "completed", @action.progress_status
+    assert_equal Action::COMPLETED, @action.progress_status
     assert @action.feedback_for.errors.any?
   end
 
@@ -58,7 +58,7 @@ class PreCheckIngestActionJobTest < ActiveJob::TestCase
 
     @action.reload
 
-    assert_equal "completed", @action.progress_status
+    assert_equal Action::COMPLETED, @action.progress_status
     assert @action.feedback_for.ok?
   end
 

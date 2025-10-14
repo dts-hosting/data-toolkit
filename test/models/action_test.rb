@@ -26,7 +26,7 @@ class ActionTest < ActiveSupport::TestCase
 
   test "has default progress_status of pending" do
     action = Action.new
-    assert_equal "pending", action.progress_status
+    assert_equal Action::PENDING, action.progress_status
   end
 
   test "should allow valid progress_status values" do
@@ -130,7 +130,7 @@ class ActionTest < ActiveSupport::TestCase
     @action.save!
     @action.start!
 
-    assert_equal "running", @action.progress_status
+    assert_equal Action::RUNNING, @action.progress_status
     assert_not_nil @action.started_at
   end
 
@@ -138,7 +138,7 @@ class ActionTest < ActiveSupport::TestCase
     @action.save!
     @action.done!
 
-    assert_equal "completed", @action.progress_status
+    assert_equal Action::COMPLETED, @action.progress_status
     assert_not_nil @action.completed_at
   end
 
@@ -149,7 +149,7 @@ class ActionTest < ActiveSupport::TestCase
     @action.save!
     @action.done!(feedback_hash)
 
-    assert_equal "completed", @action.progress_status
+    assert_equal Action::COMPLETED, @action.progress_status
     assert_not_nil @action.completed_at
     assert_equal feedback_hash, @action.feedback
   end
@@ -170,16 +170,16 @@ class ActionTest < ActiveSupport::TestCase
   test "should respond to progress status predicates" do
     @action.save!
 
-    @action.progress_status = "pending"
+    @action.progress_status = Action::PENDING
     assert @action.progress_pending?
 
-    @action.progress_status = "queued"
+    @action.progress_status = Action::QUEUED
     assert @action.progress_queued?
 
-    @action.progress_status = "running"
+    @action.progress_status = Action::RUNNING
     assert @action.progress_running?
 
-    @action.progress_status = "completed"
+    @action.progress_status = Action::COMPLETED
     assert @action.progress_completed?
   end
 
@@ -191,10 +191,10 @@ class ActionTest < ActiveSupport::TestCase
       data_item = @task.activity.data_items.create!(position: i + 1, data: {objectNumber: (i + 2).to_s})
       @task.actions.create!(data_item: data_item)
     end
-    @task.update!(progress_status: "running")
+    @task.update!(progress_status: Task::RUNNING)
 
     # Complete all actions
-    @task.actions.update_all(progress_status: "completed")
+    @task.actions.update_all(progress_status: Action::COMPLETED)
 
     # Update the last one to trigger the callback
     last_action = @task.actions.last
@@ -202,7 +202,7 @@ class ActionTest < ActiveSupport::TestCase
 
     # Wait a bit to ensure timestamp difference
     sleep 0.01
-    last_action.update(progress_status: "completed")
+    last_action.update(progress_status: Action::COMPLETED)
 
     @task.reload
     assert @task.updated_at > original_task_updated_at, "Task should have been touched"
