@@ -22,8 +22,7 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
     begin
       service.retrieve_data
     rescue => e
-      ctx = "Context: #{service.name}"
-      feedback.add_to_errors(subtype: :request_error, details: "#{ctx} - #{e.message}")
+      feedback.add_to_errors(subtype: :request_error, details: "#{service.name} - #{e.message}")
       action.done!(feedback) && return
     end
 

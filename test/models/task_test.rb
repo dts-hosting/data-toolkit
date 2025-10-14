@@ -407,7 +407,7 @@ class TaskTest < ActiveSupport::TestCase
       @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
     end
 
-    @task.create_actions_for_data_items
+    @task.send(:create_actions_for_data_items)
 
     assert_equal 5, @task.actions.count
     assert_equal 5, @task.data_items.count
@@ -427,7 +427,7 @@ class TaskTest < ActiveSupport::TestCase
       feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
     )
 
-    @task.create_actions_for_data_items
+    @task.send(:create_actions_for_data_items)
 
     assert_equal 4, @task.actions.count
     assert_equal 4, @task.data_items.count

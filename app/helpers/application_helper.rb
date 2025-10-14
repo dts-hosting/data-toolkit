@@ -33,6 +33,21 @@ module ApplicationHelper
     end
   end
 
+  def icon_for_file(file)
+    case file.content_type
+    when "text/csv", "application/csv"
+      icon "document-chart-bar", variant: :solid, class: "size-6 text-success"
+    when /^image\//
+      icon "photo", variant: :solid, class: "size-6 text-info"
+    when /^video\//
+      icon "video-camera", variant: :solid, class: "size-6 text-secondary"
+    when "application/pdf"
+      icon "document-text", variant: :solid, class: "size-6 text-error"
+    else
+      icon "document", variant: :solid, class: "size-6 text-base-content/70"
+    end
+  end
+
   def task_name(activity)
     return activity.current_task.class.display_name if activity.current_task
     return activity.next_task.class.display_name if activity.next_task

@@ -41,6 +41,14 @@ en:
         Request has failed for an unexpected reason: %{details}
       response_error: >-
         Response has failed for an unexpected reason: %{details}
+      test_error: >-
+        Failed: %{details}
+    message:
+      report_generated: >-
+        Report has been generated. See attached file for details.
+    warning:
+      test_warning: >-
+        Warning: %{details}
   tasks:
     pre_check_ingest_data:
       feedback:
