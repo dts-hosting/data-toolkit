@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_05_155107) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_21_173008) do
   create_table "actions", force: :cascade do |t|
     t.integer "task_id", null: false
     t.integer "data_item_id", null: false
@@ -24,6 +24,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_05_155107) do
     t.index ["progress_status"], name: "index_actions_on_progress_status"
     t.index ["task_id", "data_item_id"], name: "index_actions_on_task_id_and_data_item_id", unique: true
     t.index ["task_id"], name: "index_actions_on_task_id"
+    t.index ["task_id"], name: "index_actions_on_task_id_with_feedback", where: "feedback IS NOT NULL"
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -65,6 +66,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_05_155107) do
     t.integer "data_items_count", default: 0, null: false
     t.string "label", null: false
     t.index ["data_config_id"], name: "index_activities_on_data_config_id"
+    t.index ["updated_at"], name: "index_activities_on_updated_at"
     t.index ["user_id"], name: "index_activities_on_user_id"
   end
 
