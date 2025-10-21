@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # rails gems
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.0.3"
 gem "propshaft"
 gem "sqlite3", ">= 2.1"
 gem "puma", ">= 5.0"
@@ -28,7 +28,7 @@ end
 
 group :development do
   gem "htmlbeautifier"
-  gem "kamal", "~> 2.7"
+  gem "kamal", "~> 2.8"
   gem "letter_opener"
   gem "overcommit", require: false
   gem "web-console"
