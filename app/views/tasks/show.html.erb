@@ -25,3 +25,31 @@
     %>
   <% end %>
 <% end %>
+
+<% if @task.files.attached? %>
+  <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+    <%= render "shared/card/header", title: "Files" %>
+
+    <div class="space-y-2">
+      <% @task.files.each do |file| %>
+        <%= link_to rails_blob_path(file, disposition: "attachment"),
+                    class: "flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-colors group" do %>
+          <div class="flex-shrink-0">
+            <%= icon_for_file(file) %>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate group-hover:text-primary">
+              <%= file.filename %>
+            </p>
+            <p class="text-xs text-base-content/70">
+              <%= number_to_human_size(file.byte_size) %>
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+            <%= icon "arrow-down-tray", class: "size-5 text-base-content/50 group-hover:text-primary" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
