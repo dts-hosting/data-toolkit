@@ -16,7 +16,7 @@ ssh:
   user: ubuntu
 
 volumes:
-  - "/storage:/rails/storage"
+  - "/storage/toolkit:/rails/storage"
 
 env:
   clear:
