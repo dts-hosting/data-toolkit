@@ -1,0 +1,4 @@
+#!/bin/sh
+
+kamal server exec 'sudo mkdir -p /storage/toolkit && sudo chown -R 1000:1000 /storage' \
+  -d ${KAMAL_DESTINATION} -h ${KAMAL_HOSTS} 2>/dev/null
