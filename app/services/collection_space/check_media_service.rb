@@ -12,7 +12,7 @@ module CollectionSpace
       :derivatives_count
     )
     DERIVABLE_IMAGE_TYPES = %w[
-      image/jpeg image/bmp image/gif image/png image/tiff application/octet-stream
+      image/jpeg image/bmp image/gif image/png image/tiff
     ]
     EXPECTED_DERIVABLE_COUNT = 5
     VALID_TYPES = %w[media restricted_media].freeze
