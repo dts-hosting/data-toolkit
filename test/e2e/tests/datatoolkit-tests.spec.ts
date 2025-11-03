@@ -21,10 +21,10 @@ test.afterEach(async ({ page }, testInfo) => {
 
 
 
-test('Check Pages', async ({ checkPages, page }, testInfo) => {
+test('Check Create/Update Records', async ({ checkCreateUpdateRecords, checkCspace, page }, testInfo) => {
   await test.step('Create/Update Records - Success', async (step) => {
-    await checkPages.goto('Create or Update Records','New Create or Update Records');
-    await checkPages.fillFormAndSubmit('collectionobject', 'data/test.csv');
+    await checkCreateUpdateRecords.goto('Create or Update Records','New Create or Update Records');
+    await checkCreateUpdateRecords.fillFormAndSubmit('collectionobject', 'data/test.csv');
     
     // Wait for workflow tasks page to load and verify the results
     await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
@@ -43,8 +43,8 @@ test('Check Pages', async ({ checkPages, page }, testInfo) => {
   }, { box: true });
 
   await test.step('Create/Update Records - Failure', async (step) => {
-    await checkPages.goto('Create or Update Records','New Create or Update Records');
-    await checkPages.fillFormAndSubmit('collectionobject', 'data/test-failure.csv');
+    await checkCreateUpdateRecords.goto('Create or Update Records','New Create or Update Records');
+    await checkCreateUpdateRecords.fillFormAndSubmit('collectionobject', 'data/test-failure.csv');
     
     // Wait for workflow tasks page to load and verify the results
     await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
@@ -62,33 +62,46 @@ test('Check Pages', async ({ checkPages, page }, testInfo) => {
     });
   }, { box: true });
 
-  await test.step('Check Export Records Page', async (step) => {
-    await checkPages.goto('Export Record IDs','New Export Record IDs');
-    // await checkPages.fillFormAndSubmit('anthro 9.1.0 media','data/test.csv');
-    
-    // Wait for workflow tasks page to load and verify the results
-    // await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-    // await expect(page.getByText("Succeeded")).toHaveCount(1);
-  }, { box: true });
+  // checkCspace
+  await test.step('Check CSpace', async (step) => {
+    await checkCspace.doLogin();
 
-  await test.step('Check Import Terms Page', async (step) => {
-
-    await checkPages.goto('Import Terms','New Import Terms');
-    await checkPages.fillFormAndSubmit('anthro 9.1.0 media','data/test.csv');
-    
-    // Wait for workflow tasks page to load and verify the results
-    await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-    await expect(page.getByText("Succeeded")).toHaveCount(1);
   }, { box: true });
+});
 
-  await test.step('Check Media Derivates Page', async (step) => {
-    await checkPages.goto('Check Media Derivatives','New Check Media Derivatives');
-    await checkPages.fillFormAndSubmit('anthro 9.1.0 media','data/test.csv');
-    
-    // Wait for workflow tasks page to load and verify the results
-    await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-    await expect(page.getByText("Succeeded")).toHaveCount(1);
-  }, { box: true });
+test('Check Export Records Page', async ({ checkExportRecords, page }, testInfo) => {
+  await checkExportRecords.goto('Export Record IDs','New Export Record IDs');
+});
+
+test('Check Import Terms Page', async ({ checkImportTerms, page }, testInfo) => {
+
+  await checkImportTerms.goto('Import Terms','New Import Terms');
+  // Commented out while we don't have options to select
+  // await checkPages.fillFormAndSubmit('anthro 9.1.0 media','data/test.csv');
+  
+  // // Wait for workflow tasks page to load and verify the results
+  // await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
+  // await expect(page.getByText("Succeeded")).toHaveCount(1);
+});
+
+test('Check Media Derivatives Page', async ({ checkMediaDerivativesPage, page }, testInfo) => {
+  await checkMediaDerivativesPage.goto('Check Media Derivatives','New Check Media Derivatives');
+  await checkMediaDerivativesPage.fillFormAndSubmit('anthro 9.1.0 media','data/derivatives.csv');
+  
+  // Wait for workflow tasks page to load and verify the results
+  await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
+  await expect(page.getByText("Succeeded")).toHaveCount(3);
+});
+
+test('Check Profile Page', async ({ checkProfilePage, page }, testInfo) => {
+  await checkProfilePage.goto('My profile','Profile');
+
+  await page.getByText("Email address:").waitFor({ timeout: 15000 });
+  await expect(page.getByText("admin@anthro.collectionspace.org")).toBeVisible();
+});
+
+test('Check Manifest Registry Page', async ({ checkManifestRegistryPage, page }, testInfo) => {
+  await checkManifestRegistryPage.goto('Manifest Registries','Add New Manifest Registry');
 });
 
 test('Check Delete Records Page', async ({ checkDeleteRecordsPage, page }, testInfo) => {
@@ -99,3 +112,4 @@ test('Check Delete Records Page', async ({ checkDeleteRecordsPage, page }, testI
   await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
   await expect(page.getByText("Succeeded")).toHaveCount(1);
 });
+

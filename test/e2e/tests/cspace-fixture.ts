@@ -1,11 +1,11 @@
 import type { Page, Locator, expect} from '@playwright/test';
 
-export class DataToolkitBasePage {
+export class CSpaceFixture {
   private readonly taskLabel: string = 'Testing Script';
   private readonly optionFieldId: string = '#activity_data_config_id';
   private readonly fileFieldId: string = '#activity_files';
 
-  constructor(public readonly page: Page, public readonly baseURL: string, private readonly cspaceUrl: string, private readonly username: string, private readonly password: string) {
+  constructor(public readonly page: Page, public readonly baseURL: string, private readonly username: string, private readonly password: string) {
 
   }
 
@@ -14,13 +14,16 @@ export class DataToolkitBasePage {
     await this.page.goto(this.baseURL);
     await this.page.waitForLoadState();
 
-    await this.page.locator('#cspace_url').fill(this.cspaceUrl);
-    await this.page.locator('#email_address').fill(this.username);
-    await this.page.locator('#password').fill(this.password);
+    await this.page.getByRole('link', { name: "Sign in" }).click();
+    // await this.page.locator('#cspace_url').fill(this.cspaceUrl);
+
+    await this.page.getByLabel('Email').fill(this.username);
+    await this.page.getByLabel('Password').fill(this.password);
+    // await this.page.locator('#password').fill(this.password);
     
     await this.page.getByRole('button').click({ force: true });
-    await this.page.waitForLoadState();
-    await this.page.getByText("Welcome to your activities dashboard.").waitFor({ timeout: 30000 });
+
+    await this.page.getByText("My CollectionSpace").waitFor({ timeout: 15000 });
   }
 
   async goto(linkToClick: string, titleToValidate: string) {

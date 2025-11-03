@@ -3,45 +3,100 @@ import { test as base, expect} from '@playwright/test';
 // import { CreateUpdateRecordsPage } from './page_create_update';
 import { DataToolkitBasePage } from './datatoolkit-basepage';
 import { DeleteRecordsPage } from './page_delete_records';
+import { CheckMediaDerivativesPage } from './page_check_media_derivatives';
+import { CheckManifestRegistryPage } from './page_manifest_registry';
+import { CSpaceFixture } from './cspace-fixture';
 
 // Declare the types of your fixtures.
 type MyFixtures = {
-  // checkMediaDerivatesPage: DataToolkitBasePage;
-  checkPages: DataToolkitBasePage;
+  checkMediaDerivativesPage: CheckMediaDerivativesPage;
+  checkImportTerms: DataToolkitBasePage;
+  checkExportRecords: DataToolkitBasePage;
+  checkCreateUpdateRecords: DataToolkitBasePage;
+  checkProfilePage: DataToolkitBasePage;
+  checkCspace: CSpaceFixture;
+  checkManifestRegistryPage: CheckManifestRegistryPage;
   // Extended file example
   checkDeleteRecordsPage: DeleteRecordsPage;
+
+  // Add Profile Page
+  // Refactor Manifest Registries Page
 };
 
 // Extend base test by providing "todoPage" and "settingsPage".
 // This new "test" can be used in multiple test files, and each of them will get the fixtures.
 
 export const test = base.extend<MyFixtures>({
-  // checkMediaDerivatesPage: async ({ page }, use) => {
-  //   // Set up the fixture.
-  //   const checkMediaDerivatesPage = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, 'https://anthro.collectionspace.org/','admin@anthro.collectionspace.org','Administrator' );
-  //   await checkMediaDerivatesPage.doLogin();
-
-  //   // Use the fixture value in the test.
-  //   await use(checkMediaDerivatesPage);
-  // },
-
-  checkPages: async ({ page }, use) => {
+  checkMediaDerivativesPage: async ({ page }, use) => {
     // Set up the fixture.
-    const checkPages = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, 'https://anthro.collectionspace.org/','admin@anthro.collectionspace.org','Administrator' );
-    await checkPages.doLogin();
+    const checkMediaDerivativesPage = new CheckMediaDerivativesPage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL, process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    await checkMediaDerivativesPage.doLogin();
+
+    // Use the fixture value in the test.
+    await use(checkMediaDerivativesPage);
+  },
+
+  checkImportTerms: async ({ page }, use) => {
+    // Set up the fixture.
+    const checkImportTerms = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    await checkImportTerms.doLogin();
+
+    // Use the fixture value in the test.
+    await use(checkImportTerms);
+  },
+
+  checkExportRecords: async ({ page }, use) => {
+    // Set up the fixture.
+    const checkExportRecords = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    await checkExportRecords.doLogin();
+
+    // Use the fixture value in the test.
+    await use(checkExportRecords);
+  },
+  
+  checkCreateUpdateRecords: async ({ page }, use) => {
+    // Set up the fixture.
+    const checkCreateUpdateRecords = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    await checkCreateUpdateRecords.doLogin();
     
     // Use the fixture value in the test.
-    await use(checkPages);
+    await use(checkCreateUpdateRecords);
   },
 
   checkDeleteRecordsPage: async ({ page }, use) => {
     // Set up the fixture.
-    const checkDeleteRecordsPage = new DeleteRecordsPage(page, process.env.DATA_TOOLKIT_URL, 'https://anthro.collectionspace.org/','admin@anthro.collectionspace.org','Administrator' );
+    const checkDeleteRecordsPage = new DeleteRecordsPage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
     await checkDeleteRecordsPage.doLogin();
     
     // Use the fixture value in the test.
     await use(checkDeleteRecordsPage);
   },
 
+  checkProfilePage: async ({ page }, use) => {
+    // Set up the fixture.
+    const checkProfilePage = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    await checkProfilePage.doLogin();
+    
+    // Use the fixture value in the test.
+    await use(checkProfilePage);
+  },
+
+  checkManifestRegistryPage: async ({ page }, use) => {
+    // Set up the fixture.
+    const checkManifestRegistryPage = new DataToolkitBasePage(page, process.env.DATA_TOOLKIT_URL, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    await checkManifestRegistryPage.doLogin();
+    
+    // Use the fixture value in the test.
+    await use(checkManifestRegistryPage);
+  },
+
+  checkCspace: async ({  page }, use) => {
+    // Set up the fixture.
+    const checkCspace = new CSpaceFixture(page, process.env.DATA_CSPACE_URL,process.env.DATA_CSPACE_ADMIN,process.env.DATA_CSPACE_PASSWORD );
+    // await checkCspace.doLogin();
+    
+    // Use the fixture value in the test.
+    await use(checkCspace);
+  },
 });
 export { expect } from '@playwright/test';
