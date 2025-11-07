@@ -6,10 +6,7 @@ builder:
   arch: amd64
 
 registry:
-  username:
-    - DOCKER_REGISTRY_USER
-  password:
-    - DOCKER_REGISTRY_PASSWORD
+  server: "localhost:5555"
 
 ssh:
   config: true
