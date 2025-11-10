@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # rails gems
-gem "rails", "~> 8.1.0"
+gem "rails", "~> 8.1.1"
 gem "propshaft"
 gem "sqlite3", ">= 2.1"
 gem "puma", ">= 5.0"
@@ -73,5 +73,5 @@ gem "mission_control-jobs"
 gem "pagy"
 gem "rails_icons", "~> 1.4"
 gem "scout_apm"
-gem "tailwindcss-rails", "~> 4.3"
+gem "tailwindcss-rails", "~> 4.4"
 gem "tailwindcss-ruby", "~> 4.1"
