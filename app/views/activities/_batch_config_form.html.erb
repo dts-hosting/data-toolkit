@@ -1,14 +1,14 @@
 <%= form.fields_for :batch_config do |batch_form| %>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <%= render "shared/card/property_grid", columns: 2 do %>
     <!-- Select fields column -->
     <div>
       <h4 class="font-medium mb-3">Selection Options</h4>
 
       <% if activity.select_attributes.any? %>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 space-y-4">
+        <%= render "shared/card/property_grid", columns: 2 do %>
           <% activity.select_attributes.each do |attr_name| %>
             <%= batch_form.label attr_name, class: "label-text font-medium" %>
-            <div class="sm:col-span-2">
+            <div class="form-control">
               <%= batch_form.select attr_name,
                                     options_for_select(
                                       BatchConfig.values(attr_name),
@@ -18,7 +18,7 @@
                                     class: "select select-bordered w-full" %>
             </div>
           <% end %>
-        </div>
+        <% end %>
       <% else %>
         <div class="mb-4">
           <span class="label-text font-medium">No options to select</span>
@@ -30,14 +30,14 @@
     <div>
       <h4 class="font-medium mb-3">Toggle Options</h4>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 space-y-4">
+      <%= render "shared/card/property_grid", columns: 2 do %>
         <% activity.boolean_attributes.each do |attr_name| %>
           <%= batch_form.label attr_name, class: "label-text font-medium" %>
           <div class="form-control">
             <%= batch_form.check_box attr_name, class: "toggle toggle-primary" %>
           </div>
         <% end %>
-      </div>
+      <% end %>
     </div>
-  </div>
+  <% end %>
 <% end %>

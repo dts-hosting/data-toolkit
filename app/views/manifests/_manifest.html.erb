@@ -1,20 +1,14 @@
-<div id="<%= dom_id(manifest) %>" class="card bg-base-100 shadow-md mb-3">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-medium break-all">
-        <a href="<%= manifest.url %>" target="_blank" class="link link-primary"><%= manifest.name_for_url %></a>
-      </h3>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <span class="text-base-content/60 text-sm">Imported:</span>
-        <div><%= local_time(manifest.created_at) %></div>
-      </div>
-      <div>
-        <span class="text-base-content/60 text-sm">Data Configs:</span>
-        <div><%= manifest.data_configs_count %></div>
-      </div>
-    </div>
+<%= render "shared/card/base", id: dom_id(manifest), card_class: "bg-base-100 shadow-md mb-3" do %>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-medium break-all">
+      <a href="<%= manifest.url %>" target="_blank" class="link link-info"><%= manifest.name_for_url %></a>
+    </h3>
   </div>
-</div>
+
+  <%= render "shared/card/property_grid", columns: 2 do %>
+    <%= render partial: "shared/card/item",
+               locals: { property: "Imported", value: local_time(manifest.created_at) } %>
+    <%= render partial: "shared/card/item",
+               locals: { property: "Data Configs", value: manifest.data_configs_count } %>
+  <% end %>
+<% end %>

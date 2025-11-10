@@ -8,11 +8,15 @@ class ProcessUploadedFilesJob < ApplicationJob
     task.start!
     Rails.logger.info "File upload job started"
 
+    if task.activity.files.empty? && !task.activity.class.requires_files?
+      task.done!(Task::SUCCEEDED) && return
+    end
+
     feedback = task.feedback_for
 
     if task.activity.files.empty?
       feedback.add_to_errors(subtype: :no_file)
-      task.fail!(feedback) && return
+      task.done!(Task::FAILED, feedback) && return
     end
 
     validated = FilesValidator.new(
@@ -20,16 +24,23 @@ class ProcessUploadedFilesJob < ApplicationJob
       taskname: task.feedback_context,
       feedback: feedback
     ).call
-    task.fail!(feedback) && return unless validated.valid?
+    unless validated.valid?
+      task.done!(Task::FAILED, feedback) && return
+    end
 
     validated.data.each { |table| import_from_csv(task, table) }
 
-    # Can update status directly as it's not spawning other jobs
-    task.success!
+    task.reload
+    if task.activity.data_items_count.zero?
+      feedback.add_to_errors(subtype: :no_data)
+      task.done!(Task::FAILED, feedback) && return
+    end
+
+    task.done!(Task::SUCCEEDED)
   rescue => e
     Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.fail!(feedback)
+    task.done!(Task::FAILED, feedback) && return
   end
 
   def import_from_csv(task, table)

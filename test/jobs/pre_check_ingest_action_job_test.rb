@@ -1,7 +1,7 @@
 require "ostruct"
 require "test_helper"
 
-class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
+class PreCheckIngestActionJobTest < ActiveJob::TestCase
   setup do
     files = create_uploaded_files(["test.csv"])
     @activity = create_activity(
@@ -9,13 +9,13 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
       config: {action: "create", auto_advance: false},
       files: files
     )
-    @data_item = DataItem.create(
+    @data_item = DataItem.create!(
       data: {foo: "bar"},
       position: 101,
-      activity: @activity,
-      current_task: @activity.current_task
+      activity: @activity
     )
-    @data_item.save!
+    @task = @activity.current_task
+    @action = Action.create!(task: @task, data_item: @data_item)
   end
 
   test "job fails if data item check is not ok" do
@@ -28,15 +28,16 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
       .returns(mock_handler)
     mock_handler.stubs(:validate).returns(empty_required_field_response)
 
-    PreCheckIngestDataItemJob.perform_later(@data_item)
+    PreCheckIngestActionJob.perform_later(@activity, @action)
 
-    assert_performed_with(job: PreCheckIngestDataItemJob, args: [@data_item]) do
+    assert_performed_with(job: PreCheckIngestActionJob, args: [@activity, @action]) do
       perform_enqueued_jobs
     end
 
-    @data_item.reload
+    @action.reload
 
-    assert_equal "failed", @data_item.status
+    assert_equal Action::COMPLETED, @action.progress_status
+    assert @action.feedback_for.errors.any?
   end
 
   test "job succeeds if pre-checks pass" do
@@ -49,16 +50,16 @@ class PreCheckIngestDataItemJobTest < ActiveJob::TestCase
       .returns(mock_handler)
     mock_handler.stubs(:validate).returns(valid_response)
 
-    PreCheckIngestDataItemJob.perform_later(@data_item)
+    PreCheckIngestActionJob.perform_later(@activity, @action)
 
-    assert_performed_with(job: PreCheckIngestDataItemJob, args: [@data_item]) do
+    assert_performed_with(job: PreCheckIngestActionJob, args: [@activity, @action]) do
       perform_enqueued_jobs
     end
 
-    @data_item.reload
+    @action.reload
 
-    assert_equal "succeeded", @data_item.status
-    assert @data_item.feedback_for.ok?
+    assert_equal Action::COMPLETED, @action.progress_status
+    assert @action.feedback_for.ok?
   end
 
   private

@@ -4,7 +4,7 @@ class ActivitiesController < ApplicationController
 
   def new
     @activity = @activity_type.new
-    @activity.build_batch_config if @activity.requires_batch_config?
+    @activity.build_batch_config if @activity.class.has_batch_config?
   end
 
   def create
@@ -29,7 +29,8 @@ class ActivitiesController < ApplicationController
   private
 
   def set_activity
-    accessible_activities = Activity.joins(:user)
+    accessible_activities = Activity.includes(:user, :data_config, :batch_config, :tasks)
+      .joins(:user)
       .where(
         "activities.user_id = ? OR users.cspace_url = ?",
         Current.user.id,
@@ -54,6 +55,7 @@ class ActivitiesController < ApplicationController
   def activity_params
     base_params = [
       :type,
+      :label,
       :data_config_id,
       {files: []},
       config: {},

@@ -1,18 +1,14 @@
-<div class="card bg-base-200 shadow-lg mb-4">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="card-title">Feedback</h2>
-    </div>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+  <%= render "shared/card/header", title: "Feedback" %>
 
-    <% feedback.each do |type, entries| %>
-      <div class="mb-6">
-        <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-4"><%= type.to_s.titleize %></h3>
-        <ul class="list-disc list-inside">
-          <% entries.each do |message| %>
-            <%= content_tag :li, message %>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
-  </div>
-</div>
+  <% feedback.each do |type, entries| %>
+    <div class="mb-6">
+      <%= render partial: "shared/card/subtitle", locals: { title: type.to_s.titleize } %>
+      <ul class="list-disc list-inside">
+        <% entries.each do |message| %>
+          <%= content_tag :li, message %>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+<% end %>

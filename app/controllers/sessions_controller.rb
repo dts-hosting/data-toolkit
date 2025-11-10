@@ -1,6 +1,9 @@
 class SessionsController < ApplicationController
   allow_unauthenticated_access only: %i[new create]
-  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_url, alert: "Try again later." }
+  rate_limit to: 10, within: 3.minutes,
+    only: :create,
+    with: -> { redirect_to new_session_url, alert: "Try again later." },
+    if: -> { ENV["ENABLE_RATE_LIMITING"] == "true" }
 
   def new
   end
@@ -19,7 +22,7 @@ class SessionsController < ApplicationController
   def authenticate_user
     client = build_client
 
-    if client.can_authenticate?
+    if client&.can_authenticate?
       handle_authentication(client)
     else
       authentication_failed
@@ -27,6 +30,8 @@ class SessionsController < ApplicationController
   end
 
   def build_client
+    return nil unless session_params[:cspace_url]&.match?(RequiresUrl::URL_FORMAT)
+
     CollectionSpaceApi.client_for(
       session_params[:cspace_url],
       session_params[:email_address],

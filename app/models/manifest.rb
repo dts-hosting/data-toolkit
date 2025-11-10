@@ -1,5 +1,6 @@
 class Manifest < ApplicationRecord
   include RequiresUrl
+
   belongs_to :manifest_registry, touch: true
   has_many :data_configs, dependent: :delete_all
 

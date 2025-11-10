@@ -4,28 +4,24 @@ module Activities
 
     def data_config_type = "term_list"
 
-    def requires_batch_config?
-      false
-    end
-
-    def requires_config_fields?
-      false
-    end
-
-    def requires_files?
-      true
-    end
-
-    def requires_single_file?
-      true
-    end
-
     def workflow
       []
     end
 
     def self.display_name
       "Import Terms"
+    end
+
+    def self.file_requirement
+      :required_single
+    end
+
+    def self.has_batch_config?
+      false
+    end
+
+    def self.has_config_fields?
+      false
     end
   end
 end

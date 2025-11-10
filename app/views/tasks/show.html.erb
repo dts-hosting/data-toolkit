@@ -1,27 +1,55 @@
 <%= turbo_stream_from @task %>
 
-<div class="card bg-base-200 shadow-lg mb-4">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="card-title"><%= @task.class.display_name %></h2>
-      <div>
-        <%= link_to activity_path(@activity), class: "btn btn-info btn-sm" do %>
-          <%= icon "arrow-uturn-left", class: "size-3" %>
-        <% end %>
-      </div>
-    </div>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+  <% actions_content = capture do %>
+    <%= link_to activity_path(@activity), class: "btn btn-info btn-sm" do %>
+      <%= icon "arrow-uturn-left", class: "size-3" %>
+    <% end %>
+  <% end %>
+  <%= render "shared/card/header",
+             title: @task.class.display_name,
+             actions: actions_content %>
 
-    <div id="<%= dom_id(@task) %>_details">
-      <%= render "details", task: @task %>
-    </div>
+  <div id="<%= dom_id(@task) %>_details">
+    <%= render "details", task: @task %>
   </div>
-</div>
+<% end %>
 
 <% if @task.has_feedback? %>
   <% taskfeedback = @task.feedback_for %>
   <% if taskfeedback.displayable? %>
     <%= render "feedback", feedback: taskfeedback.for_display %>
   <% else %>
-    <p>We are busily generating feedback ... stand by!</p>
+    <%= render "feedback", feedback: {
+      messages: ["We are busily generating feedback ... stand by!"]}
+    %>
+  <% end %>
+<% end %>
+
+<% if @task.files.attached? %>
+  <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+    <%= render "shared/card/header", title: "Files" %>
+
+    <div class="space-y-2">
+      <% @task.files.each do |file| %>
+        <%= link_to rails_blob_path(file, disposition: "attachment"),
+                    class: "flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-colors group" do %>
+          <div class="flex-shrink-0">
+            <%= icon_for_file(file) %>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate group-hover:text-primary">
+              <%= file.filename %>
+            </p>
+            <p class="text-xs text-base-content/70">
+              <%= number_to_human_size(file.byte_size) %>
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+            <%= icon "arrow-down-tray", class: "size-5 text-base-content/50 group-hover:text-primary" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
   <% end %>
 <% end %>

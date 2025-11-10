@@ -1,53 +1,60 @@
-<div class="card bg-base-200 shadow-lg">
-  <div class="card-body">
-    <h2 class="card-title mb-4">Activities</h2>
-    <div class="mb-4">
-      <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-2">View</h3>
-      <ul class="menu menu-compact">
-        <li>
-          <%= link_to my_activities_path, class: "flex items-center px-2 py-1 rounded #{'bg-base-200 font-medium' if current_page?('#')}" do %>
-            <%= icon "user", variant: "solid", class: "size-5" %>My activities
-          <% end %>
-        </li>
-        <li>
-          <%= link_to group_activities_path, class: "flex items-center px-2 py-1 rounded #{'bg-base-200 font-medium' if current_page?('#')}" do %>
-            <%= icon "list-bullet", class: "size-5" %>Group activities
-          <% end %>
-        </li>
-      </ul>
-    </div>
-
-    <div class="mb-4">
-      <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-2">Perform</h3>
-      <ul class="menu menu-compact">
-        <% Activity.display_names.each do |name| %>
-          <li>
-            <%= link_to new_activity_with_type_path(type: name.parameterize), class: "flex items-center px-2 py-1 rounded" do %>
-              <%= icon "plus-circle", class: "size-5" %><%= name %>
-            <% end %>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-
-    <% if admin? %>
-      <div>
-        <h3 class="text-base-content/70 font-semibold border-b border-base-400 pb-2 mb-2">Admin</h3>
-        <ul class="menu menu-compact">
-          <li>
-            <%= link_to "/jobs", class: "flex items-center px-2 py-1 rounded" do %>
-              <%= icon "chart-bar", class: "size-5" %>
-              Jobs Dashboard
-            <% end %>
-          </li>
-          <li>
-            <%= link_to manifest_registries_path, class: "flex items-center px-2 py-1 rounded" do %>
-              <%= icon "document-duplicate", class: "size-5" %>
-              Manifest Registries
-            <% end %>
-          </li>
-        </ul>
-      </div>
-    <% end %>
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
+  <h2 class="card-title mb-4">Activities</h2>
+  <div class="mb-4">
+    <%= render partial: "shared/card/subtitle", locals: { title: "View" } %>
+    <ul class="menu w-full">
+      <%= render partial: "shared/menu/item",
+                 locals: {
+                   menu_item_name: "My activities",
+                   menu_item_icon: "user",
+                   menu_item_path: my_activities_path
+                 } %>
+      <%= render partial: "shared/menu/item",
+                 locals: {
+                   menu_item_name: "Group activities",
+                   menu_item_icon: "list-bullet",
+                   menu_item_path: group_activities_path
+                 } %>
+      <%= render partial: "shared/menu/item",
+                 locals: {
+                   menu_item_name: "Activity history",
+                   menu_item_icon: "archive-box",
+                   menu_item_path: activity_history_path
+                 } %>
+    </ul>
   </div>
-</div>
+
+  <div class="mb-4">
+    <%= render partial: "shared/card/subtitle", locals: { title: "Perform" } %>
+    <ul class="menu w-full">
+      <% Activity.display_names.each do |name| %>
+        <%= render partial: "shared/menu/item",
+                   locals: {
+                     menu_item_name: name,
+                     menu_item_icon: "plus-circle",
+                     menu_item_path: new_activity_with_type_path(type: name.parameterize)
+                   } %>
+      <% end %>
+    </ul>
+  </div>
+
+  <% if admin? %>
+    <div>
+      <%= render partial: "shared/card/subtitle", locals: { title: "Admin" } %>
+      <ul class="menu w-full">
+        <%= render partial: "shared/menu/item",
+                   locals: {
+                     menu_item_name: "Jobs Dashboard",
+                     menu_item_icon: "chart-bar",
+                     menu_item_path: "/jobs"
+                   } %>
+        <%= render partial: "shared/menu/item",
+                   locals: {
+                     menu_item_name: "Manifest Registries",
+                     menu_item_icon: "document-duplicate",
+                     menu_item_path: manifest_registries_path
+                   } %>
+      </ul>
+    </div>
+  <% end %>
+<% end %>

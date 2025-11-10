@@ -30,7 +30,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     end
 
     @task.reload
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.status
 
     feedback = @task.feedback_for
     assert_equal feedback.errors.map(&:subtype), [:application_error]
@@ -55,7 +55,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     end
 
     @task.reload
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.status
     feedback = @task.feedback_for
     assert_equal feedback.errors.map(&:subtype), [:application_error]
     assert_equal feedback.errors.map(&:details),
@@ -83,10 +83,10 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     end
 
     @task.reload
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.status
   end
 
-  test "job spawns DataItem jobs if pre-checks pass" do
+  test "job spawns Action jobs if pre-checks pass" do
     assert_performed_with(job: ProcessUploadedFilesJob, args: [@activity.current_task]) do
       perform_enqueued_jobs
     end
@@ -102,8 +102,8 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
       perform_enqueued_jobs
     end
 
-    @task.data_items.each do |data_item|
-      assert_performed_with(job: PreCheckIngestDataItemJob, args: [data_item])
+    @task.actions.each do |action|
+      assert_performed_with(job: PreCheckIngestActionJob, args: [@activity, action])
     end
   end
 end

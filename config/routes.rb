@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   root to: "home#index"
   get "/my_activities", to: "home#index"
   get "/group_activities", to: "home#group_activities", as: :group_activities
+  get "/history", to: "home#history", as: :activity_history
 
   resources :activities, only: [:show, :destroy] do
     resources :tasks, only: [:show] do

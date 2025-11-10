@@ -1,0 +1,5 @@
+<li>
+  <%= link_to menu_item_path, class: "#{'bg-base-300 font-medium' if current_page?(menu_item_path)}" do %>
+    <%= icon menu_item_icon, class: "size-5" %><%= menu_item_name %>
+  <% end %>
+</li>

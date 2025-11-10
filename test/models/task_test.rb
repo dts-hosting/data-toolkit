@@ -25,35 +25,41 @@ class TaskTest < ActiveSupport::TestCase
     assert_includes @task.errors[:activity], "must exist"
   end
 
-  test "should require status" do
-    @task.status = nil
+  test "should require progress_status" do
+    @task.progress_status = nil
     assert_not @task.valid?
-    assert_includes @task.errors[:status], "can't be blank"
+    assert_includes @task.errors[:progress_status], "can't be blank"
   end
 
-  test "should have default status of pending" do
+  test "should have default progress_status of pending" do
     task = Task.new
-    assert_equal "pending", task.status
+    assert_equal Task::PENDING, task.progress_status
   end
 
-  test "should allow valid status values" do
-    Task.statuses.keys.each do |status|
-      @task.status = status
-      assert @task.valid?, "#{status} should be a valid status"
+  test "should allow valid progress_status values" do
+    %w[pending queued running completed].each do |status|
+      @task.progress_status = status
+      assert @task.valid?, "#{status} should be a valid progress_status"
+    end
+  end
+
+  test "should allow valid outcome_status values" do
+    %w[review failed succeeded].each do |status|
+      @task.outcome_status = status
+      assert @task.valid?, "#{status} should be a valid outcome_status"
     end
   end
 
   test "should track timestamps for task progression" do
     @task.save!
 
-    @task.started_at = Time.current
-    @task.status = :running
-    @task.save!
+    @task.start!
     assert_not_nil @task.started_at
+    assert_equal Task::RUNNING, @task.progress_status
 
-    @task.completed_at = Time.current
-    @task.status = :succeeded
-    @task.save!
+    @task.done!(Task::SUCCEEDED)
+    assert_equal Task::SUCCEEDED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
   end
 
@@ -87,7 +93,7 @@ class TaskTest < ActiveSupport::TestCase
     assert_includes dependent_task.dependencies, first_task.class
     assert_not dependent_task.ok_to_run?
 
-    first_task.success!
+    first_task.done!(Task::SUCCEEDED)
     assert dependent_task.ok_to_run?
   end
 
@@ -96,344 +102,202 @@ class TaskTest < ActiveSupport::TestCase
     @task.save!
     @task.start!
 
-    assert_equal "running", @task.status
+    assert_equal Task::RUNNING, @task.progress_status
     assert_not_nil @task.started_at
   end
 
-  test "should execute fail! method correctly when feedback is empty Hash" do
+  test "should execute done! method correctly with outcome" do
     @task.save!
-    @task.fail!({})
+    @task.done!(Task::SUCCEEDED)
 
-    assert_equal "failed", @task.status
+    assert_equal Task::SUCCEEDED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
-    feedback = @task.feedback_for
-    refute feedback.displayable?
   end
 
-  test "should execute fail! method correctly when feedback is valid feedback Hash" do
+  test "should execute done! method correctly with feedback" do
     feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
                      "errors" =>
      [{"type" => "error",
        "subtype" => "csvlint_invalid_encoding",
        "details" => "row 2",
-       "prefix" => "invalid_encoding.csv"},
-       {"type" => "error",
-        "subtype" => "csv_stdlib_malformed_csv",
-        "details" => "Invalid byte sequence in UTF-8 in line 2.",
-        "prefix" => "invalid_encoding.csv"}],
+       "prefix" => "invalid_encoding.csv"}],
                      "warnings" => [],
                      "messages" => []}
 
     @task.save!
-    @task.fail!(feedback_hash)
+    @task.done!(Task::FAILED, feedback_hash)
 
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
     feedback = @task.feedback_for
     refute feedback.ok?
-  end
-
-  # Full backtrace for the expected error the following test should cause:
-  #   Error:
-  #   TaskTest#test_should_execute_fail!_method_correctly_when_feedback_is_invalid_feedback_Hash:
-  #   NoMethodError: undefined method 'underscore' for nil
-  #       App/lib/feedback_element.rb:73:in 'FeedbackElement#parent_scope'
-  #       app/lib/feedback_element.rb:66:in 'FeedbackElement#get_msgs'
-  #       app/lib/feedback_element.rb:22:in 'FeedbackElement#initialize'
-  #       app/models/feedback.rb:51:in 'Class#new'
-  #       app/models/feedback.rb:51:in 'Feedback#add_to_attribute'
-  #       app/models/feedback.rb:67:in 'Kernel#public_send'
-  #       app/models/feedback.rb:67:in 'block (2 levels) in Feedback#attributes='
-  #       app/models/feedback.rb:65:in 'Array#each'
-  #       app/models/feedback.rb:65:in 'block in Feedback#attributes='
-  #       app/models/feedback.rb:59:in 'Hash#each'
-  #       app/models/feedback.rb:59:in 'Feedback#attributes='
-  #       app/models/concerns/feedbackable.rb:8:in 'Feedbackable#feedback_for'
-  #       test/models/task_test.rb:156:in 'block in <class:TaskTest>'
-  test ":feedback_for should raise exception when invalid feedback Hash has been saved" do
-    feedback_hash = {"errors" =>
-                       [{"type" => "error",
-                         "subtype" => "csvlint_invalid_encoding",
-                         "details" => "row 2",
-                         "prefix" => "invalid_encoding.csv"}]}
-    @task.save!
-    @task.fail!(feedback_hash)
-
-    assert_equal "failed", @task.status
-    assert_not_nil @task.completed_at
-    assert_equal ["errors"], @task.feedback.keys
-    assert_raises(NoMethodError, "undefined method 'underscore' for nil") do
-      @task.feedback_for
-    end
-  end
-
-  test "should execute fail! method correctly when feedback is Feedback Object" do
-    @task.save!
-    feedback = @task.feedback_for
-    feedback.add_to_errors(subtype: :csvlint_invalid_encoding, details: "row 2",
-      prefix: "invalid_encoding.csv")
-    @task.fail!(feedback)
-
-    assert_equal "failed", @task.status
-    assert_not_nil @task.completed_at
-    refute feedback.ok?
-    assert_equal 1, @task.feedback["errors"].length
-  end
-
-  test "should execute success! method correctly" do
-    @task.save!
-    @task.success!
-
-    assert_equal "succeeded", @task.status
-    assert_not_nil @task.completed_at
-  end
-
-  test "should execute suspend! method correctly" do
-    @task.save!
-    @task.suspend!
-
-    assert_equal "review", @task.status
-    assert_not_nil @task.completed_at
-  end
-
-  test "should execute suspend! method correctly when feedback is empty Hash" do
-    @task.save!
-    @task.suspend!({})
-
-    assert_equal "review", @task.status
-    assert_not_nil @task.completed_at
-    feedback = @task.feedback_for
-    refute feedback.displayable?
-  end
-
-  test "should execute suspend! method correctly when feedback is valid feedback Hash" do
-    feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
-                     "errors" => [],
-                     "warnings" =>
-     [{"type" => "warning",
-       "subtype" => "csvlint_check_options",
-       "details" => "check not good",
-       "prefix" => "test.csv"},
-       {"type" => "warning",
-        "subtype" => "csvlint_duplicate_column_name",
-        "details" => "Duplicate header found",
-        "prefix" => "test.csv"}],
-                     "messages" => []}
-
-    @task.save!
-    @task.suspend!(feedback_hash)
-
-    assert_equal "review", @task.status
-    assert_not_nil @task.completed_at
-    feedback = @task.feedback_for
-    assert feedback.ok?
-  end
-
-  test "should execute suspend! method correctly when feedback is Feedback Object" do
-    @task.save!
-    feedback = @task.feedback_for
-    feedback.add_to_warnings(subtype: :csvlint_check_options, details: "check not good",
-      prefix: "test.csv")
-    @task.suspend!(feedback)
-
-    assert_equal "review", @task.status
-    assert_not_nil @task.completed_at
-    assert feedback.ok?
-    assert_equal 1, @task.feedback["warnings"].length
   end
 
   # progress checking
-  test "progress should be 0 when status is pending" do
-    @task.status = "pending"
+  test "progress should be 0 when progress_status is pending" do
+    @task.progress_status = Task::PENDING
     assert_equal 0, @task.progress
   end
 
-  test "progress should be 0 when status is queued" do
-    @task.status = "queued"
+  test "progress should be 0 when progress_status is queued" do
+    @task.progress_status = Task::QUEUED
     assert_equal 0, @task.progress
   end
 
-  test "progress should be 100 when status is succeeded" do
-    @task.status = "succeeded"
+  test "progress should be 100 when progress_status is completed" do
+    @task.progress_status = Task::COMPLETED
     assert_equal 100, @task.progress
   end
 
-  test "progress should be 100 when status is failed" do
-    @task.status = "failed"
-    assert_equal 100, @task.progress
-  end
-
-  test "progress should be 100 when status is review" do
-    @task.status = "review"
-    assert_equal 100, @task.progress
-  end
-
-  test "progress should calculate percentage when status is running" do
+  test "progress should calculate percentage when progress_status is running" do
     @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
+    create_actions_for_task(@task)
+    @task.progress_status = Task::RUNNING
 
-    @task.data_items.first.update(status: "succeeded")
-    @task.data_items.last.update(status: "succeeded")
+    @task.actions.first.update(progress_status: Task::COMPLETED)
+    @task.actions.last.update(progress_status: Task::COMPLETED)
 
-    # Should be 40% complete (2 out of 5 items)
-    assert_equal 40.0, @task.progress
+    # Should be 40% complete (2 out of 5 actions)
+    assert_equal 40, @task.progress
   end
 
-  test "progress should include review status items in calculation" do
-    @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
-
-    @task.data_items[0].update(status: "succeeded")
-    @task.data_items[1].update(status: "review")
-
-    # Should be 40% complete (2 out of 5 items, both succeeded and review count as progressed)
-    assert_equal 40.0, @task.progress
-  end
-
-  test "progress should be 0 when running with no data items" do
-    @task.status = "running"
+  test "progress should be 0 when running with no actions" do
+    @task.progress_status = Task::RUNNING
     assert_equal 0, @task.progress
   end
 
-  test "progress should trigger finish_up when reaching 100%" do
+  test "progress should trigger finalize_status when reaching 100%" do
     @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
-    @task.save!
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::RUNNING)
 
-    @task.data_items.update_all(status: "succeeded")
-    @task.data_items.last.update(status: "succeeded")
+    @task.actions.update_all(progress_status: Task::COMPLETED)
+    @task.actions.last.update(progress_status: Task::COMPLETED)
     @task.reload
 
     assert_equal 100, @task.progress
-    assert_equal "succeeded", @task.status
+    assert_equal Task::SUCCEEDED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
   end
 
-  test "progress should set status to failed if any items failed" do
+  test "progress should set outcome to failed if all actions have errors" do
     @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
-    @task.save!
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::RUNNING)
 
-    @task.data_items.update_all(status: "succeeded")
-    @task.data_items.last.update(status: "failed")
+    @task.actions.update_all(
+      progress_status: Task::COMPLETED,
+      feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
+    )
+    @task.actions.last.update(
+      progress_status: Task::COMPLETED,
+      feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
+    )
     @task.reload
 
     assert_equal 100, @task.progress
-    assert_equal "failed", @task.status
+    assert_equal Task::FAILED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
   end
 
-  test "progress should set status to review if items are in review status" do
+  test "progress should set outcome to review if any (not all) actions have errors" do
     @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "running"
-    @task.save!
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::RUNNING)
 
-    @task.data_items.update_all(status: "succeeded")
-    @task.data_items.last.update(status: "review")
+    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    @task.actions.last.update(
+      progress_status: Task::COMPLETED,
+      feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
+    )
     @task.reload
 
     assert_equal 100, @task.progress
-    assert_equal "review", @task.status
+    assert_equal Task::REVIEW, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
+    assert_not_nil @task.completed_at
+  end
+
+  test "progress should set outcome to review if any actions have warnings" do
+    @task.save!
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::RUNNING)
+
+    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    @task.actions.last.update(
+      progress_status: Task::COMPLETED,
+      feedback: {"warnings" => [{"type" => "warning", "details" => "test"}]}
+    )
+    @task.reload
+
+    assert_equal 100, @task.progress
+    assert_equal Task::REVIEW, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
   end
 
   # Tests for the separation of status setting and finalizer execution
-  test "handle_completion should run finalizer when first transitioning to completed status with auto_advance disabled" do
-    # Create activity with auto_advance disabled to ensure finalizer runs
-    activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
-      config: {action: "create", auto_advance: false},
-      data_config: create_data_config_record_type({record_type: "acquisitions"}),
-      files: create_uploaded_files(["test.csv"])
-    )
-
-    task = activity.tasks.first
+  test "handle_completion should run finalizer when first transitioning to completed (not successful) status" do
+    @task.save!
     mock_finalizer = Minitest::Mock.new
-    mock_finalizer.expect :perform_later, nil, [task]
+    mock_finalizer.expect :perform_later, nil, [@task]
 
-    task.stub :finalizer, mock_finalizer do
-      task.save!
-      task.update!(status: "succeeded", completed_at: Time.current)
+    @task.stub :finalizer, mock_finalizer do
+      @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::REVIEW, completed_at: Time.current)
     end
 
     mock_finalizer.verify
-    assert_equal "succeeded", task.status
+    assert_equal Task::REVIEW, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
   end
 
-  test "handle_completion should not run finalizer when transitioning between completed statuses" do
+  test "handle_completion should not run finalizer when transitioning outcome status only" do
     @task.save!
     # First get task into a completed status
-    @task.update!(status: "review", completed_at: Time.current)
+    @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::REVIEW, completed_at: Time.current)
 
-    # Now mock the finalizer and transition to another completed status
+    # Now mock the finalizer and transition to another outcome status
     mock_finalizer = Minitest::Mock.new
     # No expectation set - the finalizer should not be called for this transition
 
     @task.stub :finalizer, mock_finalizer do
-      @task.update!(status: "succeeded")
+      @task.update!(outcome_status: Task::SUCCEEDED)
     end
 
     mock_finalizer.verify
-    assert_equal "succeeded", @task.status
+    assert_equal Task::SUCCEEDED, @task.outcome_status
   end
 
-  test "handle_completion should not run finalizer when status change is not to completed" do
+  test "handle_completion should not run finalizer when progress_status change is not to completed" do
     mock_finalizer = Minitest::Mock.new
     # No expectation set - the finalizer should not be called
 
     @task.stub :finalizer, mock_finalizer do
       @task.save!
-      @task.update!(status: "running", started_at: Time.current)
+      @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
     end
 
     mock_finalizer.verify
-    assert_equal "running", @task.status
-  end
-
-  test "completed? method should return true for progressed statuses" do
-    @task.save!
-
-    @task.status = "succeeded"
-    assert @task.completed?
-
-    @task.status = "failed"
-    assert @task.completed?
-
-    @task.status = "review"
-    assert @task.completed?
-  end
-
-  test "completed? method should return false for non-progressed statuses" do
-    @task.save!
-
-    @task.status = "pending"
-    assert_not @task.completed?
-
-    @task.status = "queued"
-    assert_not @task.completed?
-
-    @task.status = "running"
-    assert_not @task.completed?
+    assert_equal Task::RUNNING, @task.progress_status
   end
 
   # has_feedback? method tests
-  test "has_feedback? should return false when task is not completed" do
+  test "has_feedback? should return false when task progress is not completed" do
     @task.save!
-    @task.status = "pending"
+    @task.progress_status = Task::PENDING
     assert_not @task.has_feedback?
 
-    @task.status = "running"
+    @task.progress_status = Task::RUNNING
     assert_not @task.has_feedback?
   end
 
-  test "has_feedback? should return false when task is completed but no feedback" do
+  test "has_feedback? should return false when task progress is completed but no feedback" do
     @task.save!
-    @task.status = "succeeded"
+    @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED)
     assert_not @task.has_feedback?
   end
 
@@ -448,22 +312,22 @@ class TaskTest < ActiveSupport::TestCase
                      "messages" => []}
 
     @task.save!
-    @task.fail!(feedback_hash)
+    @task.done!(Task::REVIEW, feedback_hash)
 
-    assert @task.completed?
+    assert @task.progress_completed?
     assert @task.feedback_for.displayable?
     assert @task.has_feedback?
   end
 
-  test "has_feedback? should return true when task is completed and data_items have feedback" do
+  test "has_feedback? should return true when task is completed and actions have feedback" do
     @task.save!
-    create_data_items_for_task(@task)
-    @task.status = "succeeded"
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED)
 
-    # add feedback to a data item, no top level feedback yet
-    @task.data_items.first.update!(feedback: {"errors" => [{"type" => "error", "details" => "test error"}]})
+    # add feedback to an action
+    @task.actions.first.update!(feedback: {"errors" => [{"type" => "error", "details" => "test error"}]})
 
-    assert @task.completed?
+    assert @task.progress_completed?
     assert @task.has_feedback?
   end
 
@@ -479,27 +343,25 @@ class TaskTest < ActiveSupport::TestCase
     first_task = activity.tasks.first
     second_task = activity.tasks.second
 
-    # Set up the correct initial state:
-    # First task should be in a non-pending state (like "running") so it can transition to "succeeded"
-    # Second task should be "pending" so it can be picked up by next_task
-    first_task.update!(status: "running", started_at: Time.current)
-    second_task.update!(status: "pending")
+    # Set up the correct initial state
+    first_task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+    second_task.update!(progress_status: Task::PENDING)
 
     # Verify initial state
     assert_equal true, activity.config["auto_advance"]
     assert_equal 2, activity.tasks.count
     assert_equal second_task, activity.next_task
-    assert_equal "pending", second_task.status
+    assert_equal Task::PENDING, second_task.progress_status
 
     # Trigger auto-advance by completing the first task
-    first_task.update!(status: "succeeded", completed_at: Time.current)
+    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
 
     # Verify auto-advance occurred
     activity.reload
     second_task.reload
 
     assert activity.auto_advanced?, "Activity should have auto_advanced set to true"
-    assert_equal "queued", second_task.status, "Next task should have been queued (run was called)"
+    assert_equal Task::QUEUED, second_task.progress_status, "Next task should have been queued (run was called)"
   end
 
   test "handle_completion should not trigger auto-advance when task succeeds but auto_advance is disabled" do
@@ -511,19 +373,13 @@ class TaskTest < ActiveSupport::TestCase
     )
 
     first_task = activity.tasks.first
-    mock_finalizer = Minitest::Mock.new
-    mock_finalizer.expect :perform_later, nil, [first_task]
-
-    first_task.stub :finalizer, mock_finalizer do
-      first_task.update!(status: "succeeded", completed_at: Time.current)
-    end
+    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
 
     activity.reload
     assert_not activity.auto_advanced?
-    mock_finalizer.verify
   end
 
-  test "handle_completion should not trigger auto-advance when task fails" do
+  test "handle_completion should set auto_advanced to false when running finalizer for failed task" do
     activity = create_activity(
       type: "Activities::CreateOrUpdateRecords",
       config: {action: "create", auto_advance: true},
@@ -536,7 +392,7 @@ class TaskTest < ActiveSupport::TestCase
     mock_finalizer.expect :perform_later, nil, [first_task]
 
     first_task.stub :finalizer, mock_finalizer do
-      first_task.update!(status: "failed", completed_at: Time.current)
+      first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::FAILED, completed_at: Time.current)
     end
 
     activity.reload
@@ -544,24 +400,37 @@ class TaskTest < ActiveSupport::TestCase
     mock_finalizer.verify
   end
 
-  test "handle_completion should set auto_advanced to false when running finalizer" do
-    activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
-      config: {action: "create", auto_advance: true},
-      data_config: create_data_config_record_type({record_type: "acquisitions"}),
-      files: create_uploaded_files(["test.csv"])
-    )
-
-    first_task = activity.tasks.first
-    mock_finalizer = Minitest::Mock.new
-    mock_finalizer.expect :perform_later, nil, [first_task]
-
-    first_task.stub :finalizer, mock_finalizer do
-      first_task.update!(status: "failed", completed_at: Time.current)
+  # create_actions_for_data_items tests
+  test "create_actions_for_data_items should create actions for all data items when none have errors" do
+    @task.save!
+    5.times do |i|
+      @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
     end
 
-    activity.reload
-    assert_not activity.auto_advanced?
-    mock_finalizer.verify
+    @task.send(:create_actions_for_data_items)
+
+    assert_equal 5, @task.actions.count
+    assert_equal 5, @task.data_items.count
+  end
+
+  test "create_actions_for_data_items should exclude data items with errors from previous actions" do
+    @task.save!
+    data_items = 5.times.map do |i|
+      @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
+    end
+
+    # Create a previous action with errors for one data item
+    previous_task = @task.activity.tasks.create!(type: "Tasks::PreCheckIngestData")
+    Action.create!(
+      task: previous_task,
+      data_item: data_items[0],
+      feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
+    )
+
+    @task.send(:create_actions_for_data_items)
+
+    assert_equal 4, @task.actions.count
+    assert_equal 4, @task.data_items.count
+    assert_not_includes @task.data_items, data_items[0]
   end
 end

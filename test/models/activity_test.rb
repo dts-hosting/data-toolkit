@@ -9,7 +9,8 @@ class ActivityTest < ActiveSupport::TestCase
     @activity = Activity.new(
       user: @user,
       data_config: @data_config,
-      type: "Activities::ExportRecordIds"
+      type: "Activities::ExportRecordIds",
+      label: "Test Activity Label"
     )
   end
 
@@ -44,6 +45,29 @@ class ActivityTest < ActiveSupport::TestCase
     assert @activity.files.attached?
   end
 
+  # Label validation tests
+  test "should require a label" do
+    @activity.label = nil
+    refute @activity.valid?
+    assert_not_nil @activity.errors[:label]
+  end
+
+  test "should require label to be at least 3 characters" do
+    @activity.label = "ab"
+    refute @activity.valid?
+    assert_not_nil @activity.errors[:label]
+  end
+
+  test "should accept label with exactly 3 characters" do
+    @activity.label = "abc"
+    assert @activity.valid?
+  end
+
+  test "should accept label with more than 3 characters" do
+    @activity.label = "Valid Activity Label"
+    assert @activity.valid?
+  end
+
   test "current_task returns the first task when new activity created" do
     activity = create_activity(
       type: "Activities::CreateOrUpdateRecords",
@@ -69,7 +93,7 @@ class ActivityTest < ActiveSupport::TestCase
     )
 
     current_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
-    current_expected.queued!
+    current_expected.update!(progress_status: Task::QUEUED)
     # TODO: update when workflow fully defined
 
     assert_equal current_expected, activity.current_task
@@ -119,7 +143,7 @@ class ActivityTest < ActiveSupport::TestCase
 
     final_task = activity.tasks.last
     # skip to the end
-    final_task.update!(status: "succeeded", completed_at: Time.current)
+    final_task.update!(outcome_status: Task::SUCCEEDED, progress_status: Task::COMPLETED, completed_at: Time.current)
 
     # Capture log output
     log_output = StringIO.new

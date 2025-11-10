@@ -4,11 +4,11 @@ class GenericTaskFinalizerJob < ApplicationJob
   def perform(task)
     Rails.logger.info "#{self.class.name} started"
     feedback = task.feedback_for
-    feedback_items = task.data_items.where.not(feedback: nil)
+    feedback_actions = task.actions.where.not(feedback: nil)
 
-    log_finish && return if feedback_items.empty?
+    log_finish && return if feedback_actions.empty?
 
-    task.update(feedback: item_feedback_for(feedback, feedback_items))
+    task.update(feedback: action_feedback_for(feedback, feedback_actions))
   rescue => e
     Rails.logger.error e.message
     feedback.add_to_errors(subtype: :application_error, details: e)
@@ -17,24 +17,12 @@ class GenericTaskFinalizerJob < ApplicationJob
 
   private
 
-  def log_finish
-    Rails.logger.info "#{self.class.name} finished"
-  end
+  def action_feedback_for(feedback, actions)
+    actions.find_each(batch_size: 500) do |action|
+      action_feedback = action.feedback_for
+      next unless action_feedback.displayable?
 
-  def item_feedback_for(feedback, items)
-    items.find_each(batch_size: 500) do |item|
-      item_feedback = item.feedback_for
-      next unless item_feedback.displayable?
-
-      item_feedback.errors.each do |e|
-        feedback.add_to_errors(subtype: e.subtype, details: e.details)
-      end
-      item_feedback.warnings.each do |w|
-        feedback.add_to_warnings(subtype: w.subtype, details: w.details)
-      end
-      item_feedback.messages.each do |m|
-        feedback.add_to_messages(subtype: m.subtype, details: m.details)
-      end
+      feedback + action_feedback
     end
     feedback
   end

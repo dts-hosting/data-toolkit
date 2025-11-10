@@ -1,0 +1,37 @@
+<%= render "shared/card/base", id: dom_id(history), card_class: "bg-base-100 shadow-md mb-3" do %>
+  <div class="collapse collapse-arrow">
+    <input type="checkbox" />
+    <div class="collapse-title font-bold">
+      <div class="card-title justify-between">
+        <%= render partial: "shared/card/title",
+                   locals: { title: history.activity_label } %>
+        <%= format_task_status_badge(history.task_status) %>
+      </div>
+    </div>
+    <div class="collapse-content px-0">
+      <%= render "shared/card/property_grid", columns: 2 do %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "User", value: history.activity_user } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Type", value: history.activity_type } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Label", value: history.activity_label } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Created at", value: local_time(history.activity_created_at) } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Config Type", value: history.activity_data_config_type } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Record Type", value: history.activity_data_config_record_type || "N/A" } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Task type", value: history.task_type } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Task status", value: history.task_status } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Task started", value: local_time(history.task_started_at) } %>
+        <%= render partial: "shared/card/item",
+                   locals: { property: "Task completed",
+                             value: history.task_completed_at ? local_time(history.task_completed_at) : "N/A" } %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

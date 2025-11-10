@@ -6,8 +6,9 @@ proxy:
 servers:
   web:
     hosts:
-      - toolkit.lyrasistechnology.org
+      - general-shared-production-apps.lyrasistechnology.org
     env:
       ADMIN_EMAILS: admin@core.collectionspace.org,admin@anthro.collectionspace.org
+      ENABLE_RATE_LIMITING: false
       SCOUT_NAME: Data Toolkit (QA)
       SOLID_QUEUE_IN_PUMA: true

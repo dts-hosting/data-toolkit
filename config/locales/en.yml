@@ -28,7 +28,6 @@
 #       enabled: "ON"
 
 en:
-  hello: "Hello world"
   feedback:
     error:
       application_error: >-
@@ -38,6 +37,18 @@ en:
         for examination. Via the support method you have been instructed to
         use, please send us the URL of the failed Activity. If you delete the
         failed Activity, we cannot troubleshoot it. ERROR RECEIVED: %{details}
+      request_error: >-
+        Request has failed for an unexpected reason: %{details}
+      response_error: >-
+        Response has failed for an unexpected reason: %{details}
+      test_error: >-
+        Failed: %{details}
+    message:
+      report_generated: >-
+        Report has been generated. See attached file for details.
+    warning:
+      test_warning: >-
+        Warning: %{details}
   tasks:
     pre_check_ingest_data:
       feedback:
@@ -66,6 +77,15 @@ en:
           unknown_field:
             one: "Field that will <b>not</b> import: %{details}"
             other: "%{count} fields will <b>not</b> import: %{details}"
+    process_media_derivatives:
+      feedback:
+        error:
+          derivative_count_mismatch: "Incorrect number of derivatives: %{details}"
+          duplicate_id_found: "Duplicate ID found: %{details}"
+          invalid_type: "Invalid type: %{details}"
+          record_not_found: "Record not found: %{details}"
+        message:
+          blob_data: "Blob data: %{details}"
     process_uploaded_files:
       feedback:
         error:
@@ -91,7 +111,8 @@ en:
           csvlint_whitespace: >-
             Whitespace: A quoted value in %{details} has leading or trailing
             whitespace
-          no_file: "You must upload a file"
+          no_data: No data found in file
+          no_file: You must upload a file
         warning:
           csvlint_check_options: >-
             Single Column: Ok if you are expecting only one column of data;
