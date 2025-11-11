@@ -1,6 +1,4 @@
 module ApplicationHelper
-  include Pagy::Frontend
-
   def admin?
     authenticated? && Current.user.admin?
   end

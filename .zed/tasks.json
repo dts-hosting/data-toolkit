@@ -1,0 +1,20 @@
+[
+  {
+    "label": "Run Rails server",
+    "command": "bin/rails",
+    "args": ["server"],
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "Run all tests",
+    "command": "bin/rails",
+    "args": ["test"],
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "Run Rails test (at line)",
+    "command": "bin/rails",
+    "args": ["test", "$ZED_RELATIVE_FILE:$ZED_ROW"],
+    "cwd": "$ZED_WORKTREE_ROOT"
+  }
+]
