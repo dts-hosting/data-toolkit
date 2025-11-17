@@ -1,0 +1,58 @@
+[
+  {
+    "label": "Attach to Rails server",
+    "adapter": "rdbg",
+    "request": "attach",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "Debug Rails server",
+    "adapter": "rdbg",
+    "request": "launch",
+    "command": "bundle",
+    "args": [
+      "exec",
+      "rdbg",
+      "--open",
+      "--command",
+      "--",
+      "bin/rails",
+      "server"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "Debug Rails test (file)",
+    "adapter": "rdbg",
+    "request": "launch",
+    "command": "bundle",
+    "args": [
+      "exec",
+      "rdbg",
+      "--open",
+      "--command",
+      "--",
+      "bin/rails",
+      "test",
+      "$ZED_RELATIVE_FILE"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "Debug Rails test (at line)",
+    "adapter": "rdbg",
+    "request": "launch",
+    "command": "bundle",
+    "args": [
+      "exec",
+      "rdbg",
+      "--open",
+      "--command",
+      "--",
+      "bin/rails",
+      "test",
+      "$ZED_RELATIVE_FILE:$ZED_ROW"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT"
+  }
+]
