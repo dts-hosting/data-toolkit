@@ -43,7 +43,10 @@ test("Check Create/Update Records", async ({
 
       // Take a screenshot for verification
       const screenshotPath = testInfo.outputPath(
-        `test-results/${step.titlePath.join("_").replaceAll(" ", "").replaceAll("/", "-")}.png`
+        `test-results/${step.titlePath
+          .join("_")
+          .replaceAll(" ", "")
+          .replaceAll("/", "-")}.png`
       );
 
       await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -75,7 +78,10 @@ test("Check Create/Update Records", async ({
 
       // Take a screenshot for verification
       const screenshotPath = testInfo.outputPath(
-        `test-results/${step.titlePath.join("_").replaceAll(" ", "").replaceAll("/", "-")}.png`
+        `test-results/${step.titlePath
+          .join("_")
+          .replaceAll(" ", "")
+          .replaceAll("/", "-")}.png`
       );
 
       await page.screenshot({ path: screenshotPath, fullPage: true });
