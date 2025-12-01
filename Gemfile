@@ -29,7 +29,7 @@ end
 
 group :development do
   gem "htmlbeautifier"
-  gem "kamal", "~> 2.8"
+  gem "kamal", "~> 2.9"
   gem "letter_opener"
   gem "overcommit", require: false
   gem "web-console"
@@ -72,7 +72,7 @@ gem "csvlint",
 gem "local_time"
 gem "mission_control-jobs"
 gem "pagy"
-gem "rails_icons", "~> 1.4"
+gem "rails_icons", "~> 1.5"
 gem "scout_apm"
 gem "tailwindcss-rails", "~> 4.4"
 gem "tailwindcss-ruby", "~> 4.1"
