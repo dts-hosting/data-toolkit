@@ -69,7 +69,7 @@ module CollectionSpace
     end
 
     def parse_blob_record(response)
-      blob_data = response.parsed["document"]["blobs_common"]
+      blob_data = CollectionSpaceApi.blob_data(response)
       blob.length = blob_data["length"]
       blob.digest = blob_data["digest"]
       blob.name = blob_data["name"]
@@ -77,20 +77,20 @@ module CollectionSpace
     end
 
     def parse_derivatives_record(response)
-      i = response.parsed["abstract_common_list"].fetch("itemsInPage", 0).to_i
-      blob.derivatives_count = i
+      blob.derivatives_count = CollectionSpaceApi.item_count(response)
     end
 
     def parse_media_record(response)
-      items_in_page = response.parsed["abstract_common_list"].fetch("itemsInPage", 0).to_i
-      if items_in_page.zero?
+      r = CollectionSpaceApi::ResponseWrapper.new(response)
+      i = r.item_count
+      if i.zero?
         raise "Record not found"
-      elsif items_in_page > 1
+      elsif i > 1
         raise "Duplicate ID found"
       end
 
-      blob.csid = response.parsed["abstract_common_list"]["list_item"]["blobCsid"]
-      blob.media_csid = response.parsed["abstract_common_list"]["list_item"]["csid"]
+      blob.csid = r.value_for("blobCsid")
+      blob.media_csid = r.value_for("csid")
     end
 
     def retrieve_blob_data
