@@ -14,7 +14,7 @@ class Action < ApplicationRecord
     broadcast_task_progress if rand < checkin_frequency
   end
 
-  def feedback_context = task.class.name
+  def feedback_context = task.feedback_context
 
   scope :with_errors, -> { where("feedback IS NOT NULL AND json_array_length(feedback, '$.errors') > 0") }
   scope :without_errors, -> { where("feedback IS NOT NULL AND json_array_length(feedback, '$.errors') = 0") }

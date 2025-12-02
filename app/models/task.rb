@@ -2,6 +2,10 @@ class Task < ApplicationRecord
   include ActionView::RecordIdentifier
   include Feedbackable
   include Progressable
+  include TaskDefinition
+
+  # Disable STI - we use 'type' column for task type identifiers
+  self.inheritance_column = :_type_disabled
 
   belongs_to :activity, touch: true
   delegate :user, to: :activity
@@ -25,19 +29,26 @@ class Task < ApplicationRecord
   after_touch :check_progress
   after_update_commit :handle_completion
 
-  # the action level job associated with this task
-  def action_handler
-    raise NotImplementedError, "#{self.class} must implement #action_handler"
+  task_type :process_uploaded_files do
+    display_name "Process Uploaded Files"
+    handler ProcessUploadedFilesJob
+    auto_trigger true
   end
 
-  # tasks that are required to have succeeded for this task to run
-  def dependencies
-    []
+  task_type :pre_check_ingest_data do
+    display_name "Pre-Check Ingest Data"
+    handler PreCheckIngestDataJob
+    action_handler PreCheckIngestActionJob
+    finalizer GenericTaskFinalizerJob
+    depends_on :process_uploaded_files
   end
 
-  # the job that runs when this task is complete (which can spawn other jobs etc.)
-  def finalizer
-    nil
+  task_type :process_media_derivatives do
+    display_name "Process Media Derivatives"
+    handler GenericQueueActionJob
+    action_handler ProcessMediaDerivativesActionJob
+    finalizer GenericFeedbackReportJob
+    depends_on :process_uploaded_files, :pre_check_ingest_data
   end
 
   def done!(outcome_status, feedback = nil)
@@ -50,11 +61,6 @@ class Task < ApplicationRecord
     update!(**params)
   end
 
-  # the entrypoint job associated with this task (required)
-  def handler
-    raise NotImplementedError, "#{self.class} must implement #handler"
-  end
-
   def has_feedback?
     progress_completed? &&
       (feedback_for.displayable? || actions.where.not(feedback: nil).any?)
@@ -64,7 +70,9 @@ class Task < ApplicationRecord
     met_dependencies && progress_pending? && started_at.nil?
   end
 
-  def feedback_context = self.class.name
+  def feedback_context
+    "Tasks::#{type.to_s.camelize}"
+  end
 
   def progress
     case progress_status
@@ -87,14 +95,6 @@ class Task < ApplicationRecord
 
   def status
     progress_completed? ? outcome_status : progress_status
-  end
-
-  def self.display_name
-    raise NotImplementedError
-  end
-
-  def self.report_name
-    display_name.parameterize(separator: "_")
   end
 
   private

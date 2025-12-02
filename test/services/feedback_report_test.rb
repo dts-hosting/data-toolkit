@@ -16,7 +16,7 @@ class FeedbackReportTest < ActiveSupport::TestCase
   end
 
   test "generates CSV with headers and feedback data" do
-    task = @activity.tasks.where(type: "Tasks::ProcessMediaDerivatives").first
+    task = @activity.tasks.where(type: "process_media_derivatives").first
     actions = create_actions_with_feedback(task)
 
     report = FeedbackReport::CSV.new(actions, @file_path)
@@ -43,7 +43,7 @@ class FeedbackReportTest < ActiveSupport::TestCase
   end
 
   test "skips actions without displayable feedback" do
-    task = @activity.tasks.where(type: "Tasks::ProcessMediaDerivatives").first
+    task = @activity.tasks.where(type: "process_media_derivatives").first
     action_with_feedback = create_action_with_feedback(task)
     action_without_feedback = create_action_without_feedback(task)
 
@@ -57,7 +57,7 @@ class FeedbackReportTest < ActiveSupport::TestCase
   end
 
   test "handles file write errors" do
-    task = @activity.tasks.where(type: "Tasks::ProcessMediaDerivatives").first
+    task = @activity.tasks.where(type: "process_media_derivatives").first
     actions = create_actions_with_feedback(task)
     invalid_path = "/invalid/path/report.csv"
 

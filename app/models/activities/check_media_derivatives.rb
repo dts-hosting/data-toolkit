@@ -9,9 +9,9 @@ module Activities
 
     def workflow
       [
-        Tasks::ProcessUploadedFiles,
-        Tasks::PreCheckIngestData,
-        Tasks::ProcessMediaDerivatives
+        :process_uploaded_files,
+        :pre_check_ingest_data,
+        :process_media_derivatives
       ]
     end
 

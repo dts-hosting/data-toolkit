@@ -5,7 +5,7 @@ require "test_helper"
 class IngestDataPreCheckItemTest < ActiveJob::TestCase
   setup do
     activity = create_activity
-    @task = activity.tasks.create(type: "Tasks::PreCheckIngestData")
+    @task = activity.tasks.create(type: :pre_check_ingest_data)
     @data_item = DataItem.new(
       data: {},
       position: 0,

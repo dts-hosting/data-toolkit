@@ -76,8 +76,8 @@ class ActivityTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    current_expected = activity.tasks.where(type: "Tasks::ProcessUploadedFiles").first
-    next_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
+    current_expected = activity.tasks.where(type: "process_uploaded_files").first
+    next_expected = activity.tasks.where(type: "pre_check_ingest_data").first
 
     assert_equal current_expected, activity.current_task
     assert_equal next_expected, activity.next_task
@@ -92,7 +92,7 @@ class ActivityTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    current_expected = activity.tasks.where(type: "Tasks::PreCheckIngestData").first
+    current_expected = activity.tasks.where(type: "pre_check_ingest_data").first
     current_expected.update!(progress_status: Task::QUEUED)
     # TODO: update when workflow fully defined
 

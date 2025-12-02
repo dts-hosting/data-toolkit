@@ -38,14 +38,14 @@ class TasksControllerAccessTest < ActionDispatch::IntegrationTest
     get activity_task_url(@admin_activity, @admin_task)
     assert_response :success
 
-    assert_select "h2", /#{@admin_task.class.display_name}/
+    assert_select "h2", /#{@admin_task.display_name}/
   end
 
   test "should show task from same organization" do
     get activity_task_url(@reader_activity, @reader_task)
     assert_response :success
 
-    assert_select "h2", /#{@reader_task.class.display_name}/
+    assert_select "h2", /#{@reader_task.display_name}/
   end
 
   test "should not show task from different organization" do
