@@ -46,6 +46,7 @@ module TaskDefinition
     @@task_types_registry = {}
 
     validate :task_type_must_exist_in_registry
+    validates :type, presence: true
     before_validation :normalize_type_column
 
     after_create_commit :auto_run_if_configured
