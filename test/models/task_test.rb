@@ -4,7 +4,7 @@ require "minitest/mock"
 class TaskTest < ActiveSupport::TestCase
   def setup
     @task = Task.new(
-      type: "Tasks::ProcessUploadedFiles",
+      type: :process_uploaded_files,
       activity: create_activity
     )
   end
@@ -90,7 +90,7 @@ class TaskTest < ActiveSupport::TestCase
     first_task = activity.tasks[0]
     dependent_task = activity.tasks[1]
 
-    assert_includes dependent_task.dependencies, first_task.class
+    assert_includes dependent_task.dependencies, first_task.task_type
     assert_not dependent_task.ok_to_run?
 
     first_task.done!(Task::SUCCEEDED)
@@ -420,7 +420,7 @@ class TaskTest < ActiveSupport::TestCase
     end
 
     # Create a previous action with errors for one data item
-    previous_task = @task.activity.tasks.create!(type: "Tasks::PreCheckIngestData")
+    previous_task = @task.activity.tasks.create!(type: :pre_check_ingest_data)
     Action.create!(
       task: previous_task,
       data_item: data_items[0],

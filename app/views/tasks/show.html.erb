@@ -6,8 +6,9 @@
       <%= icon "arrow-uturn-left", class: "size-3" %>
     <% end %>
   <% end %>
+
   <%= render "shared/card/header",
-             title: @task.class.display_name,
+             title: @task.display_name,
              actions: actions_content %>
 
   <div id="<%= dom_id(@task) %>_details">
@@ -21,8 +22,7 @@
     <%= render "feedback", feedback: taskfeedback.for_display %>
   <% else %>
     <%= render "feedback", feedback: {
-      messages: ["We are busily generating feedback ... stand by!"]}
-    %>
+      messages: ["We are busily generating feedback ... stand by!"]} %>
   <% end %>
 <% end %>
 
@@ -34,17 +34,18 @@
       <% @task.files.each do |file| %>
         <%= link_to rails_blob_path(file, disposition: "attachment"),
                     class: "flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-colors group" do %>
-          <div class="flex-shrink-0">
-            <%= icon_for_file(file) %>
-          </div>
+          <div class="flex-shrink-0"><%= icon_for_file(file) %></div>
+
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium truncate group-hover:text-primary">
               <%= file.filename %>
             </p>
+
             <p class="text-xs text-base-content/70">
               <%= number_to_human_size(file.byte_size) %>
             </p>
           </div>
+
           <div class="flex-shrink-0">
             <%= icon "arrow-down-tray", class: "size-5 text-base-content/50 group-hover:text-primary" %>
           </div>

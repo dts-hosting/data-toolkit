@@ -1,12 +1,14 @@
 <tr id="<%= dom_id(task) %>">
   <td>
-    <%= link_to task.class.display_name,
+    <%= link_to task.display_name,
                 activity_task_path(task.activity, task),
                 class: "link link-info" %>
   </td>
+
   <td><%= format_task_status_badge(task.status) %></td>
   <td><%= local_time(task.created_at) %></td>
   <td><%= local_time(task.updated_at) %></td>
+
   <td>
     <%= button_to run_activity_task_path(task.activity, task),
                   method: :post,

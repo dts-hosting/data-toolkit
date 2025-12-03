@@ -9,9 +9,7 @@ module Activities
                          CollectionSpaceMapper.single_record_type_handler_for(self)
 
     def workflow
-      # Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData,
-      #   Tasks::ProcessTask, Tasks::TransferTask
-      [Tasks::ProcessUploadedFiles, Tasks::PreCheckIngestData]
+      [:process_uploaded_files, :pre_check_ingest_data]
     end
 
     def self.display_name

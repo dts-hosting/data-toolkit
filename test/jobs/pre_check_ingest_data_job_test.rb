@@ -10,7 +10,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     })
     @activity.save
     @task = @activity.tasks.find do |t|
-      t.type == "Tasks::PreCheckIngestData"
+      t.type == "pre_check_ingest_data"
     end
   end
 

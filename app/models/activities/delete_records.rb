@@ -9,9 +9,8 @@ module Activities
       []
     end
 
-    # Tasks::DeleteFilePrecheck, Tasks::LookupAndDeleteRecords
     def workflow
-      [Tasks::ProcessUploadedFiles]
+      [:process_uploaded_files]
     end
 
     def self.display_name

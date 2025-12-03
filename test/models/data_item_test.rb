@@ -41,8 +41,8 @@ class DataItemTest < ActiveSupport::TestCase
 
   test "should have many actions" do
     @data_item.save!
-    task1 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::PreCheckIngestData")
-    task2 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::ProcessUploadedFiles")
+    task1 = @data_item.activity.tasks.find_or_create_by!(type: :pre_check_ingest_data)
+    task2 = @data_item.activity.tasks.find_or_create_by!(type: :process_uploaded_files)
 
     action1 = Action.find_or_create_by!(task: task1, data_item: @data_item)
     action2 = Action.find_or_create_by!(task: task2, data_item: @data_item)
@@ -54,8 +54,8 @@ class DataItemTest < ActiveSupport::TestCase
 
   test "should have many tasks through actions" do
     @data_item.save!
-    task1 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::PreCheckIngestData")
-    task2 = @data_item.activity.tasks.find_or_create_by!(type: "Tasks::ProcessUploadedFiles")
+    task1 = @data_item.activity.tasks.find_or_create_by!(type: :pre_check_ingest_data)
+    task2 = @data_item.activity.tasks.find_or_create_by!(type: :process_uploaded_files)
 
     Action.find_or_create_by!(task: task1, data_item: @data_item)
     Action.find_or_create_by!(task: task2, data_item: @data_item)

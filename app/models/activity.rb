@@ -58,7 +58,7 @@ class Activity < ApplicationRecord
       activity_data_config_type: data_config.config_type,
       activity_data_config_record_type: data_config.record_type,
       activity_created_at: created_at,
-      task_type: task.class.display_name,
+      task_type: task.display_name,
       task_status: task.status,
       task_feedback: task.feedback,
       task_started_at: task.started_at || Time.current,
