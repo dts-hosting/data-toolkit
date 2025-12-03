@@ -15,26 +15,26 @@ class Task < ApplicationRecord
 
   broadcasts_refreshes
 
-  task_type :process_uploaded_files do
-    display_name "Process Uploaded Files"
-    handler ProcessUploadedFilesJob
-    auto_trigger true
+  task_type :process_uploaded_files do |t|
+    t.display_name = "Process Uploaded Files"
+    t.handler = ProcessUploadedFilesJob
+    t.auto_trigger = true
   end
 
-  task_type :pre_check_ingest_data do
-    display_name "Pre-Check Ingest Data"
-    handler PreCheckIngestDataJob
-    action_handler PreCheckIngestActionJob
-    finalizer GenericTaskFinalizerJob
-    depends_on :process_uploaded_files
+  task_type :pre_check_ingest_data do |t|
+    t.display_name = "Pre-Check Ingest Data"
+    t.handler = PreCheckIngestDataJob
+    t.action_handler = PreCheckIngestActionJob
+    t.finalizer = GenericTaskFinalizerJob
+    t.depends_on :process_uploaded_files
   end
 
-  task_type :process_media_derivatives do
-    display_name "Process Media Derivatives"
-    handler GenericQueueActionJob
-    action_handler ProcessMediaDerivativesActionJob
-    finalizer GenericFeedbackReportJob
-    depends_on :process_uploaded_files, :pre_check_ingest_data
+  task_type :process_media_derivatives do |t|
+    t.display_name = "Process Media Derivatives"
+    t.handler = GenericQueueActionJob
+    t.action_handler = ProcessMediaDerivativesActionJob
+    t.finalizer = GenericFeedbackReportJob
+    t.depends_on :process_uploaded_files, :pre_check_ingest_data
   end
 
   def has_feedback?

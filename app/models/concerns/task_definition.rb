@@ -2,43 +2,22 @@ module TaskDefinition
   extend ActiveSupport::Concern
 
   class TaskTypeConfiguration
-    attr_accessor :name, :display_name_value, :handler_value, :action_handler_value,
-      :finalizer_value, :dependencies, :auto_trigger_value
+    attr_accessor :name, :display_name, :handler, :action_handler,
+      :finalizer, :dependencies, :auto_trigger
 
     def initialize(name)
       @name = name
+      @display_name = nil
+      @handler = nil
+      @action_handler = nil
+      @finalizer = nil
       @dependencies = []
-      @auto_trigger_value = false
-    end
-
-    def display_name(value = nil)
-      return @display_name_value if value.nil?
-      @display_name_value = value
-    end
-
-    def handler(value = nil)
-      return @handler_value if value.nil?
-      @handler_value = value
-    end
-
-    def action_handler(value = nil)
-      return @action_handler_value if value.nil?
-      @action_handler_value = value
-    end
-
-    def finalizer(value = nil)
-      return @finalizer_value if value.nil?
-      @finalizer_value = value
+      @auto_trigger = false
     end
 
     def depends_on(*task_types)
       return @dependencies if task_types.empty?
       @dependencies = task_types.flatten
-    end
-
-    def auto_trigger(value = nil)
-      return @auto_trigger_value if value.nil?
-      @auto_trigger_value = value
     end
   end
 
@@ -69,7 +48,7 @@ module TaskDefinition
   end
 
   def action_handler
-    task_config&.action_handler_value
+    task_config&.action_handler
   end
 
   def dependencies
@@ -78,15 +57,15 @@ module TaskDefinition
   end
 
   def display_name
-    task_config&.display_name_value || type.to_s.titleize
+    task_config&.display_name || type.to_s.titleize
   end
 
   def finalizer
-    task_config&.finalizer_value
+    task_config&.finalizer
   end
 
   def handler
-    task_config&.handler_value || (raise NotImplementedError, "No handler configured for task type: #{type}")
+    task_config&.handler || (raise NotImplementedError, "No handler configured for task type: #{type}")
   end
 
   def report_name
@@ -94,17 +73,17 @@ module TaskDefinition
   end
 
   def task_config
-    self.class.task_type_config(task_type_symbol)
+    self.class.task_type_config(task_type)
   end
 
-  def task_type_symbol
+  def task_type
     type&.to_sym
   end
 
   private
 
   def auto_run_if_configured
-    return unless task_config&.auto_trigger_value
+    return unless task_config&.auto_trigger
     run
   end
 
@@ -115,8 +94,7 @@ module TaskDefinition
   end
 
   def task_type_must_exist_in_registry
-    return if type.blank?
-    return if self.class.task_types_registry.key?(task_type_symbol)
+    return if self.class.task_types_registry.key?(task_type)
 
     errors.add(:type, "unknown task type: #{type}. Must be one of: #{self.class.task_types_registry.keys.join(", ")}")
   end

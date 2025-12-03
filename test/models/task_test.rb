@@ -90,7 +90,7 @@ class TaskTest < ActiveSupport::TestCase
     first_task = activity.tasks[0]
     dependent_task = activity.tasks[1]
 
-    assert_includes dependent_task.dependencies, first_task.task_type_symbol
+    assert_includes dependent_task.dependencies, first_task.task_type
     assert_not dependent_task.ok_to_run?
 
     first_task.done!(Task::SUCCEEDED)
