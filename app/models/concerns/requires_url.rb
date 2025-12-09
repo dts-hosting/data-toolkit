@@ -1,3 +1,4 @@
+# Additional (re-usable) simple validation for url requirement.
 module RequiresUrl
   extend ActiveSupport::Concern
 

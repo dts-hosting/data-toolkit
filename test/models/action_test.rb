@@ -3,7 +3,7 @@ require "test_helper"
 class ActionTest < ActiveSupport::TestCase
   setup do
     activity = create_activity
-    @task = activity.tasks.create!(type: "Tasks::PreCheckIngestData")
+    @task = activity.tasks.create!(type: :pre_check_ingest_data)
     @data_item = activity.data_items.create!(position: 0, data: {objectNumber: "123"})
     @action = Action.new(task: @task, data_item: @data_item)
   end
@@ -45,7 +45,7 @@ class ActionTest < ActiveSupport::TestCase
 
   test "should allow same data_item with different tasks" do
     @action.save!
-    other_task = @task.activity.tasks.find_or_create_by!(type: "Tasks::ProcessMediaDerivatives")
+    other_task = @task.activity.tasks.find_or_create_by!(type: :process_media_derivatives)
     other_action = Action.new(task: other_task, data_item: @data_item)
     assert other_action.valid?
   end
@@ -157,7 +157,7 @@ class ActionTest < ActiveSupport::TestCase
   # Feedbackable concern tests
   test "should provide feedback_context from task" do
     @action.save!
-    assert_equal @task.class.name, @action.feedback_context
+    assert_equal @task.feedback_context, @action.feedback_context
   end
 
   test "feedback_for should return Feedback object" do
