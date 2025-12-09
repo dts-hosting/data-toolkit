@@ -11,7 +11,7 @@ class Action < ApplicationRecord
     next unless progress_completed?
 
     next task.touch if task.progress >= 100
-    broadcast_task_progress if rand < checkin_frequency
+    broadcast_task_progress if rand < task.checkin_frequency
   end
 
   def feedback_context = task.feedback_context
@@ -30,13 +30,5 @@ class Action < ApplicationRecord
       locals: {property: "Progress", value: task.progress},
       target: "task_#{task.id}_progress"
     )
-  end
-
-  def checkin_frequency
-    item_count = task.activity.data_items_count
-    return 0 if item_count.zero?
-
-    # cap 10% checkin, but lower as item count increases
-    [Math.sqrt(item_count) / item_count, 0.1].min
   end
 end

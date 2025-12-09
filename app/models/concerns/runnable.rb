@@ -1,3 +1,6 @@
+# Groups behavior related to "task" init/progression.
+# In this app it's tightly coupled to the Task model,
+# requiring task rlshps: activity, actions, data_items.
 module Runnable
   extend ActiveSupport::Concern
 
@@ -7,6 +10,7 @@ module Runnable
 
   included do
     include Progressable # depends on progress enum
+    include TaskDefinition # runnables can define tasks
 
     after_touch :check_progress
     after_update_commit :handle_completion

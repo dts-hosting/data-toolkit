@@ -1,3 +1,4 @@
+# Exposes builder pattern functionality for defining a "task".
 module TaskDefinition
   extend ActiveSupport::Concern
 

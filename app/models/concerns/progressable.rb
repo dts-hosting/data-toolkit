@@ -1,3 +1,5 @@
+# Encapsulates state/behavior for progressing a runnable
+# or other model that needs to track a "progress" state.
 module Progressable
   extend ActiveSupport::Concern
 

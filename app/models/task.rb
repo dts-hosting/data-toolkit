@@ -2,9 +2,8 @@ class Task < ApplicationRecord
   include ActionView::RecordIdentifier
   include Feedbackable
   include Runnable
-  include TaskDefinition
 
-  # Disable STI - we use 'type' column for task type identifiers
+  # Disable STI - we use "type" column for task type identifiers
   self.inheritance_column = :_type_disabled
 
   belongs_to :activity, touch: true
@@ -35,6 +34,14 @@ class Task < ApplicationRecord
     t.action_handler = ProcessMediaDerivativesActionJob
     t.finalizer = GenericFeedbackReportJob
     t.depends_on :process_uploaded_files, :pre_check_ingest_data
+  end
+
+  def checkin_frequency
+    item_count = activity.data_items_count
+    return 0 if item_count.zero?
+
+    # cap 10% checkin, but lower as item count increases
+    [Math.sqrt(item_count) / item_count, 0.1].min
   end
 
   def has_feedback?
