@@ -39,12 +39,10 @@ data-toolkit/
 
 ## Current Tests
 
-- Test Steps
-  - Media Derivatives (file: page_check_media_derivatives.ts)
-    - Login Data Toolkit
-    - Access Page
-    - Fill the form uploading the file **_derivates.csv_**
-      - Wait for **\*Succeeded** 3 times in the Workflow Page
+- Test Steps\
+  - Login Data Toolkit
+  - Access Page
+  - Media Derivatives
   - Import Terms
   - Export Records
   - Create Update Records
@@ -52,3 +50,11 @@ data-toolkit/
   - Manifest Registry
   - Delete RecordsP
   - Cspace
+
+# Validate GitHub Action  (https://github.com/nektos/act)
+
+It's possible to validate the GitHub Action using ACT.
+The recomendation is to use the Visual Code Extension.
+
+## Configuration File
+  There is a configuration file called **.actrc** at the root level of the repository.

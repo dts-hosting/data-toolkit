@@ -1,0 +1,59 @@
+name: E2E Tests
+on:
+  pull_request:
+    types: [opened, reopened]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    env:
+      DATA_TOOLKIT_URL: http://127.0.0.1:3000/
+      CSPACE_URL: https://anthro.collectionspace.org/  
+      CSPACE_ADMIN: admin@anthro.collectionspace.org 
+      CSPACE_PASSWORD: Administrator
+
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and Run DataToolkit
+        run: |
+          docker compose -f docker-compose.yml build 
+          docker compose -f docker-compose.yml up -d
+          sleep 5
+          docker compose exec web bash -c "
+          # import data configs from a manifest registry
+          ./bin/rake \"crud:import:manifest_registry[https://gist.githubusercontent.com/mark-cooper/0492cc97d53a47105dd29ca86799c8c7/raw/f376621f1c2e110f88fc1bdd10c5437f0abc99a5/meta-manifest2.json]\"
+          "
+
+      - uses: actions/setup-node@v4
+        with:
+            node-version: 22
+            
+      - name: Install Playwright Browsers
+        working-directory: ./test/e2e
+        run: |
+          npm install
+          npx playwright install --with-deps
+            
+      - name: Run Playwright tests
+        working-directory: ./test/e2e
+        run: | 
+          npx playwright test --trace on # tests/cspace-tests.spec.ts
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          working-directory: ./test/e2e
+          name: playwright-report
+          path: ./test/e2e/playwright-report/
+          retention-days: 7
+
+
+  

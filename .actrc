@@ -1,0 +1,3 @@
+--artifact-server-path test/e2e/artifacts/
+-P ubuntu-latest=docker.io/catthehacker/ubuntu:act-latest
+--container-architecture linux/amd64
