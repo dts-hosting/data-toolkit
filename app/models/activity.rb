@@ -1,5 +1,8 @@
 class Activity < ApplicationRecord
-  include Descendents
+  include ActivityDefinition
+
+  # Disable STI - we use "type" column for activity type identifiers
+  self.inheritance_column = :_type_disabled
 
   belongs_to :data_config
   belongs_to :user
@@ -9,7 +12,7 @@ class Activity < ApplicationRecord
   has_one :batch_config, dependent: :destroy
   accepts_nested_attributes_for :batch_config
 
-  validates :batch_config, presence: true, if: -> { self.class.has_batch_config? }
+  validates :batch_config, presence: true, if: -> { has_batch_config? }
   validate :data_config, :is_eligible?
 
   with_options presence: true do
@@ -30,8 +33,71 @@ class Activity < ApplicationRecord
 
   broadcasts_refreshes
 
-  def boolean_attributes
-    BatchConfig.boolean_attributes
+  # Activity type definitions
+  activity_type :check_media_derivatives do |a|
+    a.display_name = "Check Media Derivatives"
+    a.file_requirement = :required_multiple
+    a.has_batch_config = false
+    a.has_config_fields = false
+    a.workflow = [:process_uploaded_files, :pre_check_ingest_data, :process_media_derivatives]
+    a.data_config_type = "media_record_type"
+    a.data_handler = ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
+    a.validations = ->(record) {
+      record.errors.add(:files, "can't be blank") if record.files.blank?
+      record.errors.add(:files, "must have at least one file") if record.files.length < 1
+    }
+  end
+
+  activity_type :create_or_update_records do |a|
+    a.display_name = "Create or Update Records"
+    a.file_requirement = :required_single
+    a.has_batch_config = true
+    a.has_config_fields = true
+    a.workflow = [:process_uploaded_files, :pre_check_ingest_data]
+    a.data_config_type = "record_type"
+    a.data_handler = ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
+    a.config_defaults = {action: "create", auto_advance: true}
+    a.validations = ->(record) {
+      record.errors.add(:files, "can't be blank") if record.files.blank?
+      record.errors.add(:files, "must have exactly one file") if record.files.length != 1
+      record.errors.add(:config, "can't be blank") if record.config.blank?
+    }
+  end
+
+  activity_type :delete_records do |a|
+    a.display_name = "Delete Records"
+    a.file_requirement = :required_single
+    a.has_batch_config = true
+    a.has_config_fields = false
+    a.workflow = [:process_uploaded_files]
+    a.data_config_type = "record_type"
+    a.select_attributes = [] # TODO: [:record_matchpoint]
+    a.validations = ->(record) {
+      record.errors.add(:files, "can't be blank") if record.files.blank?
+      record.errors.add(:files, "must have exactly one file") if record.files.length != 1
+    }
+  end
+
+  activity_type :export_record_ids do |a|
+    a.display_name = "Export Record IDs"
+    a.file_requirement = :none
+    a.has_batch_config = false
+    a.has_config_fields = false
+    a.workflow = []
+    a.data_config_type = "record_type"
+  end
+
+  activity_type :import_terms do |a|
+    a.display_name = "Import Terms"
+    a.file_requirement = :required_single
+    a.has_batch_config = false
+    a.has_config_fields = false
+    a.workflow = []
+    a.data_config_type = "term_list"
+    a.validations = ->(record) {
+      record.errors.add(:files, "can't be blank") if record.files.blank?
+      record.errors.add(:files, "must have exactly one file") if record.files.length != 1
+    }
   end
 
   def current_task
@@ -42,10 +108,6 @@ class Activity < ApplicationRecord
     tasks.where(progress_status: Task::PENDING).order(:created_at).first
   end
 
-  def select_attributes
-    BatchConfig.select_attributes
-  end
-
   def summary
     return {} if tasks.empty?
 
@@ -53,7 +115,7 @@ class Activity < ApplicationRecord
     {
       activity_user: user.email_address,
       activity_url: user.cspace_url,
-      activity_type: self.class.display_name,
+      activity_type: display_name,
       activity_label: label,
       activity_data_config_type: data_config.config_type,
       activity_data_config_record_type: data_config.record_type,
@@ -64,28 +126,6 @@ class Activity < ApplicationRecord
       task_started_at: task.started_at || Time.current,
       task_completed_at: task.completed_at
     }
-  end
-
-  def self.display_name
-    raise NotImplementedError
-  end
-
-  # Subclasses should implement one of:
-  # :none, :required_single, :required_multiple, :optional_multiple
-  def self.file_requirement
-    raise NotImplementedError
-  end
-
-  def self.has_batch_config?
-    raise NotImplementedError
-  end
-
-  def self.has_config_fields?
-    raise NotImplementedError
-  end
-
-  def self.requires_files?
-    [:required_single, :required_multiple].include?(file_requirement)
   end
 
   private
@@ -118,6 +158,7 @@ class Activity < ApplicationRecord
 
   def is_eligible?
     return unless user
+    return unless activity_type
 
     if DataConfig.for(user, self).empty?
       errors.add(:data_config, "is not eligible for this activity")
@@ -125,8 +166,10 @@ class Activity < ApplicationRecord
   end
 
   def set_config_defaults
-    self.config = {
-      auto_advance: true
-    }.merge(config.symbolize_keys || {})
+    defaults = {auto_advance: true}
+    if activity_config&.config_defaults
+      defaults = defaults.merge(activity_config.config_defaults)
+    end
+    self.config = defaults.merge((config || {}).symbolize_keys)
   end
 end

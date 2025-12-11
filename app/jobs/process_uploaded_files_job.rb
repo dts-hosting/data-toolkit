@@ -8,7 +8,7 @@ class ProcessUploadedFilesJob < ApplicationJob
     task.start!
     Rails.logger.info "File upload job started"
 
-    if task.activity.files.empty? && !task.activity.class.requires_files?
+    if task.activity.files.empty? && !task.activity.requires_files?
       task.done!(Task::SUCCEEDED) && return
     end
 

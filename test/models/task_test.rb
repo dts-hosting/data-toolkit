@@ -81,7 +81,7 @@ class TaskTest < ActiveSupport::TestCase
   test "should handle dependencies correctly" do
     activity = create_activity(
       {
-        type: "Activities::CreateOrUpdateRecords",
+        type: :create_or_update_records,
         config: {action: "create"},
         data_config: create_data_config_record_type({record_type: "acquisitions"}),
         files: create_uploaded_files(["test.csv"])
@@ -334,7 +334,7 @@ class TaskTest < ActiveSupport::TestCase
   # Auto-advance functionality tests
   test "handle_completion should trigger auto-advance when task succeeds and auto_advance is enabled" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
       data_config: create_data_config_record_type({record_type: "acquisitions"}),
       files: create_uploaded_files(["test.csv"])
@@ -366,7 +366,7 @@ class TaskTest < ActiveSupport::TestCase
 
   test "handle_completion should not trigger auto-advance when task succeeds but auto_advance is disabled" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
       data_config: create_data_config_record_type({record_type: "acquisitions"}),
       files: create_uploaded_files(["test.csv"])
@@ -381,7 +381,7 @@ class TaskTest < ActiveSupport::TestCase
 
   test "handle_completion should set auto_advanced to false when running finalizer for failed task" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
       data_config: create_data_config_record_type({record_type: "acquisitions"}),
       files: create_uploaded_files(["test.csv"])

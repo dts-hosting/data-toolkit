@@ -20,7 +20,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_select "h2", text: /New Create or Update Records/
-    assert_select "input[name='activity[type]'][value='Activities::CreateOrUpdateRecords']"
+    assert_select "input[name='activity[type]'][value='create_or_update_records']"
   end
 
   test "should redirect with invalid activity type" do
@@ -33,7 +33,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Activity.count") do
       post activities_url, params: {
         activity: {
-          type: "Activities::CreateOrUpdateRecords",
+          type: :create_or_update_records,
           label: "Test Label #{SecureRandom.hex(4)}",
           config: {action: "create"},
           data_config_id: @data_config.id,
@@ -58,7 +58,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_no_difference("Activity.count") do
       post activities_url, params: {
         activity: {
-          type: "Activities::CreateOrUpdateRecords",
+          type: :create_or_update_records,
           data_config_id: nil
         }
       }
@@ -72,14 +72,14 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     get activity_url(@admin_activity)
     assert_response :success
 
-    assert_select "h2", /#{@admin_activity.class.display_name}/
+    assert_select "h2", /#{@admin_activity.display_name}/
   end
 
   test "should show activity from same organization" do
     get activity_url(@reader_activity)
     assert_response :success
 
-    assert_select "h2", /#{@reader_activity.class.display_name}/
+    assert_select "h2", /#{@reader_activity.display_name}/
   end
 
   test "should not show activity from different organization" do
@@ -115,7 +115,7 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     get new_activity_with_type_url(type: "create_or_update_records")
     assert_redirected_to new_session_path
 
-    post activities_url, params: {activity: {type: "Activities::CreateOrUpdateRecords"}}
+    post activities_url, params: {activity: {type: :create_or_update_records}}
     assert_redirected_to new_session_path
 
     delete activity_url(@admin_activity)

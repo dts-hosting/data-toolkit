@@ -27,7 +27,7 @@
   <div class="mb-4">
     <%= render partial: "shared/card/subtitle", locals: { title: "Perform" } %>
     <ul class="menu w-full">
-      <% Activity.display_names.each do |name| %>
+      <% Activity.activity_type_display_names.each do |name| %>
         <%= render partial: "shared/menu/item",
                    locals: {
                      menu_item_name: name,
