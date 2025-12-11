@@ -22,7 +22,7 @@ test("Check Create/Update Records", async ({
   checkCreateUpdateRecords,
   checkCspace,
   page,
-  browser
+  browser,
 }, testInfo) => {
   test.setTimeout(120000); // Override test timeout for this specific test
   await test.step(
@@ -39,7 +39,9 @@ test("Check Create/Update Records", async ({
 
       // Wait for workflow tasks page to load and verify the results
       await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-      await expect(page.getByText("Succeeded")).toHaveCount(2, { timeout: 60000 });
+      await expect(page.getByText("Succeeded")).toHaveCount(2, {
+        timeout: 60000,
+      });
 
       // Take a screenshot for verification
       const screenshotPath = testInfo.outputPath(

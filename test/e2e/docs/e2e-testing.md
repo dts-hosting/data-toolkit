@@ -51,10 +51,11 @@ data-toolkit/
   - Delete RecordsP
   - Cspace
 
-# Validate GitHub Action  (https://github.com/nektos/act)
+# Validate GitHub Action (https://github.com/nektos/act)
 
 It's possible to validate the GitHub Action using ACT.
 The recomendation is to use the Visual Code Extension.
 
 ## Configuration File
-  There is a configuration file called **.actrc** at the root level of the repository.
+
+There is a configuration file called **.actrc** at the root level of the repository.

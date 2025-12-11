@@ -18,10 +18,7 @@ test.afterEach(async ({ page }, testInfo) => {
   }
 });
 
-test("Check Cspace", async ({
-  checkCspace,
-  page,
-}, testInfo) => {
+test("Check Cspace", async ({ checkCspace, page }, testInfo) => {
   // checkCspace
   await test.step(
     "Check CSpace",

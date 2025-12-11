@@ -111,7 +111,7 @@ export const test = base.extend<MyFixtures>({
     await checkProfilePage.doLogin();
 
     // Use the fixture value in the test.
-    await use(checkProfilePage); 
+    await use(checkProfilePage);
   },
 
   checkManifestRegistryPage: async ({ page }, use) => {
