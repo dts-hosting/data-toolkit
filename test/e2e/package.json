@@ -9,7 +9,8 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.2",
-    "playright": "^0.0.22"
+    "playright": "^0.0.22",
+    "prettier": "3.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
