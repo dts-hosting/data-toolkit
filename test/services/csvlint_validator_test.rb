@@ -1,5 +1,3 @@
-require "test_helper"
-
 class CsvlintValidatorTest < ActiveSupport::TestCase
   def subject(file)
     CsvlintValidator.new(

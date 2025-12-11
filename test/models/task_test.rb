@@ -1,4 +1,3 @@
-require "test_helper"
 require "minitest/mock"
 
 class TaskTest < ActiveSupport::TestCase
