@@ -9,19 +9,19 @@ jobs:
 
     env:
       DATA_TOOLKIT_URL: http://127.0.0.1:3000/
-      CSPACE_URL: https://anthro.collectionspace.org/  
-      CSPACE_ADMIN: admin@anthro.collectionspace.org 
+      CSPACE_URL: https://anthro.collectionspace.org/
+      CSPACE_ADMIN: admin@anthro.collectionspace.org
       CSPACE_PASSWORD: Administrator
 
     steps:
       - uses: actions/checkout@v5
-      
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Build and Run DataToolkit
         run: |
           docker compose -f docker-compose.yml build 
@@ -34,17 +34,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-            node-version: 22
-            
+          node-version: 22
+
       - name: Install Playwright Browsers
         working-directory: ./test/e2e
         run: |
           npm install
           npx playwright install --with-deps
-            
+
       - name: Run Playwright tests
         working-directory: ./test/e2e
-        run: | 
+        run: |
           npx playwright test --trace on # tests/cspace-tests.spec.ts
 
       - uses: actions/upload-artifact@v4
@@ -54,6 +54,3 @@ jobs:
           name: playwright-report
           path: ./test/e2e/playwright-report/
           retention-days: 7
-
-
-  
