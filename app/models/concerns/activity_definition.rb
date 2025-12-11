@@ -28,6 +28,7 @@ module ActivityDefinition
     @@activity_types_registry = {}
 
     validate :activity_type_must_exist_in_registry
+    validate :apply_file_requirement_validations
     validate :apply_activity_type_validations
     validates :type, presence: true
     before_validation :normalize_type_column
@@ -64,12 +65,6 @@ module ActivityDefinition
       @@activity_types_registry.find do |_name, config|
         config.display_name&.parameterize == param_name
       end&.first
-    end
-
-    def requires_files?
-      # This is now an instance method, keep class method for backwards compatibility
-      # but it should be called on instances
-      raise NotImplementedError, "requires_files? should be called on an instance"
     end
   end
 
@@ -124,20 +119,34 @@ module ActivityDefinition
 
   private
 
-  def normalize_type_column
-    if type.is_a?(Symbol)
-      self.type = type.to_s
-    end
-  end
-
   def activity_type_must_exist_in_registry
     return if self.class.activity_types_registry.key?(activity_type)
 
     errors.add(:type, "unknown activity type: #{type}. Must be one of: #{self.class.activity_types_registry.keys.join(", ")}")
   end
 
+  def apply_file_requirement_validations
+    return unless activity_type
+
+    case file_requirement
+    when :required_single
+      errors.add(:files, "can't be blank") if files.blank?
+      errors.add(:files, "must have exactly one file") if files.present? && files.length != 1
+    when :required_multiple
+      errors.add(:files, "can't be blank") if files.blank?
+      errors.add(:files, "must have at least one file") if files.present? && files.length < 1
+    end
+  end
+
   def apply_activity_type_validations
+    return unless activity_type
     return unless activity_config&.validations
     activity_config.validations.call(self)
+  end
+
+  def normalize_type_column
+    if type.is_a?(Symbol)
+      self.type = type.to_s
+    end
   end
 end

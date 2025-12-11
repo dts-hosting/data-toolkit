@@ -15,13 +15,8 @@ class Activity < ApplicationRecord
   accepts_nested_attributes_for :batch_config
 
   validates :batch_config, presence: true, if: -> { has_batch_config? }
-  validate :data_config, :is_eligible?
-
-  with_options presence: true do
-    validates :data_config, :label, :type, :user
-  end
-
-  validates :label, length: {minimum: 3}
+  validates :label, presence: true, length: {minimum: 3}
+  validate :is_eligible?
 
   after_initialize :set_config_defaults, if: :new_record?
   after_create_commit do
@@ -41,10 +36,6 @@ class Activity < ApplicationRecord
     a.workflow = [:process_uploaded_files, :pre_check_ingest_data, :process_media_derivatives]
     a.data_config_type = "media_record_type"
     a.data_handler = ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
-    a.validations = ->(record) {
-      record.errors.add(:files, "can't be blank") if record.files.blank?
-      record.errors.add(:files, "must have at least one file") if record.files.length < 1
-    }
   end
 
   activity_type :create_or_update_records do |a|
@@ -55,10 +46,8 @@ class Activity < ApplicationRecord
     a.workflow = [:process_uploaded_files, :pre_check_ingest_data]
     a.data_config_type = "record_type"
     a.data_handler = ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
-    a.config_defaults = {action: "create", auto_advance: true}
+    a.config_defaults = {action: "create"}
     a.validations = ->(record) {
-      record.errors.add(:files, "can't be blank") if record.files.blank?
-      record.errors.add(:files, "must have exactly one file") if record.files.length != 1
       record.errors.add(:config, "can't be blank") if record.config.blank?
     }
   end
@@ -71,10 +60,6 @@ class Activity < ApplicationRecord
     a.workflow = [:process_uploaded_files]
     a.data_config_type = "record_type"
     a.select_attributes = [] # TODO: [:record_matchpoint]
-    a.validations = ->(record) {
-      record.errors.add(:files, "can't be blank") if record.files.blank?
-      record.errors.add(:files, "must have exactly one file") if record.files.length != 1
-    }
   end
 
   activity_type :export_record_ids do |a|
@@ -93,10 +78,6 @@ class Activity < ApplicationRecord
     a.has_config_fields = false
     a.workflow = []
     a.data_config_type = "term_list"
-    a.validations = ->(record) {
-      record.errors.add(:files, "can't be blank") if record.files.blank?
-      record.errors.add(:files, "must have exactly one file") if record.files.length != 1
-    }
   end
 
   def current_task
