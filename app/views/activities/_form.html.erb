@@ -42,10 +42,10 @@
         </div>
 
         <% if activity.file_requirement != :none %>
-          <%= form.label :files, activity.file_requirement == :required_single ? "File" : "Files", class: "label-text font-medium" %>
+          <%= form.label :files, activity.file_requirement == :one ? "File" : "Files", class: "label-text font-medium" %>
           <div class="sm:col-span-3">
             <%= form.file_field :files,
-                                multiple: activity.file_requirement != :required_single,
+                                multiple: activity.file_requirement == :one_or_more,
                                 name: "activity[files][]",
                                 class: "file-input file-input-bordered w-full" %>
           </div>
