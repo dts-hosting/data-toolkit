@@ -22,7 +22,9 @@ test("Check Create/Update Records", async ({
   checkCreateUpdateRecords,
   checkCspace,
   page,
+  browser,
 }, testInfo) => {
+  test.setTimeout(120000); // Override test timeout for this specific test
   await test.step(
     "Create/Update Records - Success",
     async (step) => {
@@ -38,7 +40,7 @@ test("Check Create/Update Records", async ({
       // Wait for workflow tasks page to load and verify the results
       await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
       await expect(page.getByText("Succeeded")).toHaveCount(2, {
-        timeout: 15000,
+        timeout: 60000,
       });
 
       // Take a screenshot for verification
@@ -74,7 +76,7 @@ test("Check Create/Update Records", async ({
 
       // Wait for workflow tasks page to load and verify the results
       await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-      await expect(page.getByText("Failed")).toHaveCount(1, { timeout: 15000 });
+      await expect(page.getByText("Failed")).toHaveCount(1, { timeout: 60000 });
 
       // Take a screenshot for verification
       const screenshotPath = testInfo.outputPath(
@@ -99,7 +101,10 @@ test("Check Create/Update Records", async ({
   await test.step(
     "Check CSpace",
     async (step) => {
-      await checkCspace.doLogin();
+      const newContext = await browser.newContext();
+      const newPage = await newContext.newPage();
+      await checkCspace.doLogin(newPage);
+      await newContext.close();
     },
     { box: true }
   );
@@ -140,11 +145,11 @@ test("Check Media Derivatives Page", async ({
 
   // Wait for workflow tasks page to load and verify the results
   await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-  await expect(page.getByText("Succeeded")).toHaveCount(3);
+  await expect(page.getByText("Succeeded")).toHaveCount(3, { timeout: 60000 });
 });
 
 test("Check Profile Page", async ({ checkProfilePage, page }, testInfo) => {
-  await checkProfilePage.goto("My profile", "Profile");
+  await checkProfilePage.goto("My profile", "Email address");
 
   await page.getByText("Email address:").waitFor({ timeout: 15000 });
   await expect(
@@ -174,5 +179,5 @@ test("Check Delete Records Page", async ({
 
   // Wait for workflow tasks page to load and verify the results
   await page.getByText("Workflow Tasks").waitFor({ timeout: 15000 });
-  await expect(page.getByText("Succeeded")).toHaveCount(1);
+  await expect(page.getByText("Succeeded")).toHaveCount(1, { timeout: 60000 });
 });

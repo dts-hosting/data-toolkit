@@ -1,4 +1,4 @@
-import { test as base, expect } from "@playwright/test";
+import { test as base, Browser } from "@playwright/test";
 // import { CheckMediaDerivativesPage } from './page_check_media';
 // import { CreateUpdateRecordsPage } from './page_create_update';
 import { DataToolkitBasePage } from "./datatoolkit-basepage";
@@ -15,12 +15,9 @@ type MyFixtures = {
   checkCreateUpdateRecords: DataToolkitBasePage;
   checkProfilePage: DataToolkitBasePage;
   checkCspace: CSpaceFixture;
-  checkManifestRegistryPage: CheckManifestRegistryPage;
+  checkManifestRegistryPage: DataToolkitBasePage;
   // Extended file example
   checkDeleteRecordsPage: DeleteRecordsPage;
-
-  // Add Profile Page
-  // Refactor Manifest Registries Page
 };
 
 // Extend base test by providing "todoPage" and "settingsPage".
@@ -133,7 +130,6 @@ export const test = base.extend<MyFixtures>({
   },
 
   checkCspace: async ({ page }, use) => {
-    // Set up the fixture.
     const checkCspace = new CSpaceFixture(
       page,
       process.env.CSPACE_URL,

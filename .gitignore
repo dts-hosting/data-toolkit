@@ -43,3 +43,7 @@
 !/app/assets/builds/.keep
 
 .DS_Store
+
+# Ignore all local artifacts from testing.
+/test/e2e/artifacts/*
+!/test/e2e/artifacts/.keep
