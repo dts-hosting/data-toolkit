@@ -95,7 +95,7 @@ class HistoryTest < ActiveSupport::TestCase
     data_config = create_data_config_record_type
 
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create"},
       data_config: data_config,
       label: "test.csv",

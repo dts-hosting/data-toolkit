@@ -22,7 +22,7 @@
 
   <%= render "shared/card/property_grid", columns: 2 do %>
     <%= render partial: "shared/card/item",
-               locals: { property: "Activity Type", value: activity.class.display_name } %>
+               locals: { property: "Activity Type", value: activity.display_name } %>
 
     <%= render partial: "shared/card/item",
                locals: { property: data_config_type_label(activity), value: activity.data_config.display_name } %>

@@ -11,7 +11,7 @@ class ProcessUploadedFilesJobTest < ActiveJob::TestCase
         files = create_uploaded_files(["test.csv", "valid_lf.csv"])
 
         activity = create_activity({
-          type: Activities::CheckMediaDerivatives,
+          type: :check_media_derivatives,
           data_config: create_data_config_record_type(record_type: "media"),
           files: files
         })
@@ -28,7 +28,7 @@ class ProcessUploadedFilesJobTest < ActiveJob::TestCase
         files = create_uploaded_files(["invalid_encoding.csv", "valid_lf.csv"])
 
         activity = create_activity({
-          type: Activities::CheckMediaDerivatives,
+          type: :check_media_derivatives,
           data_config: create_data_config_record_type(record_type: "media"),
           files: files
         })

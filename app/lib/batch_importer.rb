@@ -22,7 +22,7 @@ class BatchImporter
 
   def finalize
     flush_batch if @data_items.any?
-    @task.activity.class.reset_counters(@task.activity_id, :data_items)
+    Activity.reset_counters(@task.activity_id, :data_items)
   end
 
   private

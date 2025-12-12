@@ -207,7 +207,7 @@ class DataConfigTest < ActiveSupport::TestCase
       Activity.new(
         user: user,
         data_config: create_data_config_record_type,
-        type: "Activities::ExportRecordIds"
+        type: :export_record_ids
       )
     ]
 

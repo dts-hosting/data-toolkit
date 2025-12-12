@@ -3,8 +3,8 @@ class ActivitiesController < ApplicationController
   before_action :verify_activity_type, only: [:new]
 
   def new
-    @activity = @activity_type.new
-    @activity.build_batch_config if @activity.class.has_batch_config?
+    @activity = Activity.new(type: @activity_type)
+    @activity.build_batch_config if @activity.has_batch_config?
   end
 
   def create
@@ -12,7 +12,7 @@ class ActivitiesController < ApplicationController
     @activity.user = Current.user
 
     if @activity.save
-      redirect_to activity_path(@activity), notice: "#{@activity.class.display_name} was successfully created."
+      redirect_to activity_path(@activity), notice: "#{@activity.display_name} was successfully created."
     else
       render :new, status: :unprocessable_content
     end
@@ -45,7 +45,7 @@ class ActivitiesController < ApplicationController
   end
 
   def verify_activity_type
-    @activity_type = Activity.find_type_by_param_name(params[:type])
+    @activity_type = Activity.find_activity_type_by_param_name(params[:type])
 
     unless @activity_type
       redirect_to my_activities_url, flash: {alert: "Invalid activity type"}

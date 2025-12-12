@@ -1,5 +1,3 @@
-require "test_helper"
-
 class CsvValidatorTest < ActiveSupport::TestCase
   def subject(file) = CsvValidator.new(
     file: fixtures_as_attachments([file]).first,

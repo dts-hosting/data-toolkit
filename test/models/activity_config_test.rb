@@ -7,8 +7,9 @@ class ActivityConfigTest < ActiveSupport::TestCase
   end
 
   test "Activity sets auto_advance to true by default" do
-    activity = Activities::ExportRecordIds.new(
+    activity = Activity.new(
       user: @user,
+      type: :export_record_ids,
       data_config: @data_config,
       label: "Test #{SecureRandom.hex(4)}"
     )
@@ -19,8 +20,9 @@ class ActivityConfigTest < ActiveSupport::TestCase
   end
 
   test "Activity preserves custom auto_advance value" do
-    activity = Activities::ExportRecordIds.new(
+    activity = Activity.new(
       user: @user,
+      type: :export_record_ids,
       config: {auto_advance: false},
       data_config: @data_config,
       label: "Test #{SecureRandom.hex(4)}"
@@ -32,8 +34,9 @@ class ActivityConfigTest < ActiveSupport::TestCase
   end
 
   test "Activity preserves additional custom config values" do
-    activity = Activities::ExportRecordIds.new(
+    activity = Activity.new(
       user: @user,
+      type: :export_record_ids,
       config: {auto_advance: false, custom_key: "custom_value"},
       data_config: @data_config,
       label: "Test #{SecureRandom.hex(4)}"

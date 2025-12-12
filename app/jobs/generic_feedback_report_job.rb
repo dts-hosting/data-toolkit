@@ -8,7 +8,7 @@ class GenericFeedbackReportJob < ApplicationJob
 
     log_finish && return if feedback_actions.empty?
 
-    file_name = "#{task.class.report_name}_report_#{task.id}.csv"
+    file_name = "#{task.report_name}_report_#{task.id}.csv"
     file_path = Rails.root.join("tmp", file_name)
     # TODO: may want / need to not hardcode the format eventually
     report = FeedbackReport::CSV.new(feedback_actions, file_path)
