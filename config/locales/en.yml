@@ -57,19 +57,6 @@ en:
     warning:
       test_warning: >-
         Warning: %{details}
-  menu:
-    title: Activities
-    view:
-      title: View
-      my: My activities
-      group: Group activities
-      history: Activity history
-    perform:
-      title: Perform
-    admin:
-      title: Admin
-      jobs: Jobs dashboard
-      registries: Manifest registries
   profile:
     title: Profile
     admin?: Data Toolkit admin?
@@ -162,4 +149,17 @@ en:
       succeeded: Succeeded
   ui:
     loading: Loading ...
+    menu:
+      title: Activities
+      view:
+        title: View
+        my: My activities
+        group: Group activities
+        history: Activity history
+      perform:
+        title: Perform
+      admin:
+        title: Admin
+        jobs: Jobs dashboard
+        registries: Manifest registries
     no_value: N/A

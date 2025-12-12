@@ -1,23 +1,23 @@
 <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
-  <h2 class="card-title mb-4"><%= t("menu.title") %></h2>
+  <h2 class="card-title mb-4"><%= t("ui.menu.title") %></h2>
   <div class="mb-4">
-    <%= render partial: "shared/card/subtitle", locals: { title: t("menu.view.title") } %>
+    <%= render partial: "shared/card/subtitle", locals: { title: t("ui.menu.view.title") } %>
     <ul class="menu w-full">
       <%= render partial: "shared/menu/item",
                  locals: {
-                   menu_item_name: t("menu.view.my"),
+                   menu_item_name: t("ui.menu.view.my"),
                    menu_item_icon: "user",
                    menu_item_path: my_activities_path
                  } %>
       <%= render partial: "shared/menu/item",
                  locals: {
-                   menu_item_name: t("menu.view.group"),
+                   menu_item_name: t("ui.menu.view.group"),
                    menu_item_icon: "list-bullet",
                    menu_item_path: group_activities_path
                  } %>
       <%= render partial: "shared/menu/item",
                  locals: {
-                   menu_item_name: t("menu.view.history"),
+                   menu_item_name: t("ui.menu.view.history"),
                    menu_item_icon: "archive-box",
                    menu_item_path: activity_history_path
                  } %>
@@ -25,7 +25,7 @@
   </div>
 
   <div class="mb-4">
-    <%= render partial: "shared/card/subtitle", locals: { title: t("menu.perform.title") } %>
+    <%= render partial: "shared/card/subtitle", locals: { title: t("ui.menu.perform.title") } %>
     <ul class="menu w-full">
       <% Activity.activity_type_display_names.each do |name| %>
         <%= render partial: "shared/menu/item",
@@ -40,17 +40,17 @@
 
   <% if admin? %>
     <div>
-      <%= render partial: "shared/card/subtitle", locals: { title: t("menu.admin.title") } %>
+      <%= render partial: "shared/card/subtitle", locals: { title: t("ui.menu.admin.title") } %>
       <ul class="menu w-full">
         <%= render partial: "shared/menu/item",
                    locals: {
-                     menu_item_name: t("menu.admin.jobs"),
+                     menu_item_name: t("ui.menu.admin.jobs"),
                      menu_item_icon: "chart-bar",
                      menu_item_path: "/jobs"
                    } %>
         <%= render partial: "shared/menu/item",
                    locals: {
-                     menu_item_name: t("menu.admin.registries"),
+                     menu_item_name: t("ui.menu.admin.registries"),
                      menu_item_icon: "document-duplicate",
                      menu_item_path: manifest_registries_path
                    } %>
