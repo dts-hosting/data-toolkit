@@ -30,7 +30,7 @@ class Activity < ApplicationRecord
   # Activity type definitions
   activity_type :check_media_derivatives do |a|
     a.display_name = "Check Media Derivatives"
-    a.file_requirement = :required_multiple
+    a.file_requirement = :one_or_more
     a.has_batch_config = false
     a.has_config_fields = false
     a.workflow = [:process_uploaded_files, :pre_check_ingest_data, :process_media_derivatives]
@@ -40,7 +40,7 @@ class Activity < ApplicationRecord
 
   activity_type :create_or_update_records do |a|
     a.display_name = "Create or Update Records"
-    a.file_requirement = :required_single
+    a.file_requirement = :one
     a.has_batch_config = true
     a.has_config_fields = true
     a.workflow = [:process_uploaded_files, :pre_check_ingest_data]
@@ -54,7 +54,7 @@ class Activity < ApplicationRecord
 
   activity_type :delete_records do |a|
     a.display_name = "Delete Records"
-    a.file_requirement = :required_single
+    a.file_requirement = :one
     a.has_batch_config = true
     a.has_config_fields = false
     a.workflow = [:process_uploaded_files]
@@ -73,7 +73,7 @@ class Activity < ApplicationRecord
 
   activity_type :import_terms do |a|
     a.display_name = "Import Terms"
-    a.file_requirement = :required_single
+    a.file_requirement = :one
     a.has_batch_config = false
     a.has_config_fields = false
     a.workflow = []

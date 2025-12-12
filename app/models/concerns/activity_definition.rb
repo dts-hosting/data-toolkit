@@ -106,7 +106,7 @@ module ActivityDefinition
   end
 
   def requires_files?
-    [:required_single, :required_multiple].include?(file_requirement)
+    [:one, :one_or_more].include?(file_requirement)
   end
 
   def select_attributes
@@ -129,10 +129,10 @@ module ActivityDefinition
     return unless activity_type
 
     case file_requirement
-    when :required_single
+    when :one
       errors.add(:files, "can't be blank") if files.blank?
       errors.add(:files, "must have exactly one file") if files.present? && files.length != 1
-    when :required_multiple
+    when :one_or_more
       errors.add(:files, "can't be blank") if files.blank?
       errors.add(:files, "must have at least one file") if files.present? && files.length < 1
     end
