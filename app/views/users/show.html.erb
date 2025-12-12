@@ -5,19 +5,19 @@
     <% end %>
   <% end %>
   <%= render "shared/card/header",
-             title: "Profile",
+             title: t("profile.title"),
              actions: actions_content %>
 
   <%= render "shared/card/property_grid" do %>
     <%= render partial: "shared/card/info",
                locals: {
-                 property: "Email address",
+                 property: User.human_attribute_name(:email_address),
                  value: @user&.email_address
                } %>
 
     <%= render partial: "shared/card/info",
                locals: {
-                 property: "CollectionSpace URL",
+                 property: User.human_attribute_name(:cspace_url),
                  value: link_to(
                   @user&.cspace_url,
                   @user&.cspace_url,
@@ -28,25 +28,25 @@
 
     <%= render partial: "shared/card/info",
                locals: {
-                 property: "API version",
+                 property: User.human_attribute_name(:cspace_api_version),
                  value: @user&.cspace_api_version
                } %>
 
     <%= render partial: "shared/card/info",
                locals: {
-                 property: "Profile",
+                 property: User.human_attribute_name(:cspace_profile),
                  value: @user&.cspace_profile
                } %>
 
     <%= render partial: "shared/card/info",
                locals: {
-                 property: "UI version",
+                 property: User.human_attribute_name(:cspace_ui_version),
                  value: @user&.cspace_ui_version
                } %>
 
     <%= render partial: "shared/card/info",
                locals: {
-                 property: "Data Toolkit admin?",
+                 property: t("profile.admin?"),
                  value: @user&.admin?
                } %>
   <% end %>
