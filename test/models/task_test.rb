@@ -245,8 +245,10 @@ class TaskTest < ActiveSupport::TestCase
     mock_finalizer = Minitest::Mock.new
     mock_finalizer.expect :perform_later, nil, [@task]
 
-    @task.stub :finalizer, mock_finalizer do
-      @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::REVIEW, completed_at: Time.current)
+    @task.activity.stub :current_task, @task do
+      @task.stub :finalizer, mock_finalizer do
+        @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::REVIEW, completed_at: Time.current)
+      end
     end
 
     mock_finalizer.verify
@@ -359,7 +361,7 @@ class TaskTest < ActiveSupport::TestCase
     activity.reload
     second_task.reload
 
-    assert activity.auto_advanced?, "Activity should have auto_advanced set to true"
+    assert activity.auto_advance?, "Activity should have auto_advance set to true"
     assert_equal Task::QUEUED, second_task.progress_status, "Next task should have been queued (run was called)"
   end
 
@@ -375,10 +377,10 @@ class TaskTest < ActiveSupport::TestCase
     first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
 
     activity.reload
-    assert_not activity.auto_advanced?
+    assert_not activity.auto_advance?
   end
 
-  test "handle_completion should set auto_advanced to false when running finalizer for failed task" do
+  test "handle_completion should set auto_advance to false when running finalizer for failed task" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -390,12 +392,14 @@ class TaskTest < ActiveSupport::TestCase
     mock_finalizer = Minitest::Mock.new
     mock_finalizer.expect :perform_later, nil, [first_task]
 
-    first_task.stub :finalizer, mock_finalizer do
-      first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::FAILED, completed_at: Time.current)
+    activity.stub :current_task, first_task do
+      first_task.stub :finalizer, mock_finalizer do
+        first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::FAILED, completed_at: Time.current)
+      end
     end
 
     activity.reload
-    assert_not activity.auto_advanced?
+    assert_not activity.auto_advance?
     mock_finalizer.verify
   end
 

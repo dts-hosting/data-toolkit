@@ -99,17 +99,11 @@ module Runnable
     end
 
     def handle_completion
-      # only run finalizer or auto advance when transitioning to a completed status
-      # and not when updating outcome status, for example, going from review -> succeeded
+      # only advance when transitioning to a completed status and not when
+      # updating outcome status, for example, going from review -> succeeded
       return unless saved_change_to_progress_status? && progress_completed?
 
-      if outcome_succeeded? && activity.config.fetch("auto_advance", true)
-        activity.next_task&.run
-        activity.update(auto_advanced: true)
-      else
-        finalizer&.perform_later(self)
-        activity.update(auto_advanced: false)
-      end
+      activity.advance
     end
 
     def met_dependencies

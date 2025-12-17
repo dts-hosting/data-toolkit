@@ -1,6 +1,6 @@
 class Activity < ApplicationRecord
   include ActivityDefinition
-  include AutoAdvanceable
+  include Advanceable
   include Historical
 
   # Disable STI - we use "type" column for activity type identifiers
@@ -82,6 +82,14 @@ class Activity < ApplicationRecord
 
   def current_task
     tasks.where.not(progress_status: Task::PENDING).order(:created_at).last
+  end
+
+  def done?
+    last_task? && current_task.outcome_succeeded?
+  end
+
+  def last_task?
+    current_task == tasks.last
   end
 
   def next_task

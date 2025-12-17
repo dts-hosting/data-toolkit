@@ -102,7 +102,7 @@ class ActivityTest < ActiveSupport::TestCase
   end
 
   # Auto-advance tests
-  test "should have auto_advanced field defaulting to true" do
+  test "should have auto_advance field defaulting to true" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create"},
@@ -110,11 +110,11 @@ class ActivityTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    assert activity.auto_advanced?
+    assert activity.auto_advance?
   end
 
   # TODO: something for real if we're not just logging
-  test "handle_advance should log when auto_advanced changes from true to false" do
+  test "track_advance should log when auto_advance changes from true to false" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -126,14 +126,14 @@ class ActivityTest < ActiveSupport::TestCase
     log_output = StringIO.new
     logger = Logger.new(log_output)
     Rails.stub :logger, logger do
-      activity.update!(auto_advanced: false)
+      activity.update!(auto_advance: false)
     end
 
     assert_includes log_output.string, "Auto-advance disabled"
   end
 
   # TODO: something for real if we're not just logging
-  test "handle_advance should log when final task completes successfully" do
+  test "track_advance should log when final task completes successfully" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -156,7 +156,7 @@ class ActivityTest < ActiveSupport::TestCase
   end
 
   # TODO: something for real if we're not just logging
-  test "handle_advance should not run when auto_advance is disabled" do
+  test "track_advance should not run when auto_advance is disabled" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
@@ -168,7 +168,7 @@ class ActivityTest < ActiveSupport::TestCase
     log_output = StringIO.new
     logger = Logger.new(log_output)
     Rails.stub :logger, logger do
-      activity.update!(auto_advanced: true)
+      activity.update!(auto_advance: true)
     end
 
     # Should not contain any auto-advance related logs
@@ -177,7 +177,7 @@ class ActivityTest < ActiveSupport::TestCase
   end
 
   # TODO: something for real if we're not just logging
-  test "handle_advance should not log when auto_advanced changes from false to true" do
+  test "track_advance should not log when auto_advance changes from false to true" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -189,7 +189,7 @@ class ActivityTest < ActiveSupport::TestCase
     log_output = StringIO.new
     logger = Logger.new(log_output)
     Rails.stub :logger, logger do
-      activity.update!(auto_advanced: true)
+      activity.update!(auto_advance: true)
     end
 
     # Should not log when changing from false to true
