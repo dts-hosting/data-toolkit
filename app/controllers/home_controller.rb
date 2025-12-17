@@ -11,7 +11,7 @@ class HomeController < ApplicationController
     @pagy, @activities = pagy(
       Activity.includes(:user, :data_config, :tasks)
               .joins(:user)
-              .where(users: {cspace_url: Current.user.cspace_url})
+              .where(users: {cspace_url: Current.collectionspace})
               .where.not(user_id: Current.user.id)
               .order(created_at: :desc)
     )
@@ -21,7 +21,7 @@ class HomeController < ApplicationController
   def history
     @pagy, @activities = pagy(
       History.where(
-        activity_url: Current.user.cspace_url
+        activity_url: Current.collectionspace
       ).order(activity_created_at: :desc)
     )
     render :index

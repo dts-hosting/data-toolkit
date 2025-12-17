@@ -18,10 +18,9 @@ class TasksController < ApplicationController
   def set_task
     accessible_tasks = Task.joins(activity: :user)
       .where(
-        "activities.id = ? AND (activities.user_id = ? OR users.cspace_url = ?)",
+        "activities.id = ? AND users.cspace_url = ?",
         params[:activity_id],
-        Current.user.id,
-        Current.user.cspace_url
+        Current.collectionspace
       )
 
     @task = accessible_tasks.find_by(id: params[:id])
