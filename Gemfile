@@ -29,7 +29,7 @@ end
 
 group :development do
   gem "htmlbeautifier"
-  gem "kamal", "~> 2.9"
+  gem "kamal", "~> 2.10"
   gem "letter_opener"
   gem "overcommit", require: false
   gem "web-console"
