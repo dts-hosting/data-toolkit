@@ -44,13 +44,13 @@ module FactoryHelpers
   def create_activity(attributes = {})
     attributes = {
       user: users(:admin),
-      type: "Activities::ExportRecordIds",
+      type: :export_record_ids,
       label: "Test Label #{SecureRandom.hex(4)}"
     }.merge(attributes)
     attributes[:data_config] = create_data_config_record_type unless attributes[:data_config]
     activity = Activity.new(attributes)
 
-    if activity.class.has_batch_config? && !activity.batch_config
+    if activity.has_batch_config? && !activity.batch_config
       activity.build_batch_config
     end
 

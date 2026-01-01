@@ -9,7 +9,7 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
       user: @user,
       config: {action: "create"},
       data_config: @data_config,
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       label: "Test Label #{SecureRandom.hex(4)}",
       files: @files
     )
@@ -55,8 +55,9 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
   end
 
   test "sets action to create and auto_advance to true by default" do
-    activity = Activities::CreateOrUpdateRecords.new(
+    activity = Activity.new(
       user: @user,
+      type: :create_or_update_records,
       data_config: @data_config,
       label: "Test #{SecureRandom.hex(4)}",
       files: @files
@@ -71,8 +72,9 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
   end
 
   test "preserves custom action value" do
-    activity = Activities::CreateOrUpdateRecords.new(
+    activity = Activity.new(
       user: @user,
+      type: :create_or_update_records,
       config: {action: "update"},
       data_config: @data_config,
       label: "Test #{SecureRandom.hex(4)}",
@@ -88,8 +90,9 @@ class CreateOrUpdateRecordsTest < ActiveSupport::TestCase
   end
 
   test "preserves custom action, key and auto_advance values" do
-    activity = Activities::CreateOrUpdateRecords.new(
+    activity = Activity.new(
       user: @user,
+      type: :create_or_update_records,
       config: {action: "update", auto_advance: false, custom_key: "custom_value"},
       data_config: @data_config,
       label: "Test #{SecureRandom.hex(4)}",

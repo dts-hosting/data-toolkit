@@ -1,5 +1,3 @@
-require "test_helper"
-
 class FeedbackTest < ActiveSupport::TestCase
   test "doesn't return display stuff when non-displayable" do
     f = Feedback.new("Tasks::PreCheckIngestData")

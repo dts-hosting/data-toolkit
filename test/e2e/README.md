@@ -1,6 +1,6 @@
 # Directory Structure
 
-```
+```text
 data-toolkit/
 ├── test/
 │   └── e2e/
@@ -25,7 +25,16 @@ data-toolkit/
 
 ## Install Playwright
 
-- Inside _e2e_ directory run npm install
+- Inside _e2e_ directory run `npm install`
+
+Install all browser dependencies:
+
+```bash
+npx playwright install-deps
+npx playwright install chromium
+npx playwright install firefox
+npx playwright install webkit
+```
 
 ## Running Tests
 
@@ -35,11 +44,15 @@ data-toolkit/
     - CSPACE_URL
     - CSPACE_ADMIN
     - CSPACE_PASSWORD
-  - Command line: npx playwright test --trace on
+  - Command line: `npx playwright test --trace on`
+
+There is a script to help with this:
+
+- `./run_test.sh`
 
 ## Current Tests
 
-- Test Steps\
+- Test Steps
   - Login Data Toolkit
   - Access Page
   - Media Derivatives
@@ -55,6 +68,14 @@ data-toolkit/
 
 It's possible to validate the GitHub Action using ACT.
 The recomendation is to use the Visual Code Extension.
+
+It can also run from the `gh cli`:
+
+```bash
+gh extension install https://github.com/nektos/gh-act
+# from data-toolkit root
+gh act -W ".github/workflows/playwright.yml"
+```
 
 ## Configuration File
 

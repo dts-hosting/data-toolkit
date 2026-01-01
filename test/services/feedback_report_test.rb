@@ -3,7 +3,7 @@ require "test_helper"
 class FeedbackReportTest < ActiveSupport::TestCase
   setup do
     @activity = create_activity(
-      type: "Activities::CheckMediaDerivatives",
+      type: :check_media_derivatives,
       user: users(:admin),
       data_config: create_data_config_record_type(record_type: "media"),
       files: create_uploaded_files(["media.csv"])

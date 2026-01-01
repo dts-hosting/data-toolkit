@@ -1,5 +1,3 @@
-require "test_helper"
-
 class FilesValidatorTest < ActiveSupport::TestCase
   def subject(files) = FilesValidator.new(
     files: fixtures_as_attachments(files),

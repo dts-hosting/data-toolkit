@@ -5,7 +5,7 @@
       <%= link_to "Cancel", :back, class: "btn btn-secondary btn-outline btn-sm" %>
     <% end %>
     <%= render "shared/card/header",
-               title: "New #{activity.class.display_name}",
+               title: "New #{activity.display_name}",
                actions: actions_content %>
 
     <% if activity.errors.any? %>
@@ -41,11 +41,11 @@
                                      class: "select select-bordered w-full" %>
         </div>
 
-        <% if activity.class.file_requirement != :none %>
-          <%= form.label :files, activity.class.file_requirement == :required_single ? "File" : "Files", class: "label-text font-medium" %>
+        <% if activity.file_requirement != :none %>
+          <%= form.label :files, activity.file_requirement == :one ? "File" : "Files", class: "label-text font-medium" %>
           <div class="sm:col-span-3">
             <%= form.file_field :files,
-                                multiple: activity.class.file_requirement != :required_single,
+                                multiple: activity.file_requirement == :one_or_more,
                                 name: "activity[files][]",
                                 class: "file-input file-input-bordered w-full" %>
           </div>
@@ -53,11 +53,11 @@
       <% end %>
     </div>
 
-    <% if activity.class.has_config_fields? %>
-      <%= render "#{activity.class.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
+    <% if activity.has_config_fields? %>
+      <%= render "#{activity.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
     <% end %>
 
-    <% if activity.class.has_batch_config? %>
+    <% if activity.has_batch_config? %>
       <div class="mb-6">
         <%= render partial: "shared/card/subtitle", locals: { title: "Batch config" } %>
         <%= render "batch_config_form", form: form, activity: activity %>

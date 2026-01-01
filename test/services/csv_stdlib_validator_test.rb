@@ -1,5 +1,3 @@
-require "test_helper"
-
 class CsvStdlibValidatorTest < ActiveSupport::TestCase
   def subject(file)
     CsvStdlibValidator.new(

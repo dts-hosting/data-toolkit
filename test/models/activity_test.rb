@@ -9,7 +9,7 @@ class ActivityTest < ActiveSupport::TestCase
     @activity = Activity.new(
       user: @user,
       data_config: @data_config,
-      type: "Activities::ExportRecordIds",
+      type: :export_record_ids,
       label: "Test Activity Label"
     )
   end
@@ -70,7 +70,7 @@ class ActivityTest < ActiveSupport::TestCase
 
   test "current_task returns the first task when new activity created" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create"},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
@@ -86,7 +86,7 @@ class ActivityTest < ActiveSupport::TestCase
 
   test "current_task returns first non-pending, most recently created task" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create"},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
@@ -104,7 +104,7 @@ class ActivityTest < ActiveSupport::TestCase
   # Auto-advance tests
   test "should have auto_advanced field defaulting to true" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create"},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
@@ -116,7 +116,7 @@ class ActivityTest < ActiveSupport::TestCase
   # TODO: something for real if we're not just logging
   test "handle_advance should log when auto_advanced changes from true to false" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
@@ -135,7 +135,7 @@ class ActivityTest < ActiveSupport::TestCase
   # TODO: something for real if we're not just logging
   test "handle_advance should log when final task completes successfully" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
@@ -158,7 +158,7 @@ class ActivityTest < ActiveSupport::TestCase
   # TODO: something for real if we're not just logging
   test "handle_advance should not run when auto_advance is disabled" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
@@ -179,7 +179,7 @@ class ActivityTest < ActiveSupport::TestCase
   # TODO: something for real if we're not just logging
   test "handle_advance should not log when auto_advanced changes from false to true" do
     activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])

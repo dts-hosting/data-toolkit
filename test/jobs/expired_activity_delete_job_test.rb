@@ -5,14 +5,14 @@ class ExpiredActivityDeleteJobTest < ActiveJob::TestCase
     @data_config = create_data_config_record_type
     # we'll force this one to be expired
     @expired_activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create"},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
     )
     # this one should not be expired
     @recent_activity = create_activity(
-      type: "Activities::CreateOrUpdateRecords",
+      type: :create_or_update_records,
       config: {action: "create"},
       data_config: @data_config,
       files: create_uploaded_files(["test.csv"])
