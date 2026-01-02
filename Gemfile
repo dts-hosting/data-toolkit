@@ -9,7 +9,7 @@ gem "importmap-rails"
 gem "turbo-rails"
 gem "stimulus-rails"
 gem "jbuilder"
-gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.21"
 gem "tzinfo-data", platforms: %i[windows jruby]
 gem "solid_cache"
 gem "solid_queue"
@@ -29,7 +29,7 @@ end
 
 group :development do
   gem "htmlbeautifier"
-  gem "kamal", "~> 2.9"
+  gem "kamal", "~> 2.10"
   gem "letter_opener"
   gem "overcommit", require: false
   gem "web-console"
