@@ -14,6 +14,15 @@ class Task < ApplicationRecord
 
   broadcasts_refreshes
 
+  def feedback_context
+    "Tasks::#{type.to_s.camelize}"
+  end
+
+  def has_feedback?
+    progress_completed? &&
+      (feedback_for.displayable? || actions.where.not(feedback: nil).any?)
+  end
+
   task_type :process_uploaded_files do |t|
     t.display_name = "Process Uploaded Files"
     t.handler = ProcessUploadedFilesJob
@@ -34,22 +43,5 @@ class Task < ApplicationRecord
     t.action_handler = ProcessMediaDerivativesActionJob
     t.finalizer = GenericFeedbackReportJob
     t.depends_on :process_uploaded_files, :pre_check_ingest_data
-  end
-
-  def checkin_frequency
-    item_count = activity.data_items_count
-    return 0 if item_count.zero?
-
-    # cap 10% checkin, but lower as item count increases
-    [Math.sqrt(item_count) / item_count, 0.1].min
-  end
-
-  def has_feedback?
-    progress_completed? &&
-      (feedback_for.displayable? || actions.where.not(feedback: nil).any?)
-  end
-
-  def feedback_context
-    "Tasks::#{type.to_s.camelize}"
   end
 end
