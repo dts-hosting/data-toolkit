@@ -14,7 +14,7 @@ jobs:
       CSPACE_PASSWORD: Administrator
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -32,7 +32,7 @@ jobs:
           ./bin/rake \"crud:import:manifest_registry[https://gist.githubusercontent.com/mark-cooper/0492cc97d53a47105dd29ca86799c8c7/raw/f376621f1c2e110f88fc1bdd10c5437f0abc99a5/meta-manifest2.json]\"
           "
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
 
@@ -47,7 +47,7 @@ jobs:
         run: |
           npx playwright test --trace on # tests/cspace-tests.spec.ts
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: playwright-report
