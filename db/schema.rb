@@ -56,7 +56,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_21_173008) do
   end
 
   create_table "activities", force: :cascade do |t|
-    t.boolean "auto_advanced", default: true
+    t.boolean "auto_advance", default: true
     t.json "config", default: {}, null: false
     t.datetime "created_at", null: false
     t.integer "data_config_id", null: false

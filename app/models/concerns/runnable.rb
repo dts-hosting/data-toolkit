@@ -21,6 +21,14 @@ module Runnable
       succeeded: SUCCEEDED
     }, prefix: :outcome
 
+    def checkin_frequency
+      item_count = activity.data_items_count
+      return 0 if item_count.zero?
+
+      # cap 10% checkin, but lower as item count increases
+      [Math.sqrt(item_count) / item_count, 0.1].min
+    end
+
     # Note: this overrides Progressable done! to add outcome
     def done!(outcome_status, feedback = nil)
       params = {
@@ -99,17 +107,11 @@ module Runnable
     end
 
     def handle_completion
-      # only run finalizer or auto advance when transitioning to a completed status
-      # and not when updating outcome status, for example, going from review -> succeeded
+      # only advance when transitioning to a completed status and not when
+      # updating outcome status, for example, going from review -> succeeded
       return unless saved_change_to_progress_status? && progress_completed?
 
-      if outcome_succeeded? && activity.config.fetch("auto_advance", true)
-        activity.next_task&.run
-        activity.update(auto_advanced: true)
-      else
-        finalizer&.perform_later(self)
-        activity.update(auto_advanced: false)
-      end
+      activity.trigger_auto_advance
     end
 
     def met_dependencies
