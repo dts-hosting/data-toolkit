@@ -31,11 +31,7 @@ class ActivitiesController < ApplicationController
   def set_activity
     accessible_activities = Activity.includes(:user, :data_config, :batch_config, :tasks)
       .joins(:user)
-      .where(
-        "activities.user_id = ? OR users.cspace_url = ?",
-        Current.user.id,
-        Current.user.cspace_url
-      )
+      .where(users: {cspace_url: Current.collectionspace})
 
     @activity = accessible_activities.find_by(id: params[:id])
 
