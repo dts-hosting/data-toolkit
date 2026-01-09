@@ -1,33 +1,41 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
+# Rails helpers for models/attrs
+# User.model_name.human -> User
+# User.model_name.human(count: 4) -> Users
+# User.human_attribute_name(:email)
 
 en:
+  activerecord:
+    models:
+      history:
+        one: History
+        other: Histories
+      user:
+        one: User
+        other: Users
+    attributes:
+      history:
+        activity_user: User
+        activity_url: Url
+        activity_type: Type
+        activity_label: Label
+        activity_created_at: Created at
+        activity_data_config_type: Config Type
+        activity_data_config_record_type: Record Type
+        task_type: Task type
+        task_status: Task status
+        task_started_at: Task started
+        task_completed_at: Task completed
+      user:
+        cspace_api_version: Api Version
+        cspace_ui_version: UI version
+        cspace_profile: Profile
+        cspace_url: CollectionSpace URL
+        email_address: Email Address
+        password: Password
+  dashboard:
+    title: Dashboard
+    subtitle: Welcome to your activities dashboard.
+    no_activities: No activities found.
   feedback:
     error:
       application_error: >-
@@ -49,6 +57,14 @@ en:
     warning:
       test_warning: >-
         Warning: %{details}
+  profile:
+    title: Profile
+    admin?: Data Toolkit admin?
+  signin:
+    title: Data Toolkit
+    cspace_url_example: "Example: https://core.collectionspace.org"
+    notice: You must not enforce single sign on to login with CollectionSpace.
+    submit: Sign in
   tasks:
     pre_check_ingest_data:
       feedback:
@@ -131,3 +147,19 @@ en:
       review: Review
       running: Running
       succeeded: Succeeded
+  ui:
+    loading: Loading ...
+    menu:
+      title: Activities
+      view:
+        title: View
+        my: My activities
+        group: Group activities
+        history: Activity history
+      perform:
+        title: Perform
+      admin:
+        title: Admin
+        jobs: Jobs dashboard
+        registries: Manifest registries
+    no_value: N/A
