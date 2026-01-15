@@ -27,7 +27,7 @@ For production `DATABASE_URL` is required as an environment variable in the form
 
 ### Rails Setup
 
-Initial use/re-setup the application:
+Initial setup and run the application:
 
 ```bash
 rbenv install -s
@@ -35,11 +35,13 @@ bundle install
 ./bin/setup
 ```
 
-Restart dev server without re-installing, etc.:
+For just running the server without redoing the setup steps:
 
 ```bash
 ./bin/dev
 ```
+
+## CLI tasks
 
 ```bash
 # create a user
