@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # rails gems
-gem "rails", "~> 8.1.1"
+gem "rails", "~> 8.1.2"
 gem "propshaft"
 gem "sqlite3", ">= 2.1"
 gem "puma", ">= 5.0"
@@ -37,6 +37,7 @@ end
 
 group :test do
   gem "capybara"
+  gem "minitest-mock"
   gem "mocha"
   gem "selenium-webdriver"
   gem "webmock"
