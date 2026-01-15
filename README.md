@@ -2,6 +2,31 @@
 
 A Rails web application for CollectionSpace data related activities.
 
+## Prerequisites
+
+### PostgreSQL Setup
+
+This application requires PostgreSQL. The default development/test db urls are:
+
+- `postgres://toolkit:toolkit@localhost:5432/toolkit_[development|test]`
+
+To create the `toolkit` database user:
+
+```bash
+# adjust envvar values as appropriate
+PGHOST=localhost PGUSER=admin PGPASSWORD=admin psql \
+    -c "CREATE ROLE toolkit WITH LOGIN SUPERUSER PASSWORD 'toolkit' CREATEDB;"
+```
+
+Using `CREATEDB` allows the role to create databases, which is required for `rails db:create`
+and `SUPERUSER` is needed for tests to disable referential integrity when loading fixtures.
+
+For production `DATABASE_URL` is required as an environment variable in the form:
+
+- `postgres://$username:$password@$host:$port/$db_name`
+
+### Rails Setup
+
 Initial use/re-setup the application:
 
 ```bash

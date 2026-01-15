@@ -2,8 +2,8 @@ source "https://rubygems.org"
 
 # rails gems
 gem "rails", "~> 8.1.2"
+gem "pg"
 gem "propshaft"
-gem "sqlite3", ">= 2.1"
 gem "puma", ">= 5.0"
 gem "importmap-rails"
 gem "turbo-rails"
