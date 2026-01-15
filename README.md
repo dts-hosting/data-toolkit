@@ -15,11 +15,11 @@ To create the `toolkit` database user:
 ```bash
 # adjust envvar values as appropriate
 PGHOST=localhost PGUSER=admin PGPASSWORD=admin psql \
-    -c "CREATE ROLE toolkit WITH LOGIN SUPERUSER PASSWORD 'toolkit' CREATEDB;"
+    -c "CREATE ROLE toolkit WITH LOGIN SUPERUSER PASSWORD 'toolkit';"
 ```
 
-Using `CREATEDB` allows the role to create databases, which is required for `rails db:create`
-and `SUPERUSER` is needed for tests to disable referential integrity when loading fixtures.
+Using `SUPERUSER` allows the role to create databases, which is required for `rails db:create`,
+and is needed for tests to disable referential integrity when loading fixtures.
 
 For production `DATABASE_URL` is required as an environment variable in the form:
 

@@ -17,11 +17,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
   create_table "actions", force: :cascade do |t|
     t.datetime "completed_at"
     t.datetime "created_at", null: false
-    t.integer "data_item_id", null: false
+    t.bigint "data_item_id", null: false
     t.jsonb "feedback"
     t.string "progress_status", default: "pending", null: false
     t.datetime "started_at"
-    t.integer "task_id", null: false
+    t.bigint "task_id", null: false
     t.datetime "updated_at", null: false
     t.index ["data_item_id"], name: "index_actions_on_data_item_id"
     t.index ["progress_status"], name: "index_actions_on_progress_status"
@@ -62,19 +62,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
     t.boolean "auto_advance", default: true
     t.jsonb "config", default: {}, null: false
     t.datetime "created_at", null: false
-    t.integer "data_config_id", null: false
+    t.bigint "data_config_id", null: false
     t.integer "data_items_count", default: 0, null: false
     t.string "label", null: false
     t.string "type", null: false
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.index ["data_config_id"], name: "index_activities_on_data_config_id"
     t.index ["updated_at"], name: "index_activities_on_updated_at"
     t.index ["user_id"], name: "index_activities_on_user_id"
   end
 
   create_table "batch_configs", force: :cascade do |t|
-    t.integer "activity_id"
+    t.bigint "activity_id"
     t.string "batch_mode", null: false
     t.boolean "check_record_status", null: false
     t.datetime "created_at", null: false
@@ -94,7 +94,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
   create_table "data_configs", force: :cascade do |t|
     t.string "config_type", null: false
     t.datetime "created_at", null: false
-    t.integer "manifest_id", null: false
+    t.bigint "manifest_id", null: false
     t.string "profile", null: false
     t.string "record_type"
     t.datetime "updated_at", null: false
@@ -105,7 +105,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
   end
 
   create_table "data_items", force: :cascade do |t|
-    t.integer "activity_id", null: false
+    t.bigint "activity_id", null: false
     t.datetime "created_at", null: false
     t.jsonb "data", null: false
     t.integer "position", default: 0, null: false
@@ -144,7 +144,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
   create_table "manifests", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "data_configs_count", default: 0, null: false
-    t.integer "manifest_registry_id", null: false
+    t.bigint "manifest_registry_id", null: false
     t.datetime "updated_at", null: false
     t.string "url", null: false
     t.index ["manifest_registry_id"], name: "index_manifests_on_manifest_registry_id"
@@ -156,12 +156,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
     t.string "ip_address"
     t.datetime "updated_at", null: false
     t.string "user_agent"
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
   create_table "tasks", force: :cascade do |t|
-    t.integer "activity_id", null: false
+    t.bigint "activity_id", null: false
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.jsonb "feedback"
