@@ -90,6 +90,11 @@ bundle exec kamal server bootstrap -d qa
 # verify access to docker registry
 bundle exec kamal registry login -d qa
 
+# boot postgres
+kamal accessory boot postgres -d qa
+kamal accessory details postgres -d qa
+kamal accessory logs postgres -d qa -f
+
 # run the deploy process
 bundle exec kamal deploy -d qa
 

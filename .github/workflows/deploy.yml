@@ -55,6 +55,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
 
+      - name: Ensure postgres accessory is running
+        run: bundle exec kamal accessory reboot postgres -d qa --no-confirm
+
       - name: Kamal deploy
         run: bundle exec kamal deploy -d qa
 
@@ -110,6 +113,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Ensure postgres accessory is running
+        run: bundle exec kamal accessory reboot postgres -d qa --no-confirm # TODO: "prod"
 
       - name: Kamal deploy
         run: bundle exec kamal deploy -d qa # TODO: "prod" (we don't have one currently)
