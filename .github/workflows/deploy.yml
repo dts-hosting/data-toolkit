@@ -56,7 +56,7 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
 
       - name: Ensure postgres accessory is running
-        run: bundle exec kamal accessory reboot postgres -d qa --no-confirm
+        run: bundle exec kamal accessory reboot postgres -d qa
 
       - name: Kamal deploy
         run: bundle exec kamal deploy -d qa
@@ -115,7 +115,7 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
 
       - name: Ensure postgres accessory is running
-        run: bundle exec kamal accessory reboot postgres -d qa --no-confirm # TODO: "prod"
+        run: bundle exec kamal accessory reboot postgres -d qa # "prod"
 
       - name: Kamal deploy
         run: bundle exec kamal deploy -d qa # TODO: "prod" (we don't have one currently)
