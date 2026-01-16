@@ -12,3 +12,16 @@ servers:
       ENABLE_RATE_LIMITING: false
       SCOUT_NAME: Data Toolkit (QA)
       SOLID_QUEUE_IN_PUMA: true
+
+accessories:
+  postgres:
+    image: postgres:17
+    host: general-shared-production-apps.lyrasistechnology.org
+    port: 5432
+    env:
+      clear:
+        POSTGRES_USER: toolkit
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      - pg-data:/var/lib/postgresql
