@@ -1,6 +1,6 @@
 class Activity < ApplicationRecord
   include ActivityDefinition
-  include AutoAdvanceable
+  include Advanceable
   include Historical
 
   # Disable STI - we use "type" column for activity type identifiers
@@ -26,6 +26,22 @@ class Activity < ApplicationRecord
   end
 
   broadcasts_refreshes
+
+  def current_task
+    tasks.where.not(progress_status: Task::PENDING).order(:created_at).last
+  end
+
+  def done?
+    last_task? && current_task.outcome_succeeded?
+  end
+
+  def last_task?
+    current_task == tasks.last
+  end
+
+  def next_task
+    tasks.where(progress_status: Task::PENDING).order(:created_at).first
+  end
 
   # Activity type definitions
   activity_type :check_media_derivatives do |a|
@@ -78,14 +94,6 @@ class Activity < ApplicationRecord
     a.has_config_fields = false
     a.workflow = []
     a.data_config_type = "term_list"
-  end
-
-  def current_task
-    tasks.where.not(progress_status: Task::PENDING).order(:created_at).last
-  end
-
-  def next_task
-    tasks.where(progress_status: Task::PENDING).order(:created_at).first
   end
 
   private

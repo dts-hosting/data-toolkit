@@ -23,6 +23,8 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_SG_NAME: ${{ secrets.AWS_SG_NAME }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       SCOUT_KEY: ${{ secrets.SCOUT_KEY }}
       SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
 
@@ -52,6 +54,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Ensure postgres accessory is running
+        run: bundle exec kamal accessory reboot postgres -d qa
 
       - name: Kamal deploy
         run: bundle exec kamal deploy -d qa
@@ -77,6 +82,8 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_SG_NAME: ${{ secrets.AWS_SG_NAME }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       SCOUT_KEY: ${{ secrets.SCOUT_KEY }}
       SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
 
@@ -106,6 +113,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
+
+      - name: Ensure postgres accessory is running
+        run: bundle exec kamal accessory reboot postgres -d qa # "prod"
 
       - name: Kamal deploy
         run: bundle exec kamal deploy -d qa # TODO: "prod" (we don't have one currently)
