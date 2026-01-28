@@ -30,17 +30,19 @@ test("Check Cspace", async ({ checkCspace, page }, testInfo) => {
   await test.step(
     "CSpace Search",
     async (step) => {
-      await checkCspace.searchItem('MR2022.1.7');
-      await checkCspace.searchByIdAndTitle('789','XYZ');
+      await checkCspace.searchItem("MR2022.1.7");
+      await checkCspace.searchByIdAndTitle("789", "XYZ");
     },
     { box: true }
   );
 
-  await test.step( 
-    "Related Objects Fetch", 
+  await test.step(
+    "Related Objects Fetch",
     async (step) => {
-      expect(await checkCspace.fetchRelatedObjects('MR2022.1.7')).toBeGreaterThan(0);
+      expect(
+        await checkCspace.fetchRelatedObjects("MR2022.1.7")
+      ).toBeGreaterThan(0);
     },
     { box: true }
-  )
+  );
 });

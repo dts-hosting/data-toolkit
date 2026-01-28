@@ -1,7 +1,6 @@
 import { test, expect } from "./datatoolkit-test";
-import { parse as csv } from 'csv-parse';
-import fs from 'fs';
-
+import { parse as csv } from "csv-parse";
+import fs from "fs";
 
 // CSV file parsing example
 type CSVRowData = {
@@ -9,22 +8,22 @@ type CSVRowData = {
   title: string;
 };
 
-const filePath: string = 'data/test.csv';
+const filePath: string = "data/test.csv";
 const CSVRows: CSVRowData[] = [];
 
 fs.createReadStream(filePath)
   .pipe(csv({ columns: true })) // `columns: true` treats the first row as headers
-  .on('data', (row: CSVRowData) => {
+  .on("data", (row: CSVRowData) => {
     // Process each row as it is parsed
-    CSVRows.push(row); 
+    CSVRows.push(row);
     // console.log(row);
   })
-  .on('end', () => {
+  .on("end", () => {
     // This event is fired when the entire file has been processed
     // console.log('CSV file successfully processed.');
     // console.log(results);
   })
-  .on('error', (error) => {
+  .on("error", (error) => {
     console.error(error);
   });
 
