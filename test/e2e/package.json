@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "csv-parse": "^6.1.0",
     "dotenv": "^17.2.2",
     "playright": "^0.0.22",
     "prettier": "3.0"

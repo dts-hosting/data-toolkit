@@ -1,4 +1,32 @@
 import { test, expect } from "./datatoolkit-test";
+import { parse as csv } from 'csv-parse';
+import fs from 'fs';
+
+
+// CSV file parsing example
+type CSVRowData = {
+  objectNumber: string;
+  title: string;
+};
+
+const filePath: string = 'data/test.csv';
+const CSVRows: CSVRowData[] = [];
+
+fs.createReadStream(filePath)
+  .pipe(csv({ columns: true })) // `columns: true` treats the first row as headers
+  .on('data', (row: CSVRowData) => {
+    // Process each row as it is parsed
+    CSVRows.push(row); 
+    // console.log(row);
+  })
+  .on('end', () => {
+    // This event is fired when the entire file has been processed
+    // console.log('CSV file successfully processed.');
+    // console.log(results);
+  })
+  .on('error', (error) => {
+    console.error(error);
+  });
 
 test.afterEach(async ({ page }, testInfo) => {
   // Check if the test has failed
@@ -62,6 +90,25 @@ test("Check Create/Update Records", async ({
     { box: true }
   );
 
+  // checkCspace - Temporarily commented out as it's not implemented on Data Toolkit
+  // await test.step(
+  //   "Check CSpace Items Created",
+  //     async (step) => {
+  //       const newContext = await browser.newContext();
+  //       const newPage = await newContext.newPage();
+  //       await checkCspace.doLogin(newPage);
+
+  //       CSVRows.forEach(async (row) => {
+  //         console.log(row);
+  //         await checkCspace.searchByIdAndTitle(row.objectNumber, row.title, newPage);
+  //       });
+
+  //       await newContext.close();
+
+  //     },
+  //     { box: true }
+  //   );
+
   await test.step(
     "Create/Update Records - Failure",
     async (step) => {
@@ -93,18 +140,6 @@ test("Check Create/Update Records", async ({
         path: screenshotPath,
         contentType: "image/png",
       });
-    },
-    { box: true }
-  );
-
-  // checkCspace
-  await test.step(
-    "Check CSpace",
-    async (step) => {
-      const newContext = await browser.newContext();
-      const newPage = await newContext.newPage();
-      await checkCspace.doLogin(newPage);
-      await newContext.close();
     },
     { box: true }
   );

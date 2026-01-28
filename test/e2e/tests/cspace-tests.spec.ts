@@ -21,10 +21,26 @@ test.afterEach(async ({ page }, testInfo) => {
 test("Check Cspace", async ({ checkCspace, page }, testInfo) => {
   // checkCspace
   await test.step(
-    "Check CSpace",
+    "CSpace Login",
     async (step) => {
       await checkCspace.doLogin();
     },
     { box: true }
   );
+  await test.step(
+    "CSpace Search",
+    async (step) => {
+      await checkCspace.searchItem('MR2022.1.7');
+      await checkCspace.searchByIdAndTitle('789','XYZ');
+    },
+    { box: true }
+  );
+
+  await test.step( 
+    "Related Objects Fetch", 
+    async (step) => {
+      expect(await checkCspace.fetchRelatedObjects('MR2022.1.7')).toBeGreaterThan(0);
+    },
+    { box: true }
+  )
 });
