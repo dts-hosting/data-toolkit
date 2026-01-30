@@ -38,8 +38,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4" # Not needed with a .ruby-version, .tool-versions or mise.toml
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+          bundler-cache: true
       - run: bin/setup --skip-server
       - run: |
           ./bin/rails server -d
