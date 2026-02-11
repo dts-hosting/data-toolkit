@@ -40,6 +40,15 @@ class ManifestRegistry < ApplicationRecord
   def should_process?(registry_updated_at)
     return true if last_updated_at.nil?
 
-    Date.parse(registry_updated_at) > last_updated_at
+    parsed_registry_updated_at = parse_updated_at(registry_updated_at)
+    return true unless parsed_registry_updated_at
+
+    parsed_registry_updated_at > last_updated_at
+  end
+
+  def parse_updated_at(value)
+    Time.zone.parse(value.to_s)
+  rescue ArgumentError, TypeError
+    nil
   end
 end
