@@ -22,47 +22,48 @@ module ActivityDefinition
       @config_defaults = {}
       @validations = nil
     end
+
+    def finalize!
+      @workflow = workflow.dup.freeze
+      @select_attributes = select_attributes&.dup&.freeze
+      @boolean_attributes = boolean_attributes&.dup&.freeze
+      @config_defaults = (config_defaults || {}).deep_dup.freeze
+      freeze
+    end
   end
 
   included do
-    @@activity_types_registry = {}
+    class_attribute :activity_types_registry, instance_accessor: false, default: {}
 
     validate :activity_type_must_exist_in_registry
     validate :apply_file_requirement_validations
     validate :apply_activity_type_validations
     validates :type, presence: true
     before_validation :normalize_type_column
-
-    def self.activity_types_registry
-      @@activity_types_registry
-    end
   end
 
   class_methods do
     def activity_type(name, &block)
       config = ActivityTypeConfiguration.new(name)
       yield(config) if block_given?
-      @@activity_types_registry[name] = config
+      self.activity_types_registry = activity_types_registry.merge(name => config.finalize!).freeze
     end
 
     def activity_type_config(name)
       return nil unless name
-      @@activity_types_registry[name.to_sym]
+      activity_types_registry[name.to_sym]
     end
 
-    # Replacement for Descendents#descendants_by_display_name
     def activity_types_by_display_name
-      @@activity_types_registry.transform_values(&:display_name).invert
+      activity_types_registry.transform_values(&:display_name).invert
     end
 
-    # Replacement for Descendents#display_names
     def activity_type_display_names
-      @@activity_types_registry.values.map(&:display_name).compact.sort
+      activity_types_registry.values.map(&:display_name).compact.sort
     end
 
-    # Replacement for Descendents#find_type_by_param_name
     def find_activity_type_by_param_name(param_name)
-      @@activity_types_registry.find do |_name, config|
+      activity_types_registry.find do |_name, config|
         config.display_name&.parameterize == param_name
       end&.first
     end

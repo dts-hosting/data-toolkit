@@ -56,11 +56,16 @@ module Runnable
     def run
       return unless ok_to_run?
 
+      should_enqueue = false
       transaction do
-        create_actions_for_data_items
-        update!(progress_status: Progressable::QUEUED)
+        if action_handler && create_actions_for_data_items.zero?
+          done!(FAILED, no_processable_items_feedback)
+        else
+          update!(progress_status: Progressable::QUEUED)
+          should_enqueue = true
+        end
       end
-      handler.perform_later(self)
+      handler.perform_later(self) if should_enqueue
     end
 
     def status
@@ -91,9 +96,12 @@ module Runnable
 
       processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
 
+      created_count = 0
       processable_items.find_each do |data_item|
         actions.create!(data_item: data_item)
+        created_count += 1
       end
+      created_count
     end
 
     def finalize_status
@@ -120,6 +128,15 @@ module Runnable
       dependencies.all? do |dependency|
         activity.tasks.exists?(type: dependency.to_s, outcome_status: SUCCEEDED)
       end
+    end
+
+    def no_processable_items_feedback
+      feedback = feedback_for
+      feedback.add_to_errors(
+        subtype: :application_error,
+        details: "Task could not be queued because there were no processable items."
+      )
+      feedback
     end
   end
 end

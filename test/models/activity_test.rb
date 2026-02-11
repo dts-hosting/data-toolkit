@@ -112,4 +112,9 @@ class ActivityTest < ActiveSupport::TestCase
 
     assert activity.auto_advance?
   end
+
+  test "activity type registry is immutable and includes configured types" do
+    assert Activity.activity_types_registry.frozen?
+    assert_includes Activity.activity_types_registry.keys, :create_or_update_records
+  end
 end
