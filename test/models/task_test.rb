@@ -12,6 +12,11 @@ class TaskTest < ActiveSupport::TestCase
     assert @task.valid?
   end
 
+  test "task type registry is immutable and includes configured types" do
+    assert Task.task_types_registry.frozen?
+    assert_includes Task.task_types_registry.keys, :process_uploaded_files
+  end
+
   test "should require type" do
     @task.type = nil
     assert_not @task.valid?
@@ -354,6 +359,9 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal second_task, activity.next_task
     assert_equal Task::PENDING, second_task.progress_status
 
+    # Ensure the next task has processable items to queue
+    activity.data_items.create!(position: 0, data: {objectnumber: "OBJ1"})
+
     # Trigger auto-advance by completing the first task
     first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
 
@@ -435,5 +443,39 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 4, @task.actions.count
     assert_equal 4, @task.data_items.count
     assert_not_includes @task.data_items, data_items[0]
+  end
+
+  test "run fails action handler task when there are no processable items" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type(record_type: "acquisitions"),
+      files: create_uploaded_files(["test.csv"])
+    )
+    process_uploaded_files_task = activity.tasks.find_by(type: "process_uploaded_files")
+    pre_check_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+    process_uploaded_files_task.update!(
+      progress_status: Task::COMPLETED,
+      outcome_status: Task::SUCCEEDED,
+      completed_at: Time.current
+    )
+
+    3.times do |i|
+      data_item = activity.data_items.create!(position: i, data: {objectnumber: "OBJ#{i}"})
+      Action.create!(
+        task: process_uploaded_files_task,
+        data_item: data_item,
+        feedback: {"errors" => [{"type" => "error", "details" => "unprocessable"}]}
+      )
+    end
+
+    assert pre_check_task.ok_to_run?
+    pre_check_task.run
+
+    pre_check_task.reload
+    assert pre_check_task.progress_completed?
+    assert pre_check_task.outcome_failed?
+    assert_includes pre_check_task.feedback_for.errors.map(&:details),
+      "Task could not be queued because there were no processable items."
   end
 end

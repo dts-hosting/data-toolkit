@@ -28,7 +28,7 @@ class ManifestRegistriesController < AdminController
   end
 
   def run
-    ManifestRegistryImportJob.perform_later
+    ManifestRegistryImportJob.perform_later(@manifest_registry)
     redirect_to manifest_registries_path, notice: "Registry import job has been queued."
   end
 

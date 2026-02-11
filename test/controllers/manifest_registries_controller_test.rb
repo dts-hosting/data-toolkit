@@ -92,7 +92,7 @@ class ManifestRegistriesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should run manifest registry import job" do
-    assert_enqueued_with(job: ManifestRegistryImportJob) do
+    assert_enqueued_with(job: ManifestRegistryImportJob, args: [@manifest_registry]) do
       post run_manifest_registry_url(@manifest_registry)
     end
 

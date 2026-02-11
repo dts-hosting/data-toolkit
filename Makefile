@@ -1,4 +1,9 @@
+.DEFAULT_GOAL := help
 SHELL:=/bin/bash
+
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: install
 install: ## make install # Install dependencies
@@ -11,7 +16,7 @@ lint: ## make lint # Run all linters
 	@bundle exec standardrb --fix
 	@npx prettier . --write
 
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+.PHONY: test
+test: ## make test # Run all tests
+	@bin/rails db:test:prepare test test:system
 
-.DEFAULT_GOAL := help

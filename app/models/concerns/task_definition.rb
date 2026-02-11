@@ -20,31 +20,32 @@ module TaskDefinition
       return @dependencies if task_types.empty?
       @dependencies = task_types.flatten
     end
+
+    def finalize!
+      @dependencies = dependencies.dup.freeze
+      freeze
+    end
   end
 
   included do
-    @@task_types_registry = {}
+    class_attribute :task_types_registry, instance_accessor: false, default: {}
 
     validate :task_type_must_exist_in_registry
     validates :type, presence: true
     before_validation :normalize_type_column
 
     after_create_commit :auto_run_if_configured
-
-    def self.task_types_registry
-      @@task_types_registry
-    end
   end
 
   class_methods do
     def task_type(name, &block)
       config = TaskTypeConfiguration.new(name)
       config.instance_eval(&block) if block_given?
-      @@task_types_registry[name] = config
+      self.task_types_registry = task_types_registry.merge(name => config.finalize!).freeze
     end
 
     def task_type_config(name)
-      @@task_types_registry[name.to_sym]
+      task_types_registry[name.to_sym]
     end
   end
 

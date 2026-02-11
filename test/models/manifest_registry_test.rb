@@ -20,4 +20,22 @@ class ManifestRegistryTest < ActiveSupport::TestCase
 
     assert_not @manifest_registry.safe_to_delete?
   end
+
+  test "should_process? returns true when incoming timestamp is later on the same day" do
+    @manifest_registry.update!(last_updated_at: Time.zone.parse("2026-02-10T10:00:00Z"))
+
+    assert @manifest_registry.send(:should_process?, "2026-02-10T12:00:00Z")
+  end
+
+  test "should_process? returns false when incoming timestamp is earlier on the same day" do
+    @manifest_registry.update!(last_updated_at: Time.zone.parse("2026-02-10T12:00:00Z"))
+
+    assert_not @manifest_registry.send(:should_process?, "2026-02-10T10:00:00Z")
+  end
+
+  test "should_process? returns true when incoming timestamp is invalid" do
+    @manifest_registry.update!(last_updated_at: Time.zone.parse("2026-02-10T12:00:00Z"))
+
+    assert @manifest_registry.send(:should_process?, "not-a-timestamp")
+  end
 end

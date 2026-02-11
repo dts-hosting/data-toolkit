@@ -78,8 +78,8 @@ namespace :crud do
     task :manifest_registry, [:url] => :environment do |t, args|
       registry = ManifestRegistry.find_or_create_by(url: args.fetch(:url))
       registry.update(last_updated_at: nil)
-      ManifestRegistryImportJob.perform_now
-      puts ManifestRegistry.last.manifests.to_json
+      ManifestRegistryImportJob.perform_now(registry)
+      puts registry.manifests.to_json
     end
   end
 end

@@ -1,17 +1,7 @@
 <%= render "form", manifest_registry: @manifest_registry %>
 
 <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
-  <% actions_content = capture do %>
-    <% if @manifest_registries.any? %>
-      <%= button_to "Update Registries",
-                    run_manifest_registry_path(@manifest_registries.first),
-                    method: :post,
-                    class: "btn btn-sm btn-success btn-outline" %>
-    <% end %>
-  <% end %>
-  <%= render "shared/card/header",
-             title: "Manifest Registries",
-             actions: actions_content %>
+  <%= render "shared/card/header", title: "Manifest Registries" %>
 
   <% if @manifest_registries.any? %>
     <div id="manifest_registries">
