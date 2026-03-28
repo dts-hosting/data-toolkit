@@ -1,12 +1,12 @@
 <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
-  <h2 class="card-title mb-4">Dashboard</h2>
-  <p class="mb-6">Welcome to your activities dashboard.</p>
+  <h2 class="card-title mb-4"><%= t("dashboard.title") %></h2>
+  <p class="mb-6"><%= t("dashboard.subtitle") %></p>
   <div id="activities">
     <%= turbo_frame_tag :activities_page, @pagy.page, target: :_top do %>
       <% if @activities.empty? %>
         <div class="alert alert-info">
           <%= icon "information-circle", class: "stroke-current shrink-0 w-6 h-6" %>
-          <span>No activities found.</span>
+          <span><%= t("dashboard.no_activities") %></span>
         </div>
       <% else %>
         <% if @activities.first.is_a?(Activity) %>
@@ -18,7 +18,7 @@
 
       <% if @pagy.next %>
         <%= turbo_frame_tag :activities_page, @pagy.next, src: url_for(page: @pagy.next), loading: :lazy, target: :_top do %>
-          <%= tag.div "Loading...", class: "text-center p-4" %>
+          <%= tag.div t("ui.loading"), class: "text-center p-4" %>
         <% end %>
       <% end %>
     <% end %>

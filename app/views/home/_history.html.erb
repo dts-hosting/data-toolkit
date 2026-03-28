@@ -11,26 +11,74 @@
     <div class="collapse-content px-0">
       <%= render "shared/card/property_grid", columns: 2 do %>
         <%= render partial: "shared/card/item",
-                   locals: { property: "User", value: history.activity_user } %>
+                   locals: {
+                     property: History.human_attribute_name(:activity_user),
+                     value: history.activity_user
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Type", value: history.activity_type } %>
+                   locals: {
+                     property: History.human_attribute_name(:activity_type),
+                     value: history.activity_type
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Label", value: history.activity_label } %>
+                   locals: {
+                     property: History.human_attribute_name(:activity_label),
+                     value: history.activity_label
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Created at", value: local_time(history.activity_created_at) } %>
+                   locals: {
+                     property: History.human_attribute_name(:activity_created_at),
+                     value: local_time(history.activity_created_at)
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Config Type", value: history.activity_data_config_type } %>
+                   locals: {
+                     property: History.human_attribute_name(:activity_data_config_type),
+                     value: history.activity_data_config_type
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Record Type", value: history.activity_data_config_record_type || "N/A" } %>
+                   locals: {
+                     property: History.human_attribute_name(:activity_data_config_record_type),
+                     value: history.activity_data_config_record_type || t("ui.no_value")
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Task type", value: history.task_type } %>
+                   locals: {
+                     property: History.human_attribute_name(:task_type),
+                     value: history.task_type
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Task status", value: history.task_status } %>
+                   locals: {
+                     property: History.human_attribute_name(:task_status),
+                     value: history.task_status
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Task started", value: local_time(history.task_started_at) } %>
+                   locals: {
+                     property: History.human_attribute_name(:task_started_at),
+                     value: local_time(history.task_started_at)
+                   }
+        %>
+
         <%= render partial: "shared/card/item",
-                   locals: { property: "Task completed",
-                             value: history.task_completed_at ? local_time(history.task_completed_at) : "N/A" } %>
+                   locals: {
+                      property: History.human_attribute_name(:task_completed_at),
+                      value: history.task_completed_at ? local_time(history.task_completed_at) : ("ui.no_value")
+                   }
+        %>
       <% end %>
     </div>
   </div>
