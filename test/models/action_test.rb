@@ -183,26 +183,46 @@ class ActionTest < ActiveSupport::TestCase
     assert @action.progress_completed?
   end
 
+  test "completing an action atomically increments task.actions_completed_count" do
+    @action.save!
+    @task.update_columns(actions_count: 1, actions_completed_count: 0)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    @action.update!(progress_status: Action::COMPLETED, completed_at: Time.current)
+
+    assert_equal 1, @task.reload.actions_completed_count
+  end
+
+  test "updating an already-completed action does not double-increment counter" do
+    @action.save!
+    @task.update_columns(actions_count: 1, actions_completed_count: 0)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    @action.update!(progress_status: Action::COMPLETED, completed_at: Time.current)
+    @action.update!(feedback: {"errors" => []})
+
+    assert_equal 1, @task.reload.actions_completed_count
+  end
+
   # Callback tests
   test "after_update_commit should touch task when progress reaches 100%" do
     @action.save!
-    # Create 4 more actions (we already have 1 from setup)
     4.times do |i|
       data_item = @task.activity.data_items.create!(position: i + 1, data: {objectNumber: (i + 2).to_s})
       @task.actions.create!(data_item: data_item)
     end
     @task.update!(progress_status: Task::RUNNING)
+    @task.update_columns(actions_count: 5)
 
-    # Complete all actions
-    @task.actions.update_all(progress_status: Action::COMPLETED)
+    # Complete all but the last via update_all (bypasses callbacks)
+    @task.actions.where.not(id: @task.actions.last.id).update_all(progress_status: Action::COMPLETED)
+    @task.update_column(:actions_completed_count, 4)
 
-    # Update the last one to trigger the callback
-    last_action = @task.actions.last
     original_task_updated_at = @task.updated_at
-
-    # Wait a bit to ensure timestamp difference
     sleep 0.01
-    last_action.update(progress_status: Action::COMPLETED)
+
+    # Complete the last one via update to trigger the callback
+    @task.actions.last.update(progress_status: Action::COMPLETED)
 
     @task.reload
     assert @task.updated_at > original_task_updated_at, "Task should have been touched"

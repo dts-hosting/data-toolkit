@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_29_154224) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -161,6 +161,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
   end
 
   create_table "tasks", force: :cascade do |t|
+    t.integer "actions_completed_count", default: 0, null: false
+    t.integer "actions_count", default: 0, null: false
     t.bigint "activity_id", null: false
     t.datetime "completed_at"
     t.datetime "created_at", null: false
@@ -170,6 +172,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_092659) do
     t.datetime "started_at"
     t.string "type", null: false
     t.datetime "updated_at", null: false
+    t.index ["activity_id", "type"], name: "index_tasks_on_activity_id_and_type", unique: true
     t.index ["activity_id"], name: "index_tasks_on_activity_id"
     t.index ["outcome_status"], name: "index_tasks_on_outcome_status"
     t.index ["progress_status"], name: "index_tasks_on_progress_status"

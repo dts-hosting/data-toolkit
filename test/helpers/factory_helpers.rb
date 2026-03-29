@@ -37,8 +37,9 @@ module FactoryHelpers
     task.actions.where.not(feedback: nil)
   end
 
-  def create_actions_for_task(task, n = 5)
+  def create_actions_for_task(task, n = 5, actions_completed_count: 0)
     create_data_items_for_task(task, n)
+    task.update_columns(actions_count: n, actions_completed_count: actions_completed_count)
   end
 
   def create_activity(attributes = {})

@@ -8,7 +8,10 @@ class Action < ApplicationRecord
   validates :task_id, uniqueness: {scope: :data_item_id}
 
   after_update_commit do
-    next unless progress_completed?
+    next unless saved_change_to_progress_status? && progress_completed?
+
+    Task.update_counters(task_id, actions_completed_count: 1)
+    task.reload
 
     next task.touch if task.progress >= 100
     broadcast_task_progress if rand < task.checkin_frequency

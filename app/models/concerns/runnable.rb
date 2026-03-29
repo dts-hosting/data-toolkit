@@ -57,7 +57,9 @@ module Runnable
       return unless ok_to_run?
 
       should_enqueue = false
-      transaction do
+      with_lock do
+        next unless ok_to_run?
+
         if action_handler && create_actions_for_data_items.zero?
           done!(FAILED, no_processable_items_feedback)
         else
@@ -75,39 +77,49 @@ module Runnable
     private
 
     def calculate_progress
-      return 0 if actions.empty?
+      return 0 if actions_count.zero?
 
-      completed_actions_ratio = actions.progress_completed.count.to_f / actions.count
-      (completed_actions_ratio * 100).round
+      ((actions_completed_count.to_f / actions_count) * 100).round
     end
 
     def check_progress
       finalize_status if progress_running? && calculate_progress >= 100
     end
 
+    BULK_INSERT_BATCH_SIZE = 1000
+
     def create_actions_for_data_items
-      all_data_items = activity.data_items # initially scope to all possible data items
+      all_data_items = activity.data_items
 
-      # Filter out items that have errors in ANY previous action
-      data_item_ids_with_errors = Action.with_errors
+      errored_items = Action.with_errors
         .where(data_item_id: all_data_items.select(:id))
-        .distinct
-        .pluck(:data_item_id)
+        .select(:data_item_id)
 
-      processable_items = all_data_items.where.not(id: data_item_ids_with_errors)
+      processable_items = all_data_items.where.not(id: errored_items)
 
-      created_count = 0
-      processable_items.find_each do |data_item|
-        actions.create!(data_item: data_item)
-        created_count += 1
+      now = Time.current
+      inserted_count = 0
+
+      processable_items.in_batches(of: BULK_INSERT_BATCH_SIZE) do |batch|
+        records = batch.pluck(:id).map do |data_item_id|
+          {task_id: id, data_item_id: data_item_id, progress_status: Progressable::PENDING,
+           created_at: now, updated_at: now}
+        end
+
+        result = Action.insert_all(records)
+        inserted_count += result.count
       end
-      created_count
+
+      update_column(:actions_count, actions.count)
+      inserted_count
     end
 
     def finalize_status
-      if actions.with_errors.count == actions.count
+      error_count = actions.with_errors.count
+
+      if error_count == actions_count
         done!(FAILED)
-      elsif actions.with_errors.exists? || actions.with_warnings.exists?
+      elsif error_count > 0 || actions.with_warnings.exists?
         done!(REVIEW)
       else
         done!(SUCCEEDED)
