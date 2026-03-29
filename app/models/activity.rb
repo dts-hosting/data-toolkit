@@ -19,10 +19,17 @@ class Activity < ApplicationRecord
   validate :is_eligible?
 
   after_initialize :set_config_defaults, if: :new_record?
-  after_create_commit do
-    workflow.each do |task|
-      tasks.create(type: task)
+  after_create do
+    workflow.each do |task_type|
+      tasks.create!(type: task_type)
     end
+  end
+
+  after_create_commit do
+    tasks.reload.each do |task|
+      task.send(:auto_run_if_configured)
+    end
+    tasks.reset
   end
 
   broadcasts_refreshes

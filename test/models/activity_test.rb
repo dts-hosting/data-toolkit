@@ -117,4 +117,87 @@ class ActivityTest < ActiveSupport::TestCase
     assert Activity.activity_types_registry.frozen?
     assert_includes Activity.activity_types_registry.keys, :create_or_update_records
   end
+
+  test "creating activity with multi-step workflow produces expected task rows in order" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    task_types = activity.tasks.order(:created_at).pluck(:type)
+    assert_equal ["process_uploaded_files", "pre_check_ingest_data"], task_types
+    activity.destroy
+  end
+
+  test "creating activity with empty workflow produces zero task rows" do
+    activity = create_activity(
+      type: :export_record_ids,
+      data_config: @data_config
+    )
+
+    assert_equal 0, activity.tasks.count
+    activity.destroy
+  end
+
+  test "auto-trigger task transitions to queued after activity creation" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    auto_trigger_task = activity.tasks.find_by(type: "process_uploaded_files")
+    assert_equal Task::QUEUED, auto_trigger_task.progress_status
+    activity.destroy
+  end
+
+  test "workflow task creation is atomic — invalid task type rolls back activity and all tasks" do
+    assert_no_difference ["Activity.count", "Task.count"] do
+      assert_raises(ActiveRecord::RecordInvalid) do
+        activity = Activity.new(
+          user: @user,
+          data_config: @data_config,
+          type: :create_or_update_records,
+          config: {action: "create"},
+          label: "Test Rollback",
+          files: create_uploaded_files(["test.csv"])
+        )
+        # Inject an invalid task type into the workflow
+        activity.define_singleton_method(:workflow) do
+          [:process_uploaded_files, :nonexistent_task_type]
+        end
+        activity.save!
+      end
+    end
+  end
+
+  test "auto-trigger sees all sibling tasks during execution" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    auto_trigger_task = activity.tasks.find_by(type: "process_uploaded_files")
+    sibling_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+
+    assert_equal Task::QUEUED, auto_trigger_task.progress_status
+    assert_not_nil sibling_task, "Sibling task should exist when auto-trigger fires"
+    activity.destroy
+  end
+
+  test "creating activity with empty workflow persists activity with zero tasks" do
+    activity = create_activity(
+      type: :export_record_ids,
+      data_config: @data_config
+    )
+
+    assert activity.persisted?
+    assert_equal 0, activity.tasks.count
+    activity.destroy
+  end
 end
