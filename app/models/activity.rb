@@ -3,6 +3,9 @@ class Activity < ApplicationRecord
   include Advanceable
   include Historical
 
+  FAILED_EXPIRATION_DAYS = 7
+  NON_FAILED_EXPIRATION_DAYS = 3
+
   # Disable STI - we use "type" column for activity type identifiers
   self.inheritance_column = :_type_disabled
 
@@ -24,14 +27,14 @@ class Activity < ApplicationRecord
       .where(users: {cspace_url: Current.collectionspace})
   }
 
-  scope :expired_failed, ->(expired = 7) {
+  scope :expired_failed, ->(expired = FAILED_EXPIRATION_DAYS) {
     joins(:tasks)
       .where(tasks: {outcome_status: Task::FAILED})
       .where(updated_at: ...expired.days.ago)
       .distinct
   }
 
-  scope :expired_non_failed, ->(expired = 3) {
+  scope :expired_non_failed, ->(expired = NON_FAILED_EXPIRATION_DAYS) {
     where(updated_at: ...expired.days.ago)
       .where.not(id: joins(:tasks).where(tasks: {outcome_status: Task::FAILED}).select(:id))
   }
