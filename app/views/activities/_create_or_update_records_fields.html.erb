@@ -5,24 +5,36 @@
       <div class="flex flex-wrap gap-4">
         <div class="form-control">
           <label class="label cursor-pointer">
-            <%= config_form.radio_button :action, "create", class: "radio radio-primary",
-                                         checked: config_checked?(activity, "action", "create", true) %>
+            <%= config_form.radio_button :action,
+                                     "create",
+                                     class: "radio radio-primary",
+                                     checked:
+                                       config_checked?(activity, "action", "create", true) %>
             <span class="label-text ml-2">Create</span>
           </label>
         </div>
 
         <div class="form-control">
           <label class="label cursor-pointer">
-            <%= config_form.radio_button :action, "update", class: "radio radio-primary",
-                                         checked: config_checked?(activity, "action", "update") %>
+            <%= config_form.radio_button :action,
+                                     "update",
+                                     class: "radio radio-primary",
+                                     checked: config_checked?(activity, "action", "update") %>
             <span class="label-text ml-2">Update</span>
           </label>
         </div>
 
         <div class="form-control">
           <label class="label cursor-pointer">
-            <%= config_form.radio_button :action, "create_and_update", class: "radio radio-primary",
-                                         checked: config_checked?(activity, "action", "create_and_update") %>
+            <%= config_form.radio_button :action,
+                                     "create_and_update",
+                                     class: "radio radio-primary",
+                                     checked:
+                                       config_checked?(
+                                         activity,
+                                         "action",
+                                         "create_and_update",
+                                       ) %>
             <span class="label-text ml-2">Create and Update</span>
           </label>
         </div>

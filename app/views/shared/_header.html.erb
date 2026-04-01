@@ -1,12 +1,20 @@
 <header>
   <div class="navbar bg-base-300">
     <div class="navbar-start">
-      <%= image_tag "CollectionSpace-Logo.png", alt: "CollectionSpace Logo", height: 30, class: "inline-block align-top my-2 max-w-48 w-auto" %>
+      <%= image_tag "CollectionSpace-Logo.png",
+      alt: "CollectionSpace Logo",
+      height: 30,
+      class: "inline-block align-top my-2 max-w-48 w-auto" %>
     </div>
     <div class="navbar-end">
       <% if authenticated? %>
-        <%= link_to "My profile", user_path(Current.user), class: "btn btn-success btn-outline mr-2" %>
-        <%= button_to "Sign Out", session_path, method: :delete, class: "btn btn-secondary btn-outline" %>
+        <%= link_to "My profile",
+        user_path(Current.user),
+        class: "btn btn-success btn-outline mr-2" %>
+        <%= button_to "Sign Out",
+        session_path,
+        method: :delete,
+        class: "btn btn-secondary btn-outline" %>
       <% end %>
     </div>
   </div>

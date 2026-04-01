@@ -4,50 +4,49 @@
       <%= icon "arrow-uturn-left", class: "size-3" %>
     <% end %>
   <% end %>
-  <%= render "shared/card/header",
-             title: "Profile",
-             actions: actions_content %>
+  <%= render "shared/card/header", title: "Profile", actions: actions_content %>
 
   <%= render "shared/card/property_grid" do %>
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "Email address",
-                 value: @user&.email_address
-               } %>
+    locals: {
+      property: "Email address",
+      value: @user&.email_address,
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "CollectionSpace URL",
-                 value: link_to(
-                  @user&.cspace_url,
-                  @user&.cspace_url,
-                  target: "_blank",
-                  class: "link link-info"
-                  )
-               } %>
+    locals: {
+      property: "CollectionSpace URL",
+      value:
+        link_to(
+          @user&.cspace_url,
+          @user&.cspace_url,
+          target: "_blank",
+          class: "link link-info",
+        ),
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "API version",
-                 value: @user&.cspace_api_version
-               } %>
+    locals: {
+      property: "API version",
+      value: @user&.cspace_api_version,
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "Profile",
-                 value: @user&.cspace_profile
-               } %>
+    locals: {
+      property: "Profile",
+      value: @user&.cspace_profile,
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "UI version",
-                 value: @user&.cspace_ui_version
-               } %>
+    locals: {
+      property: "UI version",
+      value: @user&.cspace_ui_version,
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "Data Toolkit admin?",
-                 value: @user&.admin?
-               } %>
+    locals: {
+      property: "Data Toolkit admin?",
+      value: @user&.admin?,
+    } %>
   <% end %>
 <% end %>

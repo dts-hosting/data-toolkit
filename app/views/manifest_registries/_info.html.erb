@@ -5,26 +5,39 @@
     <% end %>
   <% end %>
   <%= render "shared/card/header",
-             title: "Registry Information",
-             actions: actions_content %>
+  title: "Registry Information",
+  actions: actions_content %>
 
   <%= render "shared/card/property_grid" do %>
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "Url",
-                 value: link_to(manifest_registry.url, manifest_registry.url, target: "_blank", class: "link link-info")
-               } %>
+    locals: {
+      property: "Url",
+      value:
+        link_to(
+          manifest_registry.url,
+          manifest_registry.url,
+          target: "_blank",
+          class: "link link-info",
+        ),
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "Last Updated",
-                 value: manifest_registry.last_updated_at ? local_time(manifest_registry.last_updated_at) : 'Never'
-               } %>
+    locals: {
+      property: "Last Updated",
+      value:
+        (
+          if manifest_registry.last_updated_at
+            local_time(manifest_registry.last_updated_at)
+          else
+            "Never"
+          end
+        ),
+    } %>
 
     <%= render partial: "shared/card/info",
-               locals: {
-                 property: "Total Manifests",
-                 value: manifest_registry.manifests.count
-               } %>
+    locals: {
+      property: "Total Manifests",
+      value: manifest_registry.manifests.count,
+    } %>
   <% end %>
 <% end %>

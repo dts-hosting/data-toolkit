@@ -10,12 +10,12 @@
             <%= batch_form.label attr_name, class: "label-text font-medium" %>
             <div class="form-control">
               <%= batch_form.select attr_name,
-                                    options_for_select(
-                                      BatchConfig.values(attr_name),
-                                      BatchConfig.default_value(attr_name)
-                                    ),
-                                    { include_blank: "Select option" },
-                                    class: "select select-bordered w-full" %>
+                                options_for_select(
+                                  BatchConfig.values(attr_name),
+                                  BatchConfig.default_value(attr_name),
+                                ),
+                                { include_blank: "Select option" },
+                                class: "select select-bordered w-full" %>
             </div>
           <% end %>
         <% end %>
@@ -25,7 +25,6 @@
         </div>
       <% end %>
     </div>
-
     <!-- Boolean fields column -->
     <div>
       <h4 class="font-medium mb-3">Toggle Options</h4>

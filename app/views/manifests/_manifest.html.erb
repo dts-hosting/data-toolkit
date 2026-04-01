@@ -7,8 +7,14 @@
 
   <%= render "shared/card/property_grid", columns: 2 do %>
     <%= render partial: "shared/card/item",
-               locals: { property: "Imported", value: local_time(manifest.created_at) } %>
+    locals: {
+      property: "Imported",
+      value: local_time(manifest.created_at),
+    } %>
     <%= render partial: "shared/card/item",
-               locals: { property: "Data Configs", value: manifest.data_configs_count } %>
+    locals: {
+      property: "Data Configs",
+      value: manifest.data_configs_count,
+    } %>
   <% end %>
 <% end %>
