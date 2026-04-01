@@ -33,7 +33,6 @@ module TaskDefinition
     validate :task_type_must_exist_in_registry
     validates :type, presence: true
     before_validation :normalize_type_column
-
   end
 
   class_methods do

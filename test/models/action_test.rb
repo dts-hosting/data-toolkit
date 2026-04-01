@@ -205,7 +205,7 @@ class ActionTest < ActiveSupport::TestCase
   end
 
   # Callback tests
-  test "after_update_commit should touch task when progress reaches 100%" do
+  test "after_update_commit should finalize task when last action completes" do
     @action.save!
     4.times do |i|
       data_item = @task.activity.data_items.create!(position: i + 1, data: {objectNumber: (i + 2).to_s})
@@ -218,13 +218,12 @@ class ActionTest < ActiveSupport::TestCase
     @task.actions.where.not(id: @task.actions.last.id).update_all(progress_status: Action::COMPLETED)
     @task.update_column(:actions_completed_count, 4)
 
-    original_task_updated_at = @task.updated_at
-    sleep 0.01
-
-    # Complete the last one via update to trigger the callback
+    # Complete the last one via update to trigger finalization
     @task.actions.last.update(progress_status: Action::COMPLETED)
 
     @task.reload
-    assert @task.updated_at > original_task_updated_at, "Task should have been touched"
+    assert_equal Task::COMPLETED, @task.progress_status
+    assert_equal Task::SUCCEEDED, @task.outcome_status
+    assert_not_nil @task.completed_at
   end
 end

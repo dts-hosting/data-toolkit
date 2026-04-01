@@ -4,6 +4,8 @@
 module Runnable
   extend ActiveSupport::Concern
 
+  BULK_INSERT_BATCH_SIZE = 1000
+
   SUCCEEDED = "succeeded"
   FAILED = "failed"
   REVIEW = "review"
@@ -12,7 +14,6 @@ module Runnable
     include Progressable # depends on progress enum
     include TaskDefinition # runnables can define tasks
 
-    after_touch :check_progress
     after_update_commit :handle_completion
 
     enum :outcome_status, {
@@ -82,12 +83,6 @@ module Runnable
       ((actions_completed_count.to_f / actions_count) * 100).round
     end
 
-    def check_progress
-      finalize_status if progress_running? && calculate_progress >= 100
-    end
-
-    BULK_INSERT_BATCH_SIZE = 1000
-
     def create_actions_for_data_items
       all_data_items = activity.data_items
 
@@ -112,18 +107,6 @@ module Runnable
 
       update_column(:actions_count, actions.count)
       inserted_count
-    end
-
-    def finalize_status
-      error_count = actions.with_errors.count
-
-      if error_count == actions_count
-        done!(FAILED)
-      elsif error_count > 0 || actions.with_warnings.exists?
-        done!(REVIEW)
-      else
-        done!(SUCCEEDED)
-      end
     end
 
     def handle_completion

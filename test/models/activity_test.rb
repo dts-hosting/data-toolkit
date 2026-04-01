@@ -113,6 +113,112 @@ class ActivityTest < ActiveSupport::TestCase
     assert activity.auto_advance?
   end
 
+  # can_advance? tests
+  test "can_advance? returns true when current_task is completed" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.first
+    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
+
+    assert activity.can_advance?
+  end
+
+  test "can_advance? returns false when current_task is not completed" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    refute activity.can_advance?
+  end
+
+  test "can_advance? returns false when there is no current_task" do
+    activity = create_activity(
+      type: :export_record_ids,
+      data_config: @data_config
+    )
+
+    assert_nil activity.current_task
+    refute activity.can_advance?
+  end
+
+  # advance tests
+  test "advance resumes auto_advance and runs next_task" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: true},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+    second_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+
+    # Set up state directly: first task completed/succeeded, runtime auto_advance paused
+    first_task.update_columns(
+      progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED,
+      started_at: Time.current, completed_at: Time.current
+    )
+    activity.update_column(:auto_advance, false)
+    activity.data_items.create!(position: 0, data: {objectnumber: "OBJ1"})
+
+    activity.reload
+    refute activity.auto_advance?
+    assert_equal Task::PENDING, second_task.reload.progress_status
+
+    activity.advance
+
+    assert activity.reload.auto_advance?, "advance should resume the runtime auto_advance flag"
+    assert_equal Task::QUEUED, second_task.reload.progress_status
+  end
+
+  test "advance resumes auto_advance flag before running next_task" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: true},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+
+    # Set up state directly: first task completed/failed, runtime auto_advance paused
+    first_task.update_columns(
+      progress_status: Task::COMPLETED, outcome_status: Task::FAILED,
+      started_at: Time.current, completed_at: Time.current
+    )
+    activity.update_column(:auto_advance, false)
+
+    activity.reload
+    refute activity.auto_advance?
+
+    activity.advance
+
+    assert activity.reload.auto_advance?, "advance should resume auto_advance even when prior task failed"
+  end
+
+  test "advance does nothing when current_task is not completed" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    second_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+
+    activity.advance
+
+    assert_equal Task::PENDING, second_task.reload.progress_status
+  end
+
   test "activity type registry is immutable and includes configured types" do
     assert Activity.activity_types_registry.frozen?
     assert_includes Activity.activity_types_registry.keys, :create_or_update_records

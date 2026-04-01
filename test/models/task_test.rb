@@ -168,7 +168,7 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 0, @task.progress
   end
 
-  test "progress should trigger finalize_status when reaching 100%" do
+  test "completing all actions finalizes task as succeeded" do
     @task.save!
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING)
@@ -485,17 +485,21 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 30, @task.progress
   end
 
-  test "finalize_status produces correct outcome using counters" do
+  test "TaskOrchestrator finalizes task as succeeded when all actions complete without errors" do
     @task.save!
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
-    @task.update_column(:actions_count, @task.actions.count)
 
-    @task.actions.update_all(progress_status: Task::COMPLETED)
-    @task.update_column(:actions_completed_count, @task.actions.count)
+    # Complete all but the last via update_all (bypasses callbacks)
+    @task.actions.where.not(id: @task.actions.last.id).update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 4)
 
-    @task.send(:finalize_status)
+    # Complete the last one to trigger orchestrator
+    @task.actions.last.update!(progress_status: Task::COMPLETED)
+
+    @task.reload
     assert_equal Task::SUCCEEDED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
   end
 
   test "run acquires a row lock" do
