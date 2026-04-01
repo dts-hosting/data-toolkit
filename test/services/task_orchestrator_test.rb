@@ -30,13 +30,14 @@ class TaskOrchestratorTest < ActiveSupport::TestCase
 
   test "finalizes task as succeeded when all actions complete without errors" do
     create_actions_for_task(@task, 3)
+    last_action = @task.actions.order(:id).last
 
     # Complete first two via update_all (bypasses callbacks)
-    @task.actions.limit(2).update_all(progress_status: Action::COMPLETED)
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Action::COMPLETED)
     @task.update_column(:actions_completed_count, 2)
 
     # Complete last one via update to trigger orchestrator
-    @task.actions.last.update!(progress_status: Action::COMPLETED)
+    last_action.update!(progress_status: Action::COMPLETED)
 
     @task.reload
     assert_equal Task::COMPLETED, @task.progress_status
@@ -46,13 +47,17 @@ class TaskOrchestratorTest < ActiveSupport::TestCase
 
   test "finalizes task as failed when all actions have errors" do
     create_actions_for_task(@task, 3)
+    last_action = @task.actions.order(:id).last
 
     feedback = {"errors" => [{"type" => "error", "details" => "test"}]}
 
-    @task.actions.limit(2).update_all(progress_status: Action::COMPLETED, feedback: feedback)
+    @task.actions.where.not(id: last_action.id).update_all(
+      progress_status: Action::COMPLETED,
+      feedback: feedback
+    )
     @task.update_column(:actions_completed_count, 2)
 
-    @task.actions.last.update!(progress_status: Action::COMPLETED, feedback: feedback)
+    last_action.update!(progress_status: Action::COMPLETED, feedback: feedback)
 
     @task.reload
     assert_equal Task::COMPLETED, @task.progress_status
@@ -61,13 +66,14 @@ class TaskOrchestratorTest < ActiveSupport::TestCase
 
   test "finalizes task as review when some actions have errors" do
     create_actions_for_task(@task, 3)
+    last_action = @task.actions.order(:id).last
 
     feedback = {"errors" => [{"type" => "error", "details" => "test"}]}
 
-    @task.actions.limit(2).update_all(progress_status: Action::COMPLETED)
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Action::COMPLETED)
     @task.update_column(:actions_completed_count, 2)
 
-    @task.actions.last.update!(progress_status: Action::COMPLETED, feedback: feedback)
+    last_action.update!(progress_status: Action::COMPLETED, feedback: feedback)
 
     @task.reload
     assert_equal Task::COMPLETED, @task.progress_status
@@ -76,11 +82,12 @@ class TaskOrchestratorTest < ActiveSupport::TestCase
 
   test "finalizes task as review when actions have warnings" do
     create_actions_for_task(@task, 3)
+    last_action = @task.actions.order(:id).last
 
-    @task.actions.limit(2).update_all(progress_status: Action::COMPLETED)
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Action::COMPLETED)
     @task.update_column(:actions_completed_count, 2)
 
-    @task.actions.last.update!(
+    last_action.update!(
       progress_status: Action::COMPLETED,
       feedback: {"warnings" => [{"type" => "warning", "details" => "test"}]}
     )
@@ -94,13 +101,24 @@ class TaskOrchestratorTest < ActiveSupport::TestCase
     create_actions_for_task(@task, 5)
 
     action = @task.actions.first
-    # Force broadcast by stubbing rand to return 0 (always < checkin_frequency)
-    action.stub :rand, 0 do
-      action.stub :broadcast_action_to, nil do
-        action.update!(progress_status: Action::COMPLETED)
-      end
+    broadcast_called = false
+
+    action.define_singleton_method(:broadcast_action_to) do |*_args, **_kwargs|
+      broadcast_called = true
     end
 
+    # Force broadcast by stubbing rand on the orchestrator instance.
+    TaskOrchestrator.stub(:new, ->(_action) {
+      orchestrator = TaskOrchestrator.allocate
+      orchestrator.instance_variable_set(:@action, action)
+      orchestrator.instance_variable_set(:@task, action.task)
+      orchestrator.define_singleton_method(:rand) { 0.0 }
+      orchestrator
+    }) do
+      action.update!(progress_status: Action::COMPLETED)
+    end
+
+    assert broadcast_called
     assert_equal 1, @task.reload.actions_completed_count
     assert_equal Task::RUNNING, @task.progress_status
   end
@@ -127,6 +145,8 @@ class TaskOrchestratorTest < ActiveSupport::TestCase
     end
 
     refute broadcast_called
+    assert_equal 1, @task.reload.actions_completed_count
+    assert_equal Task::RUNNING, @task.progress_status
   end
 
   test "end-to-end: last action completes and triggers activity auto-advance" do
