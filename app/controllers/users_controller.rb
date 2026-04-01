@@ -29,6 +29,6 @@ class UsersController < ApplicationController
     # TODO: return true if Current.user.admin?
     return false unless Current.user
 
-    Current.user.id == user.id
+    Current.user.is? user
   end
 end
