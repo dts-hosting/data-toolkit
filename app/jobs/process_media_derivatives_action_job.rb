@@ -3,7 +3,6 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
 
   def perform(activity, action)
     action.start!
-    feedback = action.feedback_for
     handler = activity.data_handler
     data = action.data_item.data
 
@@ -19,24 +18,9 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
       handler.client, type: type, field: field, value: identifier
     )
 
-    begin
-      service.retrieve_data
-    rescue => e
-      feedback.add_to_errors(subtype: :request_error, details: "#{service.name} - #{e.message}")
-      action.done!(feedback) && return
-    end
-
-    unless service.is_derivable?
-      action.done! && return
-    end
-
-    unless service.verify?
-      feedback.add_to_errors(subtype: :derivative_count_mismatch, details: service.blob)
-      action.done!(feedback) && return
-    end
-
-    action.done!
+    service.perform_with!(action)
   rescue => e
+    feedback = action.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
     action.done!(feedback)
   end
