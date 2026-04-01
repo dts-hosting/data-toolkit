@@ -24,6 +24,18 @@ class Activity < ApplicationRecord
       .where(users: {cspace_url: Current.collectionspace})
   }
 
+  scope :expired_failed, ->(expired = 7) {
+    joins(:tasks)
+      .where(tasks: {outcome_status: Task::FAILED})
+      .where(updated_at: ...expired.days.ago)
+      .distinct
+  }
+
+  scope :expired_non_failed, ->(expired = 3) {
+    where(updated_at: ...expired.days.ago)
+      .where.not(id: joins(:tasks).where(tasks: {outcome_status: Task::FAILED}).select(:id))
+  }
+
   after_initialize :set_config_defaults, if: :new_record?
   after_create do
     workflow.each do |task_type|

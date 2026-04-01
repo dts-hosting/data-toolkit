@@ -306,4 +306,56 @@ class ActivityTest < ActiveSupport::TestCase
     assert_equal 0, activity.tasks.count
     activity.destroy
   end
+
+  # Expiration scope tests
+  test "expired_failed returns activities with failed tasks older than threshold" do
+    activity = create_activity(type: :create_or_update_records, config: {action: "create"},
+      data_config: @data_config, files: create_uploaded_files(["test.csv"]))
+    activity.tasks.first.update!(outcome_status: Task::FAILED)
+    activity.update_column(:updated_at, 8.days.ago)
+
+    assert_includes Activity.expired_failed, activity
+  end
+
+  test "expired_failed excludes activities within threshold" do
+    activity = create_activity(type: :create_or_update_records, config: {action: "create"},
+      data_config: @data_config, files: create_uploaded_files(["test.csv"]))
+    activity.tasks.first.update!(outcome_status: Task::FAILED)
+    activity.update_column(:updated_at, 6.days.ago)
+
+    assert_not_includes Activity.expired_failed, activity
+  end
+
+  test "expired_failed respects custom threshold" do
+    activity = create_activity(type: :create_or_update_records, config: {action: "create"},
+      data_config: @data_config, files: create_uploaded_files(["test.csv"]))
+    activity.tasks.first.update!(outcome_status: Task::FAILED)
+    activity.update_column(:updated_at, 4.days.ago)
+
+    assert_not_includes Activity.expired_failed, activity
+    assert_includes Activity.expired_failed(3), activity
+  end
+
+  test "expired_non_failed returns non-failed activities older than threshold" do
+    activity = create_activity(type: :export_record_ids, data_config: @data_config)
+    activity.update_column(:updated_at, 4.days.ago)
+
+    assert_includes Activity.expired_non_failed, activity
+  end
+
+  test "expired_non_failed excludes activities within threshold" do
+    activity = create_activity(type: :export_record_ids, data_config: @data_config)
+    activity.update_column(:updated_at, 2.days.ago)
+
+    assert_not_includes Activity.expired_non_failed, activity
+  end
+
+  test "expired_non_failed excludes failed activities even when old enough" do
+    activity = create_activity(type: :create_or_update_records, config: {action: "create"},
+      data_config: @data_config, files: create_uploaded_files(["test.csv"]))
+    activity.tasks.first.update!(outcome_status: Task::FAILED)
+    activity.update_column(:updated_at, 4.days.ago)
+
+    assert_not_includes Activity.expired_non_failed, activity
+  end
 end
