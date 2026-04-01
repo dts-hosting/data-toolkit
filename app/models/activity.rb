@@ -18,6 +18,12 @@ class Activity < ApplicationRecord
   validates :label, presence: true, length: {minimum: 3}
   validate :is_eligible?
 
+  scope :accessible, -> {
+    includes(:user, :data_config, :batch_config, :tasks)
+      .joins(:user)
+      .where(users: {cspace_url: Current.collectionspace})
+  }
+
   after_initialize :set_config_defaults, if: :new_record?
   after_create do
     workflow.each do |task_type|
