@@ -4,6 +4,14 @@ A Rails web application for CollectionSpace data related activities.
 
 ## Prerequisites
 
+Install [mise](https://mise.jdx.dev/installing-mise.html) then run:
+
+```bash
+mise trust
+mise install # install Ruby, Node, pnpm
+make install # install gems, packages
+```
+
 ### PostgreSQL Setup
 
 This application requires PostgreSQL. The default development/test db urls are:
@@ -26,8 +34,6 @@ For production `DATABASE_URL` is required as an environment variable in the form
 Initial setup and run the application:
 
 ```bash
-rbenv install -s
-bundle install
 ./bin/setup
 ```
 
@@ -75,47 +81,4 @@ Locally with Docker.
 ```bash
 docker compose build
 docker compose up
-```
-
-Remote with Kamal.
-
-```bash
-# verify connections to the server
-bundle exec kamal server bootstrap -d qa
-
-# verify access to docker registry
-bundle exec kamal registry login -d qa
-
-# boot postgres
-kamal accessory boot postgres -d qa
-kamal accessory details postgres -d qa
-kamal accessory logs postgres -d qa -f
-
-# run the deploy process
-bundle exec kamal deploy -d qa
-
-# run a command on the container
-bundle exec kamal app exec -d qa "bin/rails about"
-
-# connect to the container
-bundle exec kamal app exec -i -d qa "bin/rails console"
-```
-
-_To run Kamal locally you must first [export these envvars](.kamal/secrets-common)._
-
-A deployment can also be made via Github:
-
-1. Pushes to `main` will deploy to production (TODO).
-2. Pushes to `qa` will deploy to `qa`.
-3. A deployment can be triggered via the Github Actions UI.
-4. A deployment can be triggered via the Github Actions CLI.
-
-```bash
-# deploy via push to qa
-git checkout qa
-git reset --hard $my-branch && git push --force origin qa
-
-# deploy via gh cli
-gh workflow run deploy.yml # uses the current branch
-gh workflow run deploy.yml --ref qa # specify the branch to run from
 ```

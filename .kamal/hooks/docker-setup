@@ -1,5 +1,0 @@
-#!/bin/sh
-
-echo "Docker set up on $KAMAL_HOSTS..."
-
-kamal server exec "sudo usermod -aG docker ubuntu"

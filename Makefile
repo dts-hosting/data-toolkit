@@ -1,16 +1,19 @@
 .DEFAULT_GOAL := help
 SHELL:=/bin/bash
 
+.PHONY: hooks
+hooks: ## make hooks # Install overcommit and init it
+	@overcommit --install && overcommit --sign pre-commit
+
 .PHONY: install
 install: ## make install # Install dependencies
-	@rbenv install -s && gem install bundler && bundle install
-	@overcommit --install && overcommit --sign pre-commit
-	@. "$$HOME/.nvm/nvm.sh" && nvm install && npm install && npm i -g npx || true
+	@bundle install
+	@pnpm install
 
 .PHONY: lint
 lint: ## make lint # Run all linters
 	@bundle exec standardrb --fix
-	@npx prettier . --write
+	@pnpm exec prettier . --write
 
 .PHONY: test
 test: ## make test # Run all tests

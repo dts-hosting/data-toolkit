@@ -136,7 +136,6 @@ GEM
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt (3.1.22)
-    bcrypt_pbkdf (1.1.2)
     bigdecimal (4.1.0)
     bindex (0.8.1)
     bootsnap (1.23.0)
@@ -183,7 +182,6 @@ GEM
       concurrent-ruby (~> 1.0)
       dry-core (~> 1.1)
       zeitwerk (~> 2.6)
-    ed25519 (1.4.0)
     erb (6.0.2)
     erubi (1.13.1)
     escape_utils (1.3.0)
@@ -233,17 +231,6 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     json (2.19.3)
-    kamal (2.11.0)
-      activesupport (>= 7.0)
-      base64 (~> 0.2)
-      bcrypt_pbkdf (~> 1.0)
-      concurrent-ruby (~> 1.2)
-      dotenv (~> 3.1)
-      ed25519 (~> 1.4)
-      net-ssh (~> 7.3)
-      sshkit (>= 1.23.0, < 2.0)
-      thor (~> 1.3)
-      zeitwerk (>= 2.6.18, < 3.0)
     language_server-protocol (3.17.0.5)
     launchy (3.1.1)
       addressable (~> 2.8)
@@ -301,13 +288,8 @@ GEM
       net-protocol
     net-protocol (0.2.2)
       timeout
-    net-scp (4.1.0)
-      net-ssh (>= 2.6.5, < 8.0.0)
-    net-sftp (4.0.0)
-      net-ssh (>= 5.0.0, < 8.0.0)
     net-smtp (0.5.1)
       net-protocol
-    net-ssh (7.3.2)
     nio4r (2.7.5)
     nokogiri (1.19.2-aarch64-linux-gnu)
       racc (~> 1.4)
@@ -469,13 +451,6 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
-    sshkit (1.25.0)
-      base64
-      logger
-      net-scp (>= 1.1.2)
-      net-sftp (>= 2.1.2)
-      net-ssh (>= 2.8.0)
-      ostruct
     standard (1.54.0)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.0)
@@ -574,7 +549,6 @@ DEPENDENCIES
   htmlbeautifier
   importmap-rails
   jbuilder
-  kamal (~> 2.11)
   letter_opener
   local_time
   minitest-mock
