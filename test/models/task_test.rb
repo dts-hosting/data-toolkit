@@ -91,8 +91,8 @@ class TaskTest < ActiveSupport::TestCase
         files: create_uploaded_files(["test.csv"])
       }
     )
-    first_task = activity.tasks[0]
-    dependent_task = activity.tasks[1]
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+    dependent_task = activity.tasks.find_by(type: "pre_check_ingest_data")
 
     assert_includes dependent_task.dependencies, first_task.task_type
     assert_not dependent_task.ok_to_run?
@@ -157,13 +157,9 @@ class TaskTest < ActiveSupport::TestCase
 
   test "progress should calculate percentage when progress_status is running" do
     @task.save!
-    create_actions_for_task(@task)
+    create_actions_for_task(@task, 5, actions_completed_count: 2)
     @task.progress_status = Task::RUNNING
 
-    @task.actions.first.update(progress_status: Task::COMPLETED)
-    @task.actions.last.update(progress_status: Task::COMPLETED)
-
-    # Should be 40% complete (2 out of 5 actions)
     assert_equal 40, @task.progress
   end
 
@@ -172,12 +168,14 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 0, @task.progress
   end
 
-  test "progress should trigger finalize_status when reaching 100%" do
+  test "completing all actions finalizes task as succeeded" do
     @task.save!
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING)
 
-    @task.actions.update_all(progress_status: Task::COMPLETED)
+    # Complete 4 via update_all (bypasses callbacks), then the last via update to trigger finalize
+    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 4)
     @task.actions.last.update(progress_status: Task::COMPLETED)
     @task.reload
 
@@ -192,14 +190,10 @@ class TaskTest < ActiveSupport::TestCase
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING)
 
-    @task.actions.update_all(
-      progress_status: Task::COMPLETED,
-      feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
-    )
-    @task.actions.last.update(
-      progress_status: Task::COMPLETED,
-      feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
-    )
+    feedback = {"errors" => [{"type" => "error", "details" => "test"}]}
+    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED, feedback: feedback)
+    @task.update_column(:actions_completed_count, 4)
+    @task.actions.last.update(progress_status: Task::COMPLETED, feedback: feedback)
     @task.reload
 
     assert_equal 100, @task.progress
@@ -214,6 +208,7 @@ class TaskTest < ActiveSupport::TestCase
     @task.update!(progress_status: Task::RUNNING)
 
     @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 4)
     @task.actions.last.update(
       progress_status: Task::COMPLETED,
       feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
@@ -232,6 +227,7 @@ class TaskTest < ActiveSupport::TestCase
     @task.update!(progress_status: Task::RUNNING)
 
     @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 4)
     @task.actions.last.update(
       progress_status: Task::COMPLETED,
       feedback: {"warnings" => [{"type" => "warning", "details" => "test"}]}
@@ -396,7 +392,8 @@ class TaskTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    first_task = activity.tasks.first
+    # Reload to re-establish inverse association cleared by with_lock during auto-trigger
+    first_task = activity.tasks.reload.first
     mock_finalizer = Minitest::Mock.new
     mock_finalizer.expect :perform_later, nil, [first_task]
 
@@ -443,6 +440,161 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 4, @task.actions.count
     assert_equal 4, @task.data_items.count
     assert_not_includes @task.data_items, data_items[0]
+  end
+
+  test "create_actions_for_data_items is idempotent via unique index" do
+    @task.save!
+    5.times do |i|
+      @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
+    end
+
+    first_count = @task.send(:create_actions_for_data_items)
+    second_count = @task.send(:create_actions_for_data_items)
+
+    assert_equal 5, first_count
+    assert_equal 0, second_count
+    assert_equal 5, @task.actions.count
+  end
+
+  test "actions_count is set after create_actions_for_data_items" do
+    @task.save!
+    5.times do |i|
+      @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
+    end
+
+    @task.send(:create_actions_for_data_items)
+    assert_equal 5, @task.reload.actions_count
+  end
+
+  test "actions_completed_count increments when an action completes" do
+    @task.save!
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+    @task.update_column(:actions_count, @task.actions.count)
+
+    @task.actions.first.update!(progress_status: Task::COMPLETED)
+
+    assert_equal 1, @task.reload.actions_completed_count
+  end
+
+  test "calculate_progress returns correct percentage from counters" do
+    @task.save!
+    @task.update_columns(actions_count: 10, actions_completed_count: 3)
+    @task.progress_status = Task::RUNNING
+
+    assert_equal 30, @task.progress
+  end
+
+  test "TaskOrchestrator finalizes task as succeeded when all actions complete without errors" do
+    @task.save!
+    create_actions_for_task(@task)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    # Complete all but the last via update_all (bypasses callbacks)
+    @task.actions.where.not(id: @task.actions.last.id).update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 4)
+
+    # Complete the last one to trigger orchestrator
+    @task.actions.last.update!(progress_status: Task::COMPLETED)
+
+    @task.reload
+    assert_equal Task::SUCCEEDED, @task.outcome_status
+    assert_equal Task::COMPLETED, @task.progress_status
+  end
+
+  test "run acquires a row lock" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+    activity.tasks.find_by(type: "process_uploaded_files").update!(
+      progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current
+    )
+    task = activity.tasks.find_by(type: "pre_check_ingest_data")
+    activity.data_items.create!(position: 0, data: {objectnumber: "OBJ1"})
+
+    lock_acquired = false
+    original_with_lock = task.method(:with_lock)
+    task.define_singleton_method(:with_lock) do |&block|
+      lock_acquired = true
+      original_with_lock.call(&block)
+    end
+    task.run
+    assert lock_acquired
+  end
+
+  test "run exits cleanly if another caller wins the race before lock acquired" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+    activity.tasks.find_by(type: "process_uploaded_files").update!(
+      progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current
+    )
+    task = activity.tasks.find_by(type: "pre_check_ingest_data")
+
+    # Simulate race: another caller queues the task before we acquire the lock
+    original_with_lock = task.method(:with_lock)
+    task.define_singleton_method(:with_lock) do |&block|
+      update_column(:progress_status, "queued")
+      original_with_lock.call(&block)
+    end
+
+    task.run
+    assert_equal Task::QUEUED, task.reload.progress_status
+    assert_equal 0, task.actions.count
+  end
+
+  test "run is a no-op when task is already queued" do
+    @task.save!
+    @task.update!(progress_status: Task::QUEUED)
+
+    assert_nil @task.run
+    assert_equal Task::QUEUED, @task.reload.progress_status
+  end
+
+  test "run is a no-op when task is already running" do
+    @task.save!
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    assert_nil @task.run
+    assert_equal Task::RUNNING, @task.reload.progress_status
+  end
+
+  test "run is a no-op when dependencies have not succeeded" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+    dependent_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+
+    assert_nil dependent_task.run
+    assert_equal Task::PENDING, dependent_task.reload.progress_status
+  end
+
+  test "full orchestration chain: task completes then next task auto-advances to queued" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: true},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+    second_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+
+    first_task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+    activity.data_items.create!(position: 0, data: {objectnumber: "OBJ1"})
+
+    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
+
+    assert_equal Task::QUEUED, second_task.reload.progress_status
   end
 
   test "run fails action handler task when there are no processable items" do

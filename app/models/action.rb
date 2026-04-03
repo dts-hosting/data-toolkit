@@ -8,10 +8,9 @@ class Action < ApplicationRecord
   validates :task_id, uniqueness: {scope: :data_item_id}
 
   after_update_commit do
-    next unless progress_completed?
+    next unless saved_change_to_progress_status? && progress_completed?
 
-    next task.touch if task.progress >= 100
-    broadcast_task_progress if rand < task.checkin_frequency
+    TaskOrchestrator.action_completed(self)
   end
 
   def feedback_context = task.feedback_context
@@ -19,16 +18,4 @@ class Action < ApplicationRecord
   scope :with_errors, -> { where("feedback IS NOT NULL AND jsonb_array_length(feedback->'errors') > 0") }
   scope :without_errors, -> { where("feedback IS NOT NULL AND jsonb_array_length(feedback->'errors') = 0") }
   scope :with_warnings, -> { where("feedback IS NOT NULL AND jsonb_array_length(feedback->'warnings') > 0") }
-
-  private
-
-  def broadcast_task_progress
-    broadcast_action_to(
-      task,
-      action: :update,
-      partial: "shared/card/progress",
-      locals: {property: "Progress", value: task.progress},
-      target: "task_#{task.id}_progress"
-    )
-  end
 end

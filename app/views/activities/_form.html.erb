@@ -5,13 +5,14 @@
       <%= link_to "Cancel", :back, class: "btn btn-secondary btn-outline btn-sm" %>
     <% end %>
     <%= render "shared/card/header",
-               title: "New #{activity.display_name}",
-               actions: actions_content %>
+    title: "New #{activity.display_name}",
+    actions: actions_content %>
 
     <% if activity.errors.any? %>
       <div class="alert alert-error mb-4">
         <div>
-          <h3 class="font-semibold"><%= pluralize(activity.errors.count, "error") %> prohibited this activity from being saved:</h3>
+          <h3 class="font-semibold"><%= pluralize(activity.errors.count, "error") %>
+            prohibited this activity from being saved:</h3>
           <ul class="list-disc list-inside mt-2">
             <% activity.errors.full_messages.each do |message| %>
               <li><%= message %></li>
@@ -29,32 +30,44 @@
         <%= form.label :label, "Label", class: "label-text font-medium" %>
         <div class="sm:col-span-3">
           <%= form.text_field :label,
-                               required: true,
-                               placeholder: "Enter a reference label i.e. record-batch1",
-                               class: "input input-bordered w-full" %>
+                          required: true,
+                          placeholder: "Enter a reference label i.e. record-batch1",
+                          class: "input input-bordered w-full" %>
         </div>
 
-        <%= form.label :data_config, data_config_type_label(activity), class: "label-text font-medium" %>
+        <%= form.label :data_config,
+                   data_config_type_label(activity),
+                   class: "label-text font-medium" %>
         <div class="sm:col-span-3">
-          <%= form.collection_select :data_config_id, DataConfig.for(Current.user, activity), :id, :display_name,
-                                     { include_blank: "Select a #{data_config_type_label(activity)}" },
-                                     class: "select select-bordered w-full" %>
+          <%= form.collection_select :data_config_id,
+                                 DataConfig.for(Current.user, activity),
+                                 :id,
+                                 :display_name,
+                                 {
+                                   include_blank:
+                                     "Select a #{data_config_type_label(activity)}",
+                                 },
+                                 class: "select select-bordered w-full" %>
         </div>
 
         <% if activity.file_requirement != :none %>
-          <%= form.label :files, activity.file_requirement == :one ? "File" : "Files", class: "label-text font-medium" %>
+          <%= form.label :files,
+                     activity.file_requirement == :one ? "File" : "Files",
+                     class: "label-text font-medium" %>
           <div class="sm:col-span-3">
             <%= form.file_field :files,
-                                multiple: activity.file_requirement == :one_or_more,
-                                name: "activity[files][]",
-                                class: "file-input file-input-bordered w-full" %>
+                            multiple: activity.file_requirement == :one_or_more,
+                            name: "activity[files][]",
+                            class: "file-input file-input-bordered w-full" %>
           </div>
         <% end %>
       <% end %>
     </div>
 
     <% if activity.has_config_fields? %>
-      <%= render "#{activity.display_name.parameterize(separator: "_")}_fields", form: form, activity: activity %>
+      <%= render "#{activity.display_name.parameterize(separator: "_")}_fields",
+      form: form,
+      activity: activity %>
     <% end %>
 
     <% if activity.has_batch_config? %>

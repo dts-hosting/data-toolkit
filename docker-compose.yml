@@ -11,3 +11,22 @@ services:
     environment:
       - RAILS_ENV=development
     network_mode: host
+
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: toolkit
+      POSTGRES_PASSWORD: toolkit
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:

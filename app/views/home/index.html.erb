@@ -10,9 +10,13 @@
         </div>
       <% else %>
         <% if @activities.first.is_a?(Activity) %>
-          <%= render partial: "activities/activity", collection: @activities, locals: {inline: true} %>
+          <%= render partial: "activities/activity",
+          collection: @activities,
+          locals: {
+            inline: true,
+          } %>
         <% else %>
-          <%= render partial: "history", collection: @activities, locals: {inline: true} %>
+          <%= render partial: "history", collection: @activities, locals: { inline: true } %>
         <% end %>
       <% end %>
 
@@ -24,3 +28,4 @@
     <% end %>
   </div>
 <% end %>
+

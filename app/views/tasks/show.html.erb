@@ -7,9 +7,7 @@
     <% end %>
   <% end %>
 
-  <%= render "shared/card/header",
-             title: @task.display_name,
-             actions: actions_content %>
+  <%= render "shared/card/header", title: @task.display_name, actions: actions_content %>
 
   <div id="<%= dom_id(@task) %>_details">
     <%= render "details", task: @task %>
@@ -21,8 +19,10 @@
   <% if taskfeedback.displayable? %>
     <%= render "feedback", feedback: taskfeedback.for_display %>
   <% else %>
-    <%= render "feedback", feedback: {
-      messages: ["We are busily generating feedback ... stand by!"]} %>
+    <%= render "feedback",
+    feedback: {
+      messages: ["We are busily generating feedback ... stand by!"],
+    } %>
   <% end %>
 <% end %>
 
@@ -47,7 +47,8 @@
           </div>
 
           <div class="flex-shrink-0">
-            <%= icon "arrow-down-tray", class: "size-5 text-base-content/50 group-hover:text-primary" %>
+            <%= icon "arrow-down-tray",
+            class: "size-5 text-base-content/50 group-hover:text-primary" %>
           </div>
         <% end %>
       <% end %>

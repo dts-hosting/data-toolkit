@@ -36,6 +36,28 @@ module CollectionSpace
       blob.csid && blob.derivatives_count.to_i == EXPECTED_DERIVABLE_COUNT
     end
 
+    def perform_with!(action)
+      feedback = action.feedback_for
+
+      begin
+        retrieve_data
+      rescue => e
+        feedback.add_to_errors(subtype: :request_error, details: "#{name} - #{e.message}")
+        action.done!(feedback) && return
+      end
+
+      unless is_derivable?
+        action.done! && return
+      end
+
+      unless verify?
+        feedback.add_to_errors(subtype: :derivative_count_mismatch, details: blob)
+        action.done!(feedback) && return
+      end
+
+      action.done!
+    end
+
     def retrieve_data
       retrieve_media_data
       retrieve_blob_data

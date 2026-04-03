@@ -5,7 +5,7 @@ class TasksController < ApplicationController
   end
 
   def run
-    if @task.user == Current.user
+    if Current.user.is? @task.user
       @task.run
       redirect_to activity_path(@activity), notice: "Task was successfully queued."
     else
@@ -16,20 +16,17 @@ class TasksController < ApplicationController
   private
 
   def set_task
-    accessible_tasks = Task.joins(activity: :user)
-      .where(
-        "activities.id = ? AND users.cspace_url = ?",
-        params[:activity_id],
-        Current.collectionspace
-      )
+    @activity = Activity.accessible.find_by(id: params[:activity_id])
 
-    @task = accessible_tasks.find_by(id: params[:id])
-
-    unless @task
+    unless @activity
       redirect_to my_activities_url, alert: "You don't have permission to access this task."
       return
     end
 
-    @activity = @task.activity
+    @task = @activity.tasks.find_by(id: params[:id])
+
+    unless @task
+      redirect_to my_activities_url, alert: "You don't have permission to access this task."
+    end
   end
 end

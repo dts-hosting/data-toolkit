@@ -9,12 +9,12 @@
             <span class="label-text mb-1">CollectionSpace URL</span>
           </label>
           <%= form.text_field :cspace_url,
-                              required: true,
-                              autofocus: true,
-                              autocomplete: "cspace-url",
-                              placeholder: "Enter your instance URL",
-                              value: params[:cspace_url],
-                              class: "input input-bordered w-full" %>
+                          required: true,
+                          autofocus: true,
+                          autocomplete: "cspace-url",
+                          placeholder: "Enter your instance URL",
+                          value: params[:cspace_url],
+                          class: "input input-bordered w-full" %>
           <label class="label">
             <span class="label-text-alt text-base-content/60 mt-1">Example: https://core.collectionspace.org</span>
           </label>
@@ -25,11 +25,11 @@
             <span class="label-text mb-1">Email Address</span>
           </label>
           <%= form.email_field :email_address,
-                               required: true,
-                               autocomplete: "username",
-                               placeholder: "Enter your email",
-                               value: params[:email_address],
-                               class: "input input-bordered w-full" %>
+                           required: true,
+                           autocomplete: "username",
+                           placeholder: "Enter your email",
+                           value: params[:email_address],
+                           class: "input input-bordered w-full" %>
         </div>
 
         <div class="form-control mb-4">
@@ -37,11 +37,11 @@
             <span class="label-text mb-1">Password</span>
           </label>
           <%= form.password_field :password,
-                                  required: true,
-                                  autocomplete: "current-password",
-                                  placeholder: "Enter your password",
-                                  maxlength: 72,
-                                  class: "input input-bordered w-full" %>
+                              required: true,
+                              autocomplete: "current-password",
+                              placeholder: "Enter your password",
+                              maxlength: 72,
+                              class: "input input-bordered w-full" %>
         </div>
 
         <div class="alert alert-warning mb-4">
@@ -56,3 +56,4 @@
     <% end %>
   </div>
 </div>
+

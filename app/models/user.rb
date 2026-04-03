@@ -32,4 +32,8 @@ class User < ApplicationRecord
   def client
     CollectionSpaceApi.client_for(cspace_url, email_address, password)
   end
+
+  def is?(user)
+    id == user&.id
+  end
 end

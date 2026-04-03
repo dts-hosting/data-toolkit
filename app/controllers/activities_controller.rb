@@ -29,11 +29,7 @@ class ActivitiesController < ApplicationController
   private
 
   def set_activity
-    accessible_activities = Activity.includes(:user, :data_config, :batch_config, :tasks)
-      .joins(:user)
-      .where(users: {cspace_url: Current.collectionspace})
-
-    @activity = accessible_activities.find_by(id: params[:id])
+    @activity = Activity.accessible.find_by(id: params[:id])
 
     unless @activity
       redirect_to my_activities_url, alert: "You don't have permission to access this activity."

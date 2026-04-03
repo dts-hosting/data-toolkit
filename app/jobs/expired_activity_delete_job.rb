@@ -3,13 +3,11 @@ class ExpiredActivityDeleteJob < ApplicationJob
   limits_concurrency to: 1, key: :expired_activity_delete_job, duration: 30.minutes
 
   EXPIRED_BATCH_SIZE = 10
-  FAILED_EXPIRATION_DAYS = 7
-  NON_FAILED_EXPIRATION_DAYS = 3
 
   def perform
     Rails.logger.info "Starting ExpiredActivityDeleteJob"
-    destroy_expired_activities(failed_activities)
-    destroy_expired_activities(non_failed_activities)
+    destroy_expired_activities(Activity.expired_failed)
+    destroy_expired_activities(Activity.expired_non_failed)
     Rails.logger.info "Completed ExpiredActivityDeleteJob"
   end
 
@@ -22,21 +20,5 @@ class ExpiredActivityDeleteJob < ApplicationJob
     rescue => e
       Rails.logger.error "Error processing batch: #{e.message}"
     end
-  end
-
-  def failed_activities
-    Activity.joins(:tasks)
-      .where(tasks: {outcome_status: Task::FAILED})
-      .where(updated_at: ...FAILED_EXPIRATION_DAYS.days.ago)
-      .distinct
-  end
-
-  def non_failed_activities
-    failed_activity_ids = Activity.joins(:tasks)
-      .where(tasks: {outcome_status: Task::FAILED})
-      .select(:id)
-
-    Activity.where(updated_at: ...NON_FAILED_EXPIRATION_DAYS.days.ago)
-      .where.not(id: failed_activity_ids)
   end
 end

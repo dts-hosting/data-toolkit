@@ -1,8 +1,8 @@
 <tr id="<%= dom_id(task) %>">
   <td>
     <%= link_to task.display_name,
-                activity_task_path(task.activity, task),
-                class: "link link-info" %>
+    activity_task_path(task.activity, task),
+    class: "link link-info" %>
   </td>
 
   <td><%= format_task_status_badge(task.status) %></td>
