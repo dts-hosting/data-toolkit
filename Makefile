@@ -3,6 +3,7 @@ SHELL:=/bin/bash
 
 .PHONY: hooks
 hooks: ## make hooks # Install overcommit and init it
+	@gem install overcommit
 	@overcommit --install && overcommit --sign pre-commit
 
 .PHONY: install
