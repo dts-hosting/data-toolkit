@@ -10,16 +10,12 @@ This application requires PostgreSQL. The default development/test db urls are:
 
 - `postgres://toolkit:toolkit@localhost:5432/toolkit_[development|test]`
 
-To create the `toolkit` database user:
+To create the `toolkit` databases with Docker:
 
 ```bash
-# adjust envvar values as appropriate
-PGHOST=localhost PGUSER=admin PGPASSWORD=admin psql \
-    -c "CREATE ROLE toolkit WITH LOGIN SUPERUSER PASSWORD 'toolkit';"
+docker compose up -d db
+./bin/rails db:setup
 ```
-
-Using `SUPERUSER` allows the role to create databases, which is required for `rails db:create`,
-and is needed for tests to disable referential integrity when loading fixtures.
 
 For production `DATABASE_URL` is required as an environment variable in the form:
 
