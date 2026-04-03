@@ -1,6 +1,6 @@
 Prettier:
   enabled: true
-  command: ["npx", "prettier", "--check", "."]
+  command: ["pnpm", "exec", "prettier", ".", "--write"]
 StandardRB:
   enabled: true
   command: ["bundle", "exec", "standardrb"]

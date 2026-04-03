@@ -4,6 +4,14 @@ A Rails web application for CollectionSpace data related activities.
 
 ## Prerequisites
 
+Install [mise](https://mise.jdx.dev/installing-mise.html) then run:
+
+```bash
+mise trust
+mise install # install Ruby, Node, pnpm
+make install # install gems, packages
+```
+
 ### PostgreSQL Setup
 
 This application requires PostgreSQL. The default development/test db urls are:
@@ -26,8 +34,6 @@ For production `DATABASE_URL` is required as an environment variable in the form
 Initial setup and run the application:
 
 ```bash
-rbenv install -s
-bundle install
 ./bin/setup
 ```
 
