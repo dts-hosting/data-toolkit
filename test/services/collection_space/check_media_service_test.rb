@@ -139,60 +139,50 @@ module CollectionSpace
       end
     end
 
-    # perform_with! tests
-    test "perform_with! completes action when all derivatives present" do
+    # perform_with tests
+    test "perform_with returns feedback when all derivatives present" do
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, set_blob(csid: "b1", mime_type: "image/jpeg", derivatives_count: 5) do
-        @service.perform_with!(action)
+        feedback = @service.perform_with(action)
+        assert feedback.ok?
       end
-
-      assert action.reload.progress_completed?
-      assert_nil action.feedback
     end
 
-    test "perform_with! completes action without feedback when not derivable" do
+    test "perform_with returns feedback without errors when not derivable" do
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, set_blob(csid: "b1", mime_type: "application/pdf") do
-        @service.perform_with!(action)
+        feedback = @service.perform_with(action)
+        assert feedback.ok?
       end
-
-      assert action.reload.progress_completed?
-      assert_nil action.feedback
     end
 
-    test "perform_with! completes action without feedback when no blob csid" do
+    test "perform_with returns feedback without errors when no blob csid" do
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, nil do
-        @service.perform_with!(action)
+        feedback = @service.perform_with(action)
+        assert feedback.ok?
       end
-
-      assert action.reload.progress_completed?
-      assert_nil action.feedback
     end
 
-    test "perform_with! records derivative_count_mismatch when verify fails" do
+    test "perform_with returns feedback with derivative_count_mismatch when verify fails" do
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, set_blob(csid: "b1", mime_type: "image/jpeg", derivatives_count: 3) do
-        @service.perform_with!(action)
+        feedback = @service.perform_with(action)
+        refute feedback.ok?
       end
-
-      assert action.reload.progress_completed?
-      refute action.feedback_for.ok?
     end
 
-    test "perform_with! records request_error when retrieve_data raises" do
+    test "perform_with returns feedback with request_error when retrieve_data raises" do
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, -> { raise "Connection refused" } do
-        @service.perform_with!(action)
+        feedback = @service.perform_with(action)
+        refute feedback.ok?
       end
-
-      assert action.reload.progress_completed?
-      refute action.feedback_for.ok?
     end
 
     private
