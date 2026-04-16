@@ -21,3 +21,6 @@ production:
   session_expiration:
     command: "Session.sweep"
     schedule: every hour
+  publish_queue_size:
+    class: "PublishQueueSizeJob"
+    schedule: every 5 minutes

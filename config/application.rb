@@ -33,6 +33,10 @@ module DataToolkit
     config.admin_emails = ENV.fetch("ADMIN_EMAILS", "").split(",")
     config.mission_control.jobs.base_controller_class = "AdminController"
     config.mission_control.jobs.http_basic_auth_enabled = false
+
+    # Configuration for CloudWatch Metrics
+    config.cloudwatch_environment = ENV.fetch("CW_ENVIRONMENT", "UAT")
+    config.cloudwatch_namespace   = ENV.fetch("CW_NAMESPACE", "DataToolkit/Queue")
   end
 end
 
