@@ -36,7 +36,7 @@ module DataToolkit
 
     # Configuration for CloudWatch Metrics
     config.cloudwatch_environment = ENV.fetch("CW_ENVIRONMENT", "UAT")
-    config.cloudwatch_namespace   = ENV.fetch("CW_NAMESPACE", "DataToolkit/Queue")
+    config.cloudwatch_namespace = ENV.fetch("CW_NAMESPACE", "DataToolkit/Queue")
   end
 end
 
