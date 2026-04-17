@@ -11,7 +11,7 @@
 production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
-    schedule: every hour at minute 12
+    schedule: every hour at minute 30
   expired_activity_deletion:
     class: ExpiredActivityDeleteJob
     schedule: at 6am every day
@@ -21,3 +21,6 @@ production:
   session_expiration:
     command: "Session.sweep"
     schedule: every hour
+  publish_queue_size:
+    class: "PublishQueueSizeJob"
+    schedule: every 5 minutes

@@ -4,3 +4,5 @@ plugins:
 ignore:
   - "db/migrate/**/*":
       - Rails/ReversibleMigration
+  - "lib/tasks/*":
+      - Lint/ConstantDefinitionInBlock
