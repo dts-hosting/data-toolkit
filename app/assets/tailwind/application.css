@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source not "./daisyui{,*}.mjs";
+@source inline("badge-{primary,secondary,info,success,warning,error}");
 @plugin "./daisyui.mjs";
 
 /* Fix vertical alignment of active option value in select */
