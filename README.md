@@ -43,6 +43,13 @@ For just running the server without redoing the setup steps:
 ./bin/dev
 ```
 
+## Configuration
+
+The project provides a prefab `.env` file that is ready for local use and shows what
+needs to be configured for a production environment. You can override the defaults
+set in `.env` by creating `.env.local` and redefining the value. This is useful for
+testing CloudWatch publishing: `CW_ENABLED=true`.
+
 ## CLI tasks
 
 ```bash
@@ -72,6 +79,12 @@ FILE=test/fixtures/files/test.csv
 
 # list tasks for activity
 ./bin/rake "crud:read:tasks[1]" | jq .
+```
+
+There is a task for generating basic sample data for objects:
+
+```bash
+bundle exec rake sample:objects[20000]
 ```
 
 ## Deployment

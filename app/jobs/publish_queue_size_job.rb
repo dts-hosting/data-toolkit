@@ -1,39 +1,23 @@
-require "aws-sdk-cloudwatch"
-
 class PublishQueueSizeJob < ApplicationJob
-  queue_as :default
-  limits_concurrency to: 1, key: :publish_queue_size_job, duration: 30.minutes
-
-  CW_NAMESPACE = Rails.configuration.cloudwatch_namespace
-  CW_ENVIRONMENT = Rails.configuration.cloudwatch_environment
+  queue_as :high_priority
 
   def perform
-    Rails.logger.info "Starting PublishQueueSizeJob"
+    return unless CloudWatch.enabled?
 
-    dimensions = [
-      {name: "Environment", value: CW_ENVIRONMENT}
-    ]
+    Rails.logger.info "Starting PublishQueueSizeJob"
 
     metric_data = [{
       metric_name: "Jobs",
-      dimensions: dimensions,
+      dimensions: [{name: "Environment", value: CloudWatch.env}],
       value: SolidQueue::ReadyExecution.count.to_f,
       unit: "Count"
     }]
 
-    cloudwatch_client.put_metric_data(namespace: CW_NAMESPACE, metric_data: metric_data)
+    CloudWatch.client.put_metric_data(namespace: CloudWatch.namespace, metric_data: metric_data)
 
     Rails.logger.info "Completed PublishQueueSizeJob"
   rescue => e
     Rails.logger.error "PublishQueueSizeJob unexpected error: #{e.class} #{e.message}"
     raise
-  end
-
-  private
-
-  def cloudwatch_client
-    @cloudwatch_client ||= Aws::CloudWatch::Client.new(
-      region: ENV["AWS_REGION"]
-    )
   end
 end
