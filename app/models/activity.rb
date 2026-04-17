@@ -72,56 +72,46 @@ class Activity < ApplicationRecord
   end
 
   # Activity type definitions
-  activity_type :check_media_derivatives do |a|
-    a.display_name = "Check Media Derivatives"
-    a.file_requirement = :one_or_more
-    a.has_batch_config = false
-    a.has_config_fields = false
-    a.workflow = [:process_uploaded_files, :pre_check_ingest_data, :process_media_derivatives]
-    a.data_config_type = "media_record_type"
-    a.data_handler = ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
+  activity_type :check_media_derivatives do
+    display_name "Check Media Derivatives"
+    file_requirement :one_or_more
+    workflow :process_uploaded_files, :pre_check_ingest_data, :process_media_derivatives
+    data_config_type "media_record_type"
+    data_handler ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
   end
 
-  activity_type :create_or_update_records do |a|
-    a.display_name = "Create or Update Records"
-    a.file_requirement = :one
-    a.has_batch_config = true
-    a.has_config_fields = true
-    a.workflow = [:process_uploaded_files, :pre_check_ingest_data]
-    a.data_config_type = "record_type"
-    a.data_handler = ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
-    a.config_defaults = {action: "create"}
-    a.validations = ->(record) {
+  activity_type :create_or_update_records do
+    display_name "Create or Update Records"
+    file_requirement :one
+    has_batch_config true
+    has_config_fields true
+    workflow :process_uploaded_files, :pre_check_ingest_data
+    data_config_type "record_type"
+    data_handler ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
+    config_defaults action: "create"
+    validations ->(record) {
       record.errors.add(:config, "can't be blank") if record.config.blank?
     }
   end
 
-  activity_type :delete_records do |a|
-    a.display_name = "Delete Records"
-    a.file_requirement = :one
-    a.has_batch_config = true
-    a.has_config_fields = false
-    a.workflow = [:process_uploaded_files]
-    a.data_config_type = "record_type"
-    a.select_attributes = [] # TODO: [:record_matchpoint]
+  activity_type :delete_records do
+    display_name "Delete Records"
+    file_requirement :one
+    has_batch_config true
+    workflow [:process_uploaded_files]
+    data_config_type "record_type"
+    select_attributes [] # TODO: [:record_matchpoint]
   end
 
-  activity_type :export_record_ids do |a|
-    a.display_name = "Export Record IDs"
-    a.file_requirement = :none
-    a.has_batch_config = false
-    a.has_config_fields = false
-    a.workflow = []
-    a.data_config_type = "record_type"
+  activity_type :export_record_ids do
+    display_name "Export Record IDs"
+    data_config_type "record_type"
   end
 
-  activity_type :import_terms do |a|
-    a.display_name = "Import Terms"
-    a.file_requirement = :one
-    a.has_batch_config = false
-    a.has_config_fields = false
-    a.workflow = []
-    a.data_config_type = "term_list"
+  activity_type :import_terms do
+    display_name "Import Terms"
+    file_requirement :one
+    data_config_type "term_list"
   end
 
   private

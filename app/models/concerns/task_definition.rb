@@ -3,15 +3,20 @@ module TaskDefinition
   extend ActiveSupport::Concern
 
   class TaskTypeConfiguration
-    attr_accessor :name, :display_name, :handler, :action_handler,
-      :finalizer, :dependencies, :auto_trigger
+    def self.attribute(*names)
+      names.each do |name|
+        define_method(name) do |*args|
+          return instance_variable_get(:"@#{name}") if args.empty?
+          instance_variable_set(:"@#{name}", (args.size == 1) ? args.first : args)
+        end
+      end
+    end
+
+    attr_reader :name, :dependencies
+    attribute :display_name, :handler, :action_handler, :finalizer, :auto_trigger
 
     def initialize(name)
       @name = name
-      @display_name = nil
-      @handler = nil
-      @action_handler = nil
-      @finalizer = nil
       @dependencies = []
       @auto_trigger = false
     end

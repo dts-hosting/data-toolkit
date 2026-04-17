@@ -3,24 +3,28 @@ module ActivityDefinition
   extend ActiveSupport::Concern
 
   class ActivityTypeConfiguration
-    attr_accessor :name, :display_name, :file_requirement, :has_batch_config,
+    def self.attribute(*names)
+      names.each do |name|
+        define_method(name) do |*args|
+          return instance_variable_get(:"@#{name}") if args.empty?
+          instance_variable_set(:"@#{name}", (args.size == 1) ? args.first : args)
+        end
+      end
+    end
+
+    attr_reader :name
+    attribute :display_name, :file_requirement, :has_batch_config,
       :has_config_fields, :workflow, :data_config_type,
       :data_handler, :select_attributes, :boolean_attributes,
       :config_defaults, :validations
 
     def initialize(name)
       @name = name
-      @display_name = nil
       @file_requirement = :none
       @has_batch_config = false
       @has_config_fields = false
       @workflow = []
-      @data_config_type = nil
-      @data_handler = nil
-      @select_attributes = nil
-      @boolean_attributes = nil
       @config_defaults = {}
-      @validations = nil
     end
 
     def finalize!
@@ -45,7 +49,7 @@ module ActivityDefinition
   class_methods do
     def activity_type(name, &block)
       config = ActivityTypeConfiguration.new(name)
-      yield(config) if block_given?
+      config.instance_eval(&block) if block
       self.activity_types_registry = activity_types_registry.merge(name => config.finalize!).freeze
     end
 
