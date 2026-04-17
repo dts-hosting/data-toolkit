@@ -184,6 +184,35 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_not_includes DataConfig.term_list(users(:admin)), @record_type_config
   end
 
+  test "media_record_type scope matches legacy and human-friendly record_type values case-insensitively" do
+    user = users(:admin)
+    legacy_media = create_data_config_record_type(
+      record_type: "media",
+      url: "https://example.com/core-media-1.0.0.json"
+    )
+    legacy_restricted = create_data_config_record_type(
+      record_type: "restrictedmedia",
+      url: "https://example.com/core-restrictedmedia-1.0.0.json"
+    )
+    friendly_media = create_data_config_record_type(
+      record_type: "Media Handling",
+      url: "https://example.com/core-media-handling-1.0.0.json"
+    )
+    friendly_restricted = create_data_config_record_type(
+      record_type: "Restricted Media Handling",
+      url: "https://example.com/core-restricted-media-handling-1.0.0.json"
+    )
+
+    scope = DataConfig.media_record_type(user)
+    assert_includes scope, legacy_media
+    assert_includes scope, legacy_restricted
+    assert_includes scope, friendly_media
+    assert_includes scope, friendly_restricted
+
+    @record_type_config.save!
+    assert_not_includes scope, @record_type_config
+  end
+
   # Helper Method Tests
   test "optlist_override_config?" do
     assert @optlist_config.optlist_override?
