@@ -22,7 +22,7 @@ class DataConfig < ApplicationRecord
   scope :by_config_type, ->(config_type) { where(config_type: config_type.to_s) }
   scope :by_profile, ->(user) { where(profile: user.cspace_profile) }
   scope :by_version, ->(user) { where(version: user.cspace_ui_version) }
-  scope :media_record_type, ->(user) { record_type(user).where("record_type LIKE ?", "%media") }
+  scope :media_record_type, ->(user) { record_type(user).where("record_type ILIKE ?", "%media%") }
   scope :optlist_override, ->(user) { by_profile(user).by_config_type(:optlist_override) }
   scope :record_type, ->(user) { by_profile(user).by_version(user).by_config_type(:record_type) }
   scope :term_list, ->(user) { by_profile(user).by_version(user).by_config_type(:term_list) }
