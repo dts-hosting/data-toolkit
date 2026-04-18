@@ -3,6 +3,7 @@ require_relative "../config/environment"
 require_relative "helpers/factory_helpers"
 require "rails/test_help"
 require "mocha/minitest"
+require "ostruct"
 
 module ActiveSupport
   class TestCase
@@ -19,6 +20,7 @@ module ActiveSupport
       client = user.client
       CollectionSpaceApi.stubs(:client_for).returns(client)
       client.stubs(:can_authenticate?).returns(true)
+      client.stubs(:version).returns(version_data_for(user))
       post session_url, params: {
         cspace_url: user.cspace_url,
         email_address: user.email_address,
@@ -36,6 +38,13 @@ module ActiveSupport
         email_address: user.email_address,
         password: user.password
       }
+    end
+
+    def version_data_for(user)
+      OpenStruct.new(
+        api: OpenStruct.new(joined: user.cspace_api_version),
+        ui: OpenStruct.new(profile: user.cspace_profile, version: user.cspace_ui_version)
+      )
     end
 
     def fixture_file_path(file_name)
