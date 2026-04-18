@@ -324,7 +324,7 @@ class TaskTest < ActiveSupport::TestCase
   test "has_feedback? should return true when task is completed and actions have feedback" do
     @task.save!
     create_actions_for_task(@task)
-    @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED)
+    @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::FAILED)
 
     # add feedback to an action
     @task.actions.first.update!(feedback: {"errors" => [{"type" => "error", "details" => "test error"}]})
