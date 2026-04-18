@@ -1,4 +1,8 @@
 class ApplicationJob < ActiveJob::Base
+  retry_on ActiveRecord::ConnectionNotEstablished,
+    PG::ConnectionBad,
+    wait: :polynomially_longer, attempts: 10
+
   # Automatically retry jobs that encountered a deadlock
   # retry_on ActiveRecord::Deadlocked
 
