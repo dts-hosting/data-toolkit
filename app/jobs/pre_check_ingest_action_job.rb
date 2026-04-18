@@ -13,6 +13,7 @@ class PreCheckIngestActionJob < ApplicationJob
     action.done!
   rescue => e
     Rails.logger.error e.message
+    feedback ||= action.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
     action.done!(feedback)
   end
