@@ -9,13 +9,17 @@ class TaskOrchestrator
   end
 
   def action_completed
-    new_count = atomic_increment_completed
-    return if new_count.nil?
+    row = atomic_increment_completed
+    return if row.nil?
 
-    if new_count == @task.actions_count
-      finalize_task
+    new_count = row["actions_completed_count"]
+    total = row["actions_count"]
+
+    if new_count == total
+      @task.finalize!
     elsif rand < @task.checkin_frequency
       @task.actions_completed_count = new_count
+      @task.actions_count = total
       broadcast_progress
     end
   end
@@ -23,28 +27,16 @@ class TaskOrchestrator
   private
 
   def atomic_increment_completed
-    Task.connection.select_value(
+    Task.connection.select_one(
       Task.sanitize_sql([
         "UPDATE tasks SET actions_completed_count = actions_completed_count + 1, " \
-        "updated_at = NOW() WHERE id = ? AND progress_status != ? " \
-        "RETURNING actions_completed_count",
+        "updated_at = NOW() " \
+        "WHERE id = ? AND progress_status != ? " \
+        "AND actions_completed_count < actions_count " \
+        "RETURNING actions_completed_count, actions_count",
         @task.id, Progressable::COMPLETED
       ])
     )
-  end
-
-  def finalize_task
-    error_count = @task.actions.with_errors.count
-
-    outcome = if error_count == @task.actions_count
-      Task::FAILED
-    elsif error_count > 0 || @task.actions.with_warnings.exists?
-      Task::REVIEW
-    else
-      Task::SUCCEEDED
-    end
-
-    @task.done!(outcome)
   end
 
   def broadcast_progress

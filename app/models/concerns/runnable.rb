@@ -41,6 +41,25 @@ module Runnable
       update!(**params)
     end
 
+    # Safe for any caller to invoke unconditionally. The row lock makes it
+    # single-winner, and recompute_counts! rebuilds the cache from the actions
+    # table before the guard so a drifted counter cannot force a false finalize.
+    def finalize!
+      with_lock do
+        recompute_counts!
+        return false unless progress_running?
+        return false unless actions_count.positive?
+        return false unless actions_completed_count >= actions_count
+
+        update!(
+          progress_status: Progressable::COMPLETED,
+          outcome_status: computed_outcome,
+          completed_at: Time.current
+        )
+        true
+      end
+    end
+
     def ok_to_run?
       met_dependencies && progress_pending? && started_at.nil?
     end
@@ -52,6 +71,13 @@ module Runnable
       when Progressable::COMPLETED then 100
       else 0
       end
+    end
+
+    def recompute_counts!
+      update_columns(
+        actions_count: actions.count,
+        actions_completed_count: actions.progress_completed.count
+      )
     end
 
     def run
@@ -81,6 +107,13 @@ module Runnable
       return 0 if actions_count.zero?
 
       ((actions_completed_count.to_f / actions_count) * 100).round
+    end
+
+    def computed_outcome
+      error_count = actions.with_errors.count
+      return FAILED if error_count == actions_count
+      return REVIEW if error_count > 0 || actions.with_warnings.exists?
+      SUCCEEDED
     end
 
     def create_actions_for_data_items

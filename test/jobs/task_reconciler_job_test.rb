@@ -49,6 +49,18 @@ class TaskReconcilerJobTest < ActiveJob::TestCase
     assert @task.progress_running?
   end
 
+  test "finalizes an all-completed running task before checking live jobs" do
+    @task.actions.update_all(progress_status: Progressable::COMPLETED)
+    # leave actions_completed_count stale at 0; finalize! must recompute
+    stub_live_jobs(true) # would block the orphan sweep path if reached
+
+    TaskReconcilerJob.perform_now
+
+    @task.reload
+    assert @task.progress_completed?
+    assert @task.outcome_succeeded?
+  end
+
   test "skips tasks without an action_handler" do
     @task.update_column(:progress_status, Progressable::COMPLETED)
     files_task = @activity.tasks.find { |t| t.type == "process_uploaded_files" }

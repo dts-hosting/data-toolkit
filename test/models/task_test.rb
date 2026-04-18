@@ -502,6 +502,88 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal Task::COMPLETED, @task.progress_status
   end
 
+  test "finalize! does not finalize when counter drifts above actual completions" do
+    @task.save!
+    create_actions_for_task(@task, 3)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    # 2 of 3 actions actually completed, but cache claims all 3
+    @task.actions.limit(2).update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 3)
+
+    refute @task.finalize!
+    @task.reload
+
+    assert @task.progress_running?, "task must not finalize while an action is still pending"
+    assert_equal 2, @task.actions_completed_count, "drifted cache should be corrected by recompute"
+  end
+
+  test "finalize! succeeds when actions are all complete even if cache is stale low" do
+    @task.save!
+    create_actions_for_task(@task, 3)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    # all actions complete, cache stuck at 1 (simulates a dropped callback)
+    @task.actions.update_all(progress_status: Task::COMPLETED)
+    @task.update_column(:actions_completed_count, 1)
+
+    assert @task.finalize!
+    @task.reload
+
+    assert @task.progress_completed?
+    assert @task.outcome_succeeded?
+    assert_equal 3, @task.actions_completed_count
+  end
+
+  test "finalize! is a no-op on a second call (single-winner)" do
+    @task.save!
+    create_actions_for_task(@task, 3)
+    @task.actions.update_all(progress_status: Task::COMPLETED)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    assert @task.finalize!
+    completed_at = @task.reload.completed_at
+
+    refute @task.finalize!
+    assert_equal completed_at, @task.reload.completed_at
+  end
+
+  test "duplicate action completions do not overcount or prematurely finalize" do
+    @task.save!
+    create_actions_for_task(@task, 3)
+    @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+
+    action_a, action_b, action_c = @task.actions.order(:id).to_a
+
+    action_a.update!(progress_status: Task::COMPLETED)
+
+    # Simulate repeated duplicate dispatches for the same completed action.
+    # The cached counter may drift up to actions_count, but must not overshoot,
+    # and finalize! must repair drift from the actions table.
+    5.times { TaskOrchestrator.action_completed(action_a) }
+
+    @task.reload
+    assert_equal 3, @task.actions_count
+    assert_operator @task.actions_completed_count, :<=, @task.actions_count, "cap must prevent overshoot"
+    assert @task.progress_running?, "task must not finalize while B and C are still pending"
+    assert action_b.reload.progress_pending?
+    assert action_c.reload.progress_pending?
+
+    # B completes; if the duplicate had inflated the cache, the orchestrator would
+    # call finalize! here. finalize!'s recompute must catch that C is still pending.
+    action_b.update!(progress_status: Task::COMPLETED)
+    @task.reload
+
+    assert @task.progress_running?, "task must not finalize while C is still pending"
+    assert action_c.reload.progress_pending?
+
+    action_c.update!(progress_status: Task::COMPLETED)
+    @task.reload
+
+    assert @task.progress_completed?
+    assert @task.outcome_succeeded?
+  end
+
   test "run acquires a row lock" do
     activity = create_activity(
       type: :create_or_update_records,
