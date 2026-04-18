@@ -119,6 +119,7 @@ class Activity < ApplicationRecord
   def is_eligible?
     return unless user
     return unless activity_type
+    return unless data_config_type
 
     if DataConfig.for(user, self).empty?
       errors.add(:data_config, "is not eligible for this activity")

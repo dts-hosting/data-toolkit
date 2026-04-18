@@ -19,7 +19,7 @@ class Task < ApplicationRecord
   end
 
   def has_feedback?
-    progress_completed? &&
+    progress_completed? && !outcome_succeeded? &&
       (feedback_for.displayable? || actions.where.not(feedback: nil).any?)
   end
 

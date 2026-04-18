@@ -39,6 +39,7 @@ class ProcessUploadedFilesJob < ApplicationJob
     task.done!(Task::SUCCEEDED)
   rescue => e
     Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"
+    feedback ||= task.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
     task.done!(Task::FAILED, feedback) && return
   end

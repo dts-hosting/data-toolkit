@@ -9,42 +9,34 @@ class TaskOrchestrator
   end
 
   def action_completed
-    should_broadcast = false
+    row = atomic_increment_completed
+    return if row.nil?
 
-    @task.with_lock do
-      @task.reload
-      return if @task.progress_completed?
+    new_count = row["actions_completed_count"]
+    total = row["actions_count"]
 
-      @task.update_column(:actions_completed_count, @task.actions_completed_count + 1)
-
-      if ready_to_finalize?
-        finalize_task
-      else
-        should_broadcast = rand < @task.checkin_frequency
-      end
+    if new_count == total
+      @task.finalize!
+    elsif rand < @task.checkin_frequency
+      @task.actions_completed_count = new_count
+      @task.actions_count = total
+      broadcast_progress
     end
-
-    broadcast_progress if should_broadcast
   end
 
   private
 
-  def ready_to_finalize?
-    @task.progress_running? && @task.progress >= 100
-  end
-
-  def finalize_task
-    error_count = @task.actions.with_errors.count
-
-    outcome = if error_count == @task.actions_count
-      Task::FAILED
-    elsif error_count > 0 || @task.actions.with_warnings.exists?
-      Task::REVIEW
-    else
-      Task::SUCCEEDED
-    end
-
-    @task.done!(outcome)
+  def atomic_increment_completed
+    Task.connection.select_one(
+      Task.sanitize_sql([
+        "UPDATE tasks SET actions_completed_count = actions_completed_count + 1, " \
+        "updated_at = NOW() " \
+        "WHERE id = ? AND progress_status != ? " \
+        "AND actions_completed_count < actions_count " \
+        "RETURNING actions_completed_count, actions_count",
+        @task.id, Progressable::COMPLETED
+      ])
+    )
   end
 
   def broadcast_progress

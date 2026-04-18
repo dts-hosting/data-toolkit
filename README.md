@@ -72,7 +72,7 @@ DATA_CFG_RECORD_TYPE=collectionobject
 # create an activity
 USER_ID=1
 LABEL=coll1
-ACT_TYPE=Activities::CreateOrUpdateRecords
+ACT_TYPE=create_or_update_records
 DATA_CFG_ID=$(./bin/rake "crud:read:data_configs[$USER_ID,$DATA_CFG_TYPE,$DATA_CFG_RECORD_TYPE]" | jq -r '.[0].id')
 FILE=test/fixtures/files/test.csv
 ./bin/rake "crud:create:activity[$USER_ID,$LABEL,$ACT_TYPE,$DATA_CFG_ID,$FILE]" | jq .
