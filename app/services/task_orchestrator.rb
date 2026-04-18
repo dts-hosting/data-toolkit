@@ -9,28 +9,28 @@ class TaskOrchestrator
   end
 
   def action_completed
-    should_broadcast = false
+    new_count = atomic_increment_completed
+    return if new_count.nil?
 
-    @task.with_lock do
-      @task.reload
-      return if @task.progress_completed?
-
-      @task.update_column(:actions_completed_count, @task.actions_completed_count + 1)
-
-      if ready_to_finalize?
-        finalize_task
-      else
-        should_broadcast = rand < @task.checkin_frequency
-      end
+    if new_count == @task.actions_count
+      finalize_task
+    elsif rand < @task.checkin_frequency
+      @task.actions_completed_count = new_count
+      broadcast_progress
     end
-
-    broadcast_progress if should_broadcast
   end
 
   private
 
-  def ready_to_finalize?
-    @task.progress_running? && @task.progress >= 100
+  def atomic_increment_completed
+    Task.connection.select_value(
+      Task.sanitize_sql([
+        "UPDATE tasks SET actions_completed_count = actions_completed_count + 1, " \
+        "updated_at = NOW() WHERE id = ? AND progress_status != ? " \
+        "RETURNING actions_completed_count",
+        @task.id, Progressable::COMPLETED
+      ])
+    )
   end
 
   def finalize_task
