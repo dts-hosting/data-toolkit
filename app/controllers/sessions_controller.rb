@@ -40,23 +40,17 @@ class SessionsController < ApplicationController
   end
 
   def handle_authentication(client)
-    user = find_or_create_user(client)
+    user = User.find_or_initialize_by(
+      cspace_url: client.config.base_uri,
+      email_address: session_params[:email_address]
+    )
+    set_user_data(user, client)
 
-    if user.valid?
-      update_user_if_needed(user)
+    if user.valid? && (!user.changed? || user.save)
       start_new_session_for(user)
       redirect_to after_authentication_url
     else
       version_fetch_failed
-    end
-  end
-
-  def find_or_create_user(client)
-    User.find_or_create_by(
-      cspace_url: client.config.base_uri,
-      email_address: session_params[:email_address]
-    ) do |user|
-      set_user_data(user, client)
     end
   end
 
@@ -65,11 +59,7 @@ class SessionsController < ApplicationController
     user.cspace_api_version = version_data.api.joined
     user.cspace_profile = version_data.ui.profile
     user.cspace_ui_version = version_data.ui.version
-    user.password = session_params[:password]
-  end
-
-  def update_user_if_needed(user)
-    user.update(password: session_params[:password]) if user.password != session_params[:password]
+    user.password = session_params[:password] if user.password != session_params[:password]
   end
 
   def authentication_failed
@@ -81,6 +71,6 @@ class SessionsController < ApplicationController
   end
 
   def session_params
-    params.permit(:cspace_url, :email_address, :password)
+    @session_params ||= params.permit(:cspace_url, :email_address, :password)
   end
 end

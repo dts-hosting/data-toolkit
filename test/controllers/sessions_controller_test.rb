@@ -66,6 +66,35 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
+  test "should refresh version data for existing user on login" do
+    updated_version = OpenStruct.new(
+      api: OpenStruct.new(joined: "8.2.0"),
+      ui: OpenStruct.new(profile: "anthro", version: "8.2.0")
+    )
+    setup_successful_auth(version_data: updated_version)
+
+    post session_url, params: auth_params(@user)
+
+    @user.reload
+    assert_equal "8.2.0", @user.cspace_api_version
+    assert_equal "anthro", @user.cspace_profile
+    assert_equal "8.2.0", @user.cspace_ui_version
+    assert_redirected_to root_path
+  end
+
+  test "should not write user when nothing changed" do
+    matching_version = OpenStruct.new(
+      api: OpenStruct.new(joined: @user.cspace_api_version),
+      ui: OpenStruct.new(profile: @user.cspace_profile, version: @user.cspace_ui_version)
+    )
+    setup_successful_auth(version_data: matching_version)
+
+    assert_no_changes -> { @user.reload.updated_at } do
+      post session_url, params: auth_params(@user)
+    end
+    assert_redirected_to root_path
+  end
+
   test "should handle version fetch failure" do
     setup_successful_auth(version_data: mock_empty_version_data)
     user = User.new(
