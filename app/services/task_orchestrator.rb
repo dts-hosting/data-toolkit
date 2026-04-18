@@ -18,9 +18,7 @@ class TaskOrchestrator
     if new_count == total
       @task.finalize!
     elsif rand < @task.checkin_frequency
-      @task.actions_completed_count = new_count
-      @task.actions_count = total
-      broadcast_progress
+      broadcast_progress(new_count, total)
     end
   end
 
@@ -39,12 +37,13 @@ class TaskOrchestrator
     )
   end
 
-  def broadcast_progress
+  def broadcast_progress(count, total)
+    progress = total.positive? ? ((count.to_f / total) * 100).round : 0
     @action.broadcast_action_to(
       @task,
       action: :update,
       partial: "shared/card/progress",
-      locals: {property: "Progress", value: @task.progress},
+      locals: {property: "Progress", value: progress},
       target: "task_#{@task.id}_progress"
     )
   end
