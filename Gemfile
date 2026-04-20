@@ -69,7 +69,7 @@ gem "collectionspace-refcache",
 gem "csv"
 gem "csvlint",
   git: "https://github.com/lyrasis/csvlint.rb.git",
-  tag: "1.5.0"
+  branch: "main"
 gem "local_time"
 gem "mission_control-jobs"
 gem "pagy"
