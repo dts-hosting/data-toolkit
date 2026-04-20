@@ -37,8 +37,8 @@ GIT
 
 GIT
   remote: https://github.com/lyrasis/csvlint.rb.git
-  revision: 2d0da18ca3798d6cf8c4e8bce1e8e08ffa58ae60
-  tag: 1.5.0
+  revision: 030059732d8d62251d528577f14b96ea8cefe6e2
+  branch: main
   specs:
     csvlint (1.5.0)
       activesupport
@@ -204,14 +204,7 @@ GEM
       tzinfo
     ethon (0.16.0)
       ffi (>= 1.15.0)
-    ffi (1.17.1-aarch64-linux-gnu)
-    ffi (1.17.1-aarch64-linux-musl)
-    ffi (1.17.1-arm-linux-gnu)
-    ffi (1.17.1-arm-linux-musl)
-    ffi (1.17.1-arm64-darwin)
-    ffi (1.17.1-x86_64-darwin)
-    ffi (1.17.1-x86_64-linux-gnu)
-    ffi (1.17.1-x86_64-linux-musl)
+    ffi (1.17.1)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)

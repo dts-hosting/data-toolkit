@@ -1,6 +1,6 @@
 [tools]
-ruby = "3.4.5"
-node = "25"
+ruby = "4"
+node = "lts"
 pnpm = "latest"
 
 [settings]
