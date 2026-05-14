@@ -15,6 +15,7 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 gem "aws-sdk-cloudwatch"
+gem "aws-sdk-s3"
 gem "bootsnap", require: false
 gem "thruster", require: false
 
