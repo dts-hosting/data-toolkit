@@ -23,7 +23,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
       .raises(CollectionSpace::Mapper::NoClientServiceError.new("rectype"))
 
     assert @task.ok_to_run?
-    @task.run
+    WorkflowManager.run_task(@task)
 
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
       perform_enqueued_jobs
@@ -48,7 +48,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
       .raises(CollectionSpace::Mapper::IdFieldNotInMapperError)
 
     assert @task.ok_to_run?
-    @task.run
+    WorkflowManager.run_task(@task)
 
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
       perform_enqueued_jobs
@@ -76,7 +76,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     IngestDataPreCheckFirstItem.any_instance
       .stubs(:ok?).returns(false)
 
-    @task.run
+    WorkflowManager.run_task(@task)
 
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
       perform_enqueued_jobs
@@ -96,7 +96,7 @@ class PreCheckIngestDataJobTest < ActiveJob::TestCase
     IngestDataPreCheckFirstItem.any_instance
       .stubs(:ok?).returns(true)
 
-    @task.run
+    WorkflowManager.run_task(@task)
 
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
       perform_enqueued_jobs

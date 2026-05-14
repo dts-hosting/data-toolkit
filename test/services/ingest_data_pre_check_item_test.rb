@@ -18,7 +18,7 @@ class IngestDataPreCheckItemTest < ActiveJob::TestCase
     data_hash = {objectnumber: "", title: "t", "": "foo"}
     @data_item.update!(data: data_hash)
     @action = Action.create!(task: @task, data_item: @data_item)
-    @action.start!
+    WorkflowManager.start_action(@action)
 
     @mock_handler.expect(:validate, empty_required_field_response,
       [data_hash])
@@ -37,7 +37,7 @@ class IngestDataPreCheckItemTest < ActiveJob::TestCase
     data_hash = {objectnumber: "123", title: "t", "": "foo"}
     @data_item.update!(data: data_hash)
     @action = Action.create!(task: @task, data_item: @data_item)
-    @action.start!
+    WorkflowManager.start_action(@action)
 
     @mock_handler.expect(:validate, valid_response,
       [data_hash])

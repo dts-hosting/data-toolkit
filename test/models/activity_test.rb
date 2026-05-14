@@ -113,44 +113,8 @@ class ActivityTest < ActiveSupport::TestCase
     assert activity.auto_advance?
   end
 
-  # can_advance? tests
-  test "can_advance? returns true when current_task is completed" do
-    activity = create_activity(
-      type: :create_or_update_records,
-      config: {action: "create"},
-      data_config: @data_config,
-      files: create_uploaded_files(["test.csv"])
-    )
-
-    first_task = activity.tasks.first
-    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
-
-    assert activity.can_advance?
-  end
-
-  test "can_advance? returns false when current_task is not completed" do
-    activity = create_activity(
-      type: :create_or_update_records,
-      config: {action: "create"},
-      data_config: @data_config,
-      files: create_uploaded_files(["test.csv"])
-    )
-
-    refute activity.can_advance?
-  end
-
-  test "can_advance? returns false when there is no current_task" do
-    activity = create_activity(
-      type: :export_record_ids,
-      data_config: @data_config
-    )
-
-    assert_nil activity.current_task
-    refute activity.can_advance?
-  end
-
   # advance tests
-  test "advance resumes auto_advance and runs next_task" do
+  test "advance_manually resumes auto_advance and runs next_task" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -173,13 +137,13 @@ class ActivityTest < ActiveSupport::TestCase
     refute activity.auto_advance?
     assert_equal Task::PENDING, second_task.reload.progress_status
 
-    activity.advance
+    WorkflowManager.advance_manually(activity)
 
     assert activity.reload.auto_advance?, "advance should resume the runtime auto_advance flag"
     assert_equal Task::QUEUED, second_task.reload.progress_status
   end
 
-  test "advance resumes auto_advance flag before running next_task" do
+  test "advance_manually resumes auto_advance flag before running next_task" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -199,12 +163,12 @@ class ActivityTest < ActiveSupport::TestCase
     activity.reload
     refute activity.auto_advance?
 
-    activity.advance
+    WorkflowManager.advance_manually(activity)
 
     assert activity.reload.auto_advance?, "advance should resume auto_advance even when prior task failed"
   end
 
-  test "advance does nothing when current_task is not completed" do
+  test "advance_manually does nothing when current_task is not completed" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create"},
@@ -214,7 +178,7 @@ class ActivityTest < ActiveSupport::TestCase
 
     second_task = activity.tasks.find_by(type: "pre_check_ingest_data")
 
-    activity.advance
+    WorkflowManager.advance_manually(activity)
 
     assert_equal Task::PENDING, second_task.reload.progress_status
   end

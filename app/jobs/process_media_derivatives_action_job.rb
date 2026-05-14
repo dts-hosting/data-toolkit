@@ -2,7 +2,7 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
   queue_as :default
 
   def perform(activity, action)
-    action.start!
+    WorkflowManager.start_action(action)
     handler = activity.data_handler
     data = action.data_item.data
 
@@ -18,10 +18,10 @@ class ProcessMediaDerivativesActionJob < ApplicationJob
       handler.client, type: type, field: field, value: identifier
     )
 
-    action.done!(service.perform_with(action))
+    WorkflowManager.complete_action(action, feedback: service.perform_with(action))
   rescue => e
     feedback = action.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
-    action.done!(feedback)
+    WorkflowManager.complete_action(action, feedback: feedback)
   end
 end
