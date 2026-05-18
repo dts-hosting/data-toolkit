@@ -1,7 +1,12 @@
 class Task < ApplicationRecord
   include ActionView::RecordIdentifier
   include Feedbackable
-  include Runnable
+  include Progressable
+  include TaskDefinition
+
+  SUCCEEDED = "succeeded"
+  FAILED = "failed"
+  REVIEW = "review"
 
   # Disable STI - we use "type" column for task type identifiers
   self.inheritance_column = :_type_disabled
@@ -12,6 +17,12 @@ class Task < ApplicationRecord
   has_many :data_items, through: :actions
   has_many_attached :files
 
+  enum :outcome_status, {
+    review: REVIEW,
+    failed: FAILED,
+    succeeded: SUCCEEDED
+  }, prefix: :outcome
+
   broadcasts_refreshes
 
   def feedback_context
@@ -21,6 +32,31 @@ class Task < ApplicationRecord
   def has_feedback?
     progress_completed? && !outcome_succeeded? &&
       (feedback_for.displayable? || actions.where.not(feedback: nil).any?)
+  end
+
+  def ok_to_run?
+    met_dependencies && progress_pending? && started_at.nil?
+  end
+
+  def checkin_frequency
+    item_count = activity.data_items_count
+    return 0 if item_count.zero?
+
+    # cap 10% checkin, but lower as item count increases
+    [Math.sqrt(item_count) / item_count, 0.1].min
+  end
+
+  def progress
+    case progress_status
+    when Progressable::PENDING, Progressable::QUEUED then 0
+    when Progressable::RUNNING then calculate_progress
+    when Progressable::COMPLETED then 100
+    else 0
+    end
+  end
+
+  def status
+    progress_completed? ? outcome_status : progress_status
   end
 
   task_type :process_uploaded_files do
@@ -43,5 +79,21 @@ class Task < ApplicationRecord
     action_handler ProcessMediaDerivativesActionJob
     finalizer GenericFeedbackReportJob
     depends_on :process_uploaded_files, :pre_check_ingest_data
+  end
+
+  private
+
+  def calculate_progress
+    return 0 if actions_count.zero?
+
+    ((actions_completed_count.to_f / actions_count) * 100).round
+  end
+
+  def met_dependencies
+    return true if dependencies.empty?
+
+    dependencies.all? do |dependency|
+      activity.tasks.exists?(type: dependency.to_s, outcome_status: SUCCEEDED)
+    end
   end
 end

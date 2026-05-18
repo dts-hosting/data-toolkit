@@ -57,11 +57,11 @@ class TaskTest < ActiveSupport::TestCase
   test "should track timestamps for task progression" do
     @task.save!
 
-    @task.start!
+    WorkflowManager.start_task(@task)
     assert_not_nil @task.started_at
     assert_equal Task::RUNNING, @task.progress_status
 
-    @task.done!(Task::SUCCEEDED)
+    WorkflowManager.complete_task(@task, outcome: Task::SUCCEEDED)
     assert_equal Task::SUCCEEDED, @task.outcome_status
     assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
@@ -97,29 +97,29 @@ class TaskTest < ActiveSupport::TestCase
     assert_includes dependent_task.dependencies, first_task.task_type
     assert_not dependent_task.ok_to_run?
 
-    first_task.done!(Task::SUCCEEDED)
+    WorkflowManager.complete_task(first_task, outcome: Task::SUCCEEDED)
     assert dependent_task.ok_to_run?
   end
 
   # status transitions
-  test "should execute start! method correctly" do
+  test "WorkflowManager.start_task transitions to running" do
     @task.save!
-    @task.start!
+    WorkflowManager.start_task(@task)
 
     assert_equal Task::RUNNING, @task.progress_status
     assert_not_nil @task.started_at
   end
 
-  test "should execute done! method correctly with outcome" do
+  test "WorkflowManager.complete_task transitions to completed with outcome" do
     @task.save!
-    @task.done!(Task::SUCCEEDED)
+    WorkflowManager.complete_task(@task, outcome: Task::SUCCEEDED)
 
     assert_equal Task::SUCCEEDED, @task.outcome_status
     assert_equal Task::COMPLETED, @task.progress_status
     assert_not_nil @task.completed_at
   end
 
-  test "should execute done! method correctly with feedback" do
+  test "WorkflowManager.complete_task records feedback" do
     feedback_hash = {"parent" => "Tasks::ProcessUploadedFiles",
                      "errors" =>
      [{"type" => "error",
@@ -130,7 +130,7 @@ class TaskTest < ActiveSupport::TestCase
                      "messages" => []}
 
     @task.save!
-    @task.done!(Task::FAILED, feedback_hash)
+    WorkflowManager.complete_task(@task, outcome: Task::FAILED, feedback: feedback_hash)
 
     assert_equal Task::FAILED, @task.outcome_status
     assert_equal Task::COMPLETED, @task.progress_status
@@ -173,10 +173,11 @@ class TaskTest < ActiveSupport::TestCase
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING)
 
-    # Complete 4 via update_all (bypasses callbacks), then the last via update to trigger finalize
-    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    # Complete 4 via update_all (bypasses orchestration), then the last via WorkflowManager to trigger finalize
+    last_action = @task.actions.last
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Task::COMPLETED)
     @task.update_column(:actions_completed_count, 4)
-    @task.actions.last.update(progress_status: Task::COMPLETED)
+    WorkflowManager.complete_action(last_action)
     @task.reload
 
     assert_equal 100, @task.progress
@@ -191,9 +192,10 @@ class TaskTest < ActiveSupport::TestCase
     @task.update!(progress_status: Task::RUNNING)
 
     feedback = {"errors" => [{"type" => "error", "details" => "test"}]}
-    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED, feedback: feedback)
+    last_action = @task.actions.last
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Task::COMPLETED, feedback: feedback)
     @task.update_column(:actions_completed_count, 4)
-    @task.actions.last.update(progress_status: Task::COMPLETED, feedback: feedback)
+    WorkflowManager.complete_action(last_action, feedback: feedback)
     @task.reload
 
     assert_equal 100, @task.progress
@@ -207,10 +209,11 @@ class TaskTest < ActiveSupport::TestCase
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING)
 
-    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    last_action = @task.actions.last
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Task::COMPLETED)
     @task.update_column(:actions_completed_count, 4)
-    @task.actions.last.update(
-      progress_status: Task::COMPLETED,
+    WorkflowManager.complete_action(
+      last_action,
       feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
     )
     @task.reload
@@ -226,10 +229,11 @@ class TaskTest < ActiveSupport::TestCase
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING)
 
-    @task.actions.limit(4).update_all(progress_status: Task::COMPLETED)
+    last_action = @task.actions.last
+    @task.actions.where.not(id: last_action.id).update_all(progress_status: Task::COMPLETED)
     @task.update_column(:actions_completed_count, 4)
-    @task.actions.last.update(
-      progress_status: Task::COMPLETED,
+    WorkflowManager.complete_action(
+      last_action,
       feedback: {"warnings" => [{"type" => "warning", "details" => "test"}]}
     )
     @task.reload
@@ -240,51 +244,21 @@ class TaskTest < ActiveSupport::TestCase
     assert_not_nil @task.completed_at
   end
 
-  # Tests for the separation of status setting and finalizer execution
-  test "handle_completion should run finalizer when first transitioning to completed (not successful) status" do
+  # complete_task → advance_activity → finalizer (on non-success branch)
+  test "complete_task runs finalizer when outcome is not successful" do
     @task.save!
     mock_finalizer = Minitest::Mock.new
     mock_finalizer.expect :perform_later, nil, [@task]
 
     @task.activity.stub :current_task, @task do
       @task.stub :finalizer, mock_finalizer do
-        @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::REVIEW, completed_at: Time.current)
+        WorkflowManager.complete_task(@task, outcome: Task::REVIEW)
       end
     end
 
     mock_finalizer.verify
     assert_equal Task::REVIEW, @task.outcome_status
     assert_equal Task::COMPLETED, @task.progress_status
-  end
-
-  test "handle_completion should not run finalizer when transitioning outcome status only" do
-    @task.save!
-    # First get task into a completed status
-    @task.update!(progress_status: Task::COMPLETED, outcome_status: Task::REVIEW, completed_at: Time.current)
-
-    # Now mock the finalizer and transition to another outcome status
-    mock_finalizer = Minitest::Mock.new
-    # No expectation set - the finalizer should not be called for this transition
-
-    @task.stub :finalizer, mock_finalizer do
-      @task.update!(outcome_status: Task::SUCCEEDED)
-    end
-
-    mock_finalizer.verify
-    assert_equal Task::SUCCEEDED, @task.outcome_status
-  end
-
-  test "handle_completion should not run finalizer when progress_status change is not to completed" do
-    mock_finalizer = Minitest::Mock.new
-    # No expectation set - the finalizer should not be called
-
-    @task.stub :finalizer, mock_finalizer do
-      @task.save!
-      @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
-    end
-
-    mock_finalizer.verify
-    assert_equal Task::RUNNING, @task.progress_status
   end
 
   # has_feedback? method tests
@@ -314,7 +288,7 @@ class TaskTest < ActiveSupport::TestCase
                      "messages" => []}
 
     @task.save!
-    @task.done!(Task::REVIEW, feedback_hash)
+    WorkflowManager.complete_task(@task, outcome: Task::REVIEW, feedback: feedback_hash)
 
     assert @task.progress_completed?
     assert @task.feedback_for.displayable?
@@ -334,7 +308,7 @@ class TaskTest < ActiveSupport::TestCase
   end
 
   # Auto-advance functionality tests
-  test "handle_completion should trigger auto-advance when task succeeds and auto_advance is enabled" do
+  test "complete_task triggers auto-advance when task succeeds and auto_advance is enabled" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -345,23 +319,18 @@ class TaskTest < ActiveSupport::TestCase
     first_task = activity.tasks.first
     second_task = activity.tasks.second
 
-    # Set up the correct initial state
     first_task.update!(progress_status: Task::RUNNING, started_at: Time.current)
     second_task.update!(progress_status: Task::PENDING)
 
-    # Verify initial state
     assert_equal true, activity.config["auto_advance"]
     assert_equal 2, activity.tasks.count
     assert_equal second_task, activity.next_task
     assert_equal Task::PENDING, second_task.progress_status
 
-    # Ensure the next task has processable items to queue
     activity.data_items.create!(position: 0, data: {objectnumber: "OBJ1"})
 
-    # Trigger auto-advance by completing the first task
-    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
+    WorkflowManager.complete_task(first_task, outcome: Task::SUCCEEDED)
 
-    # Verify auto-advance occurred
     activity.reload
     second_task.reload
 
@@ -369,7 +338,7 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal Task::QUEUED, second_task.progress_status, "Next task should have been queued (run was called)"
   end
 
-  test "handle_completion should not trigger auto-advance when task succeeds but auto_advance is disabled" do
+  test "complete_task does not trigger auto-advance when task succeeds but auto_advance is disabled" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
@@ -378,13 +347,13 @@ class TaskTest < ActiveSupport::TestCase
     )
 
     first_task = activity.tasks.first
-    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
+    WorkflowManager.complete_task(first_task, outcome: Task::SUCCEEDED)
 
     activity.reload
     assert_not activity.auto_advance?
   end
 
-  test "handle_completion should set auto_advance to false when running finalizer for failed task" do
+  test "complete_task sets auto_advance to false and runs finalizer when task fails" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: true},
@@ -399,7 +368,7 @@ class TaskTest < ActiveSupport::TestCase
 
     activity.stub :current_task, first_task do
       first_task.stub :finalizer, mock_finalizer do
-        first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::FAILED, completed_at: Time.current)
+        WorkflowManager.complete_task(first_task, outcome: Task::FAILED)
       end
     end
 
@@ -408,20 +377,20 @@ class TaskTest < ActiveSupport::TestCase
     mock_finalizer.verify
   end
 
-  # create_actions_for_data_items tests
-  test "create_actions_for_data_items should create actions for all data items when none have errors" do
+  # build_actions_for tests (private helper on WorkflowManager)
+  test "build_actions_for creates actions for all data items when none have errors" do
     @task.save!
     5.times do |i|
       @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
     end
 
-    @task.send(:create_actions_for_data_items)
+    WorkflowManager.send(:build_actions_for, @task)
 
     assert_equal 5, @task.actions.count
     assert_equal 5, @task.data_items.count
   end
 
-  test "create_actions_for_data_items should exclude data items with errors from previous actions" do
+  test "build_actions_for excludes data items with errors from previous actions" do
     @task.save!
     data_items = 5.times.map do |i|
       @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
@@ -435,34 +404,34 @@ class TaskTest < ActiveSupport::TestCase
       feedback: {"errors" => [{"type" => "error", "details" => "test"}]}
     )
 
-    @task.send(:create_actions_for_data_items)
+    WorkflowManager.send(:build_actions_for, @task)
 
     assert_equal 4, @task.actions.count
     assert_equal 4, @task.data_items.count
     assert_not_includes @task.data_items, data_items[0]
   end
 
-  test "create_actions_for_data_items is idempotent via unique index" do
+  test "build_actions_for is idempotent via unique index" do
     @task.save!
     5.times do |i|
       @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
     end
 
-    first_count = @task.send(:create_actions_for_data_items)
-    second_count = @task.send(:create_actions_for_data_items)
+    first_count = WorkflowManager.send(:build_actions_for, @task)
+    second_count = WorkflowManager.send(:build_actions_for, @task)
 
     assert_equal 5, first_count
     assert_equal 0, second_count
     assert_equal 5, @task.actions.count
   end
 
-  test "actions_count is set after create_actions_for_data_items" do
+  test "actions_count is set after build_actions_for" do
     @task.save!
     5.times do |i|
       @task.activity.data_items.create!(position: i, data: {content: "Data #{i}"})
     end
 
-    @task.send(:create_actions_for_data_items)
+    WorkflowManager.send(:build_actions_for, @task)
     assert_equal 5, @task.reload.actions_count
   end
 
@@ -472,7 +441,7 @@ class TaskTest < ActiveSupport::TestCase
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
     @task.update_column(:actions_count, @task.actions.count)
 
-    @task.actions.first.update!(progress_status: Task::COMPLETED)
+    WorkflowManager.complete_action(@task.actions.first)
 
     assert_equal 1, @task.reload.actions_completed_count
   end
@@ -485,24 +454,23 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 30, @task.progress
   end
 
-  test "TaskOrchestrator finalizes task as succeeded when all actions complete without errors" do
+  test "complete_action finalizes task as succeeded when all actions complete without errors" do
     @task.save!
     create_actions_for_task(@task)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
 
-    # Complete all but the last via update_all (bypasses callbacks)
+    # Complete all but the last via update_all (bypasses orchestration)
     @task.actions.where.not(id: @task.actions.last.id).update_all(progress_status: Task::COMPLETED)
     @task.update_column(:actions_completed_count, 4)
 
-    # Complete the last one to trigger orchestrator
-    @task.actions.last.update!(progress_status: Task::COMPLETED)
+    WorkflowManager.complete_action(@task.actions.last)
 
     @task.reload
     assert_equal Task::SUCCEEDED, @task.outcome_status
     assert_equal Task::COMPLETED, @task.progress_status
   end
 
-  test "finalize! does not finalize when counter drifts above actual completions" do
+  test "finalize_task does not finalize when counter drifts above actual completions" do
     @task.save!
     create_actions_for_task(@task, 3)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
@@ -511,23 +479,23 @@ class TaskTest < ActiveSupport::TestCase
     @task.actions.limit(2).update_all(progress_status: Task::COMPLETED)
     @task.update_column(:actions_completed_count, 3)
 
-    refute @task.finalize!
+    refute WorkflowManager.finalize_task(@task)
     @task.reload
 
     assert @task.progress_running?, "task must not finalize while an action is still pending"
     assert_equal 2, @task.actions_completed_count, "drifted cache should be corrected by recompute"
   end
 
-  test "finalize! succeeds when actions are all complete even if cache is stale low" do
+  test "finalize_task succeeds when actions are all complete even if cache is stale low" do
     @task.save!
     create_actions_for_task(@task, 3)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
 
-    # all actions complete, cache stuck at 1 (simulates a dropped callback)
+    # all actions complete, cache stuck at 1 (simulates a dropped orchestration call)
     @task.actions.update_all(progress_status: Task::COMPLETED)
     @task.update_column(:actions_completed_count, 1)
 
-    assert @task.finalize!
+    assert WorkflowManager.finalize_task(@task)
     @task.reload
 
     assert @task.progress_completed?
@@ -535,16 +503,16 @@ class TaskTest < ActiveSupport::TestCase
     assert_equal 3, @task.actions_completed_count
   end
 
-  test "finalize! is a no-op on a second call (single-winner)" do
+  test "finalize_task is a no-op on a second call (single-winner)" do
     @task.save!
     create_actions_for_task(@task, 3)
     @task.actions.update_all(progress_status: Task::COMPLETED)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
 
-    assert @task.finalize!
+    assert WorkflowManager.finalize_task(@task)
     completed_at = @task.reload.completed_at
 
-    refute @task.finalize!
+    refute WorkflowManager.finalize_task(@task)
     assert_equal completed_at, @task.reload.completed_at
   end
 
@@ -555,36 +523,31 @@ class TaskTest < ActiveSupport::TestCase
 
     action_a, action_b, action_c = @task.actions.order(:id).to_a
 
-    action_a.update!(progress_status: Task::COMPLETED)
-
-    # Simulate repeated duplicate dispatches for the same completed action.
-    # The cached counter may drift up to actions_count, but must not overshoot,
-    # and finalize! must repair drift from the actions table.
-    5.times { TaskOrchestrator.action_completed(action_a) }
+    # First completion bumps counter to 1; subsequent duplicate dispatches must
+    # not increment the counter or replay task finalization.
+    6.times { WorkflowManager.complete_action(action_a) }
 
     @task.reload
     assert_equal 3, @task.actions_count
-    assert_operator @task.actions_completed_count, :<=, @task.actions_count, "cap must prevent overshoot"
+    assert_equal 1, @task.actions_completed_count
     assert @task.progress_running?, "task must not finalize while B and C are still pending"
     assert action_b.reload.progress_pending?
     assert action_c.reload.progress_pending?
 
-    # B completes; if the duplicate had inflated the cache, the orchestrator would
-    # call finalize! here. finalize!'s recompute must catch that C is still pending.
-    action_b.update!(progress_status: Task::COMPLETED)
+    WorkflowManager.complete_action(action_b)
     @task.reload
 
     assert @task.progress_running?, "task must not finalize while C is still pending"
     assert action_c.reload.progress_pending?
 
-    action_c.update!(progress_status: Task::COMPLETED)
+    WorkflowManager.complete_action(action_c)
     @task.reload
 
     assert @task.progress_completed?
     assert @task.outcome_succeeded?
   end
 
-  test "run acquires a row lock" do
+  test "run_task acquires a row lock" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
@@ -603,11 +566,11 @@ class TaskTest < ActiveSupport::TestCase
       lock_acquired = true
       original_with_lock.call(&block)
     end
-    task.run
+    WorkflowManager.run_task(task)
     assert lock_acquired
   end
 
-  test "run exits cleanly if another caller wins the race before lock acquired" do
+  test "run_task exits cleanly if another caller wins the race before lock acquired" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
@@ -626,28 +589,28 @@ class TaskTest < ActiveSupport::TestCase
       original_with_lock.call(&block)
     end
 
-    task.run
+    WorkflowManager.run_task(task)
     assert_equal Task::QUEUED, task.reload.progress_status
     assert_equal 0, task.actions.count
   end
 
-  test "run is a no-op when task is already queued" do
+  test "run_task is a no-op when task is already queued" do
     @task.save!
     @task.update!(progress_status: Task::QUEUED)
 
-    assert_nil @task.run
+    assert_nil WorkflowManager.run_task(@task)
     assert_equal Task::QUEUED, @task.reload.progress_status
   end
 
-  test "run is a no-op when task is already running" do
+  test "run_task is a no-op when task is already running" do
     @task.save!
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
 
-    assert_nil @task.run
+    assert_nil WorkflowManager.run_task(@task)
     assert_equal Task::RUNNING, @task.reload.progress_status
   end
 
-  test "run is a no-op when dependencies have not succeeded" do
+  test "run_task is a no-op when dependencies have not succeeded" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create"},
@@ -656,7 +619,7 @@ class TaskTest < ActiveSupport::TestCase
     )
     dependent_task = activity.tasks.find_by(type: "pre_check_ingest_data")
 
-    assert_nil dependent_task.run
+    assert_nil WorkflowManager.run_task(dependent_task)
     assert_equal Task::PENDING, dependent_task.reload.progress_status
   end
 
@@ -674,12 +637,12 @@ class TaskTest < ActiveSupport::TestCase
     first_task.update!(progress_status: Task::RUNNING, started_at: Time.current)
     activity.data_items.create!(position: 0, data: {objectnumber: "OBJ1"})
 
-    first_task.update!(progress_status: Task::COMPLETED, outcome_status: Task::SUCCEEDED, completed_at: Time.current)
+    WorkflowManager.complete_task(first_task, outcome: Task::SUCCEEDED)
 
     assert_equal Task::QUEUED, second_task.reload.progress_status
   end
 
-  test "run fails action handler task when there are no processable items" do
+  test "run_task fails action handler task when there are no processable items" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create", auto_advance: false},
@@ -704,7 +667,7 @@ class TaskTest < ActiveSupport::TestCase
     end
 
     assert pre_check_task.ok_to_run?
-    pre_check_task.run
+    WorkflowManager.run_task(pre_check_task)
 
     pre_check_task.reload
     assert pre_check_task.progress_completed?

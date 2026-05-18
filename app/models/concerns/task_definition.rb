@@ -87,11 +87,6 @@ module TaskDefinition
 
   private
 
-  def auto_run_if_configured
-    return unless task_config&.auto_trigger
-    run
-  end
-
   def normalize_type_column
     if type.is_a?(Symbol)
       self.type = type.to_s

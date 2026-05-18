@@ -7,12 +7,6 @@ class Action < ApplicationRecord
 
   validates :task_id, uniqueness: {scope: :data_item_id}
 
-  after_update_commit do
-    next unless saved_change_to_progress_status? && progress_completed?
-
-    TaskOrchestrator.action_completed(self)
-  end
-
   def feedback_context = task.feedback_context
 
   scope :with_errors, -> { where("feedback IS NOT NULL AND jsonb_array_length(feedback->'errors') > 0") }

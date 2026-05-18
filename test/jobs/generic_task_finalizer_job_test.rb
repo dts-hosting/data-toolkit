@@ -61,7 +61,7 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
       .stubs(:ok?).returns(true)
 
     @task = @activity.next_task
-    @task.run
+    WorkflowManager.run_task(@task)
     assert_performed_with(job: PreCheckIngestDataJob, args: [@task]) do
       assert_performed_with(job: GenericTaskFinalizerJob, args: [@task]) do
         perform_enqueued_jobs
@@ -77,10 +77,10 @@ class GenericTaskFinalizerJobTest < ActiveJob::TestCase
         subtype: :required_field_value_missing,
         details: ["objectnumber must be populated"]
       )
-      action.done!(feedback)
+      action.update!(feedback: feedback)
     end
     task.update(progress_status: Task::PENDING)
-    task.done!(Task::FAILED)
+    WorkflowManager.complete_task(task, outcome: Task::FAILED)
   end
 
   def valid_response = OpenStruct.new(valid?: true, errors: [])

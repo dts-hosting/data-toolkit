@@ -2,7 +2,7 @@ class PreCheckIngestDataJob < ApplicationJob
   queue_as :default
 
   def perform(task)
-    task.start!
+    WorkflowManager.start_task(task)
     Rails.logger.info "#{self.class.name} started"
 
     feedback = task.feedback_for
@@ -21,12 +21,12 @@ class PreCheckIngestDataJob < ApplicationJob
     if fail_msg
       Rails.logger.error fail_msg
       feedback.add_to_errors(subtype: :application_error, details: fail_msg)
-      task.done!(Task::FAILED, feedback) && return
+      WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return
     end
 
     first_data_item = task.data_items.first.data
     checker = IngestDataPreCheckFirstItem.new(handler, first_data_item, feedback)
-    task.done!(Task::FAILED, feedback) && return unless checker.ok?
+    WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return unless checker.ok?
 
     task.actions.in_batches(of: 1000) do |batch|
       jobs = batch.map { |action| task.action_handler.new(activity, action) }
@@ -38,6 +38,6 @@ class PreCheckIngestDataJob < ApplicationJob
     Rails.logger.error e.message
     feedback ||= task.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.done!(Task::FAILED, feedback)
+    WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback)
   end
 end

@@ -126,28 +126,32 @@ class ActionTest < ActiveSupport::TestCase
   end
 
   # Status transition tests
-  test "start! should update progress_status and started_at" do
+  test "WorkflowManager.start_action updates progress_status and started_at" do
     @action.save!
-    @action.start!
+    WorkflowManager.start_action(@action)
 
     assert_equal Action::RUNNING, @action.progress_status
     assert_not_nil @action.started_at
   end
 
-  test "done! should update progress_status and completed_at" do
+  test "WorkflowManager.complete_action updates progress_status and completed_at" do
     @action.save!
-    @action.done!
+    @action.task.update_columns(actions_count: 1, actions_completed_count: 0)
+    @action.task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+    WorkflowManager.complete_action(@action)
 
     assert_equal Action::COMPLETED, @action.progress_status
     assert_not_nil @action.completed_at
   end
 
-  test "done! should accept feedback" do
+  test "WorkflowManager.complete_action accepts feedback" do
     feedback_hash = {
       "errors" => [{"type" => "error", "details" => "test error"}]
     }
     @action.save!
-    @action.done!(feedback_hash)
+    @action.task.update_columns(actions_count: 1, actions_completed_count: 0)
+    @action.task.update!(progress_status: Task::RUNNING, started_at: Time.current)
+    WorkflowManager.complete_action(@action, feedback: feedback_hash)
 
     assert_equal Action::COMPLETED, @action.progress_status
     assert_not_nil @action.completed_at
@@ -188,24 +192,23 @@ class ActionTest < ActiveSupport::TestCase
     @task.update_columns(actions_count: 1, actions_completed_count: 0)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
 
-    @action.update!(progress_status: Action::COMPLETED, completed_at: Time.current)
+    WorkflowManager.complete_action(@action)
 
     assert_equal 1, @task.reload.actions_completed_count
   end
 
-  test "updating an already-completed action does not double-increment counter" do
+  test "completing an already-completed action does not increment counter beyond actions_count" do
     @action.save!
     @task.update_columns(actions_count: 1, actions_completed_count: 0)
     @task.update!(progress_status: Task::RUNNING, started_at: Time.current)
 
-    @action.update!(progress_status: Action::COMPLETED, completed_at: Time.current)
-    @action.update!(feedback: {"errors" => []})
+    WorkflowManager.complete_action(@action)
+    WorkflowManager.complete_action(@action, feedback: {"errors" => []})
 
     assert_equal 1, @task.reload.actions_completed_count
   end
 
-  # Callback tests
-  test "after_update_commit should finalize task when last action completes" do
+  test "WorkflowManager.complete_action finalizes task when last action completes" do
     @action.save!
     4.times do |i|
       data_item = @task.activity.data_items.create!(position: i + 1, data: {objectNumber: (i + 2).to_s})
@@ -214,12 +217,11 @@ class ActionTest < ActiveSupport::TestCase
     @task.update!(progress_status: Task::RUNNING)
     @task.update_columns(actions_count: 5)
 
-    # Complete all but the last via update_all (bypasses callbacks)
+    # Complete all but the last via update_all (bypasses orchestration)
     @task.actions.where.not(id: @task.actions.last.id).update_all(progress_status: Action::COMPLETED)
     @task.update_column(:actions_completed_count, 4)
 
-    # Complete the last one via update to trigger finalization
-    @task.actions.last.update(progress_status: Action::COMPLETED)
+    WorkflowManager.complete_action(@task.actions.last)
 
     @task.reload
     assert_equal Task::COMPLETED, @task.progress_status

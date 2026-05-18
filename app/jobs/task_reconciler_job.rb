@@ -25,7 +25,7 @@ class TaskReconcilerJob < ApplicationJob
   def reconcile(task)
     return unless task.action_handler
 
-    return if task.finalize!
+    return if WorkflowManager.finalize_task(task)
     return if live_action_jobs?(task)
 
     pending_actions = task.actions.where.not(progress_status: Progressable::COMPLETED)
@@ -34,7 +34,7 @@ class TaskReconcilerJob < ApplicationJob
     Rails.logger.warn "TaskReconcilerJob: Task #{task.id} has #{pending_actions.count} orphaned actions; marking failed"
     pending_actions.find_each { |action| fail_orphan(action) }
 
-    task.finalize!
+    WorkflowManager.finalize_task(task)
   end
 
   def fail_orphan(action)
@@ -43,7 +43,7 @@ class TaskReconcilerJob < ApplicationJob
       subtype: :application_error,
       details: "Action job did not complete; marked as failed by reconciler"
     )
-    action.done!(feedback)
+    WorkflowManager.complete_action(action, feedback: feedback)
   end
 
   # A job is "live" if it still has a chance to run on its own:

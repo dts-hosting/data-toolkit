@@ -5,18 +5,18 @@ class ProcessUploadedFilesJob < ApplicationJob
 
   # This job iterates files to create data items
   def perform(task)
-    task.start!
+    WorkflowManager.start_task(task)
     Rails.logger.info "File upload job started"
 
     if task.activity.files.empty? && !task.activity.requires_files?
-      task.done!(Task::SUCCEEDED) && return
+      WorkflowManager.complete_task(task, outcome: Task::SUCCEEDED) && return
     end
 
     feedback = task.feedback_for
 
     if task.activity.files.empty?
       feedback.add_to_errors(subtype: :no_file)
-      task.done!(Task::FAILED, feedback) && return
+      WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return
     end
 
     validated = FilesValidator.new(
@@ -25,7 +25,7 @@ class ProcessUploadedFilesJob < ApplicationJob
       feedback: feedback
     ).call
     unless validated.valid?
-      task.done!(Task::FAILED, feedback) && return
+      WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return
     end
 
     validated.data.each { |table| import_from_csv(task, table) }
@@ -33,15 +33,15 @@ class ProcessUploadedFilesJob < ApplicationJob
     task.reload
     if task.activity.data_items_count.zero?
       feedback.add_to_errors(subtype: :no_data)
-      task.done!(Task::FAILED, feedback) && return
+      WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return
     end
 
-    task.done!(Task::SUCCEEDED)
+    WorkflowManager.complete_task(task, outcome: Task::SUCCEEDED)
   rescue => e
     Rails.logger.error "#{e.message} -- #{e.backtrace.first(5)}"
     feedback ||= task.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.done!(Task::FAILED, feedback) && return
+    WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return
   end
 
   def import_from_csv(task, table)

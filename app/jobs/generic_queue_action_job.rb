@@ -2,7 +2,7 @@ class GenericQueueActionJob < ApplicationJob
   queue_as :default
 
   def perform(task)
-    task.start!
+    WorkflowManager.start_task(task)
     Rails.logger.info "#{self.class.name} started"
 
     feedback = task.feedback_for
@@ -18,6 +18,6 @@ class GenericQueueActionJob < ApplicationJob
     Rails.logger.error e.message
     feedback ||= task.feedback_for
     feedback.add_to_errors(subtype: :application_error, details: e)
-    task.done!(Task::FAILED, feedback)
+    WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback)
   end
 end

@@ -1,6 +1,5 @@
 class Activity < ApplicationRecord
   include ActivityDefinition
-  include Advanceable
   include Historical
 
   FAILED_EXPIRATION_DAYS = 7
@@ -46,12 +45,7 @@ class Activity < ApplicationRecord
     end
   end
 
-  after_create_commit do
-    tasks.reload.each do |task|
-      task.send(:auto_run_if_configured)
-    end
-    tasks.reset
-  end
+  after_create_commit { WorkflowManager.start_workflow(self) }
 
   broadcasts_refreshes
 
@@ -69,6 +63,18 @@ class Activity < ApplicationRecord
 
   def next_task
     tasks.where(progress_status: Task::PENDING).order(:created_at).first
+  end
+
+  def auto_advance_enabled?
+    config.fetch("auto_advance", true)
+  end
+
+  def pause_auto_advance!
+    update(auto_advance: false) if auto_advance?
+  end
+
+  def resume_auto_advance!
+    update(auto_advance: true) unless auto_advance?
   end
 
   # Activity type definitions
