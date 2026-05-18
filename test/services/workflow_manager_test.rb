@@ -47,6 +47,71 @@ class WorkflowManagerTest < ActiveSupport::TestCase
     assert_equal 1, @task.reload.actions_completed_count
   end
 
+  test "start_workflow runs first workflow task" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: create_data_config_record_type(record_type: "start_workflow_records"),
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+
+    WorkflowManager.expects(:run_task).with(first_task).once
+
+    WorkflowManager.start_workflow(activity)
+  end
+
+  test "start_workflow does nothing when workflow has no tasks" do
+    activity = create_activity(
+      type: :export_record_ids,
+      data_config: create_data_config_record_type(record_type: "empty_workflow_records")
+    )
+
+    WorkflowManager.expects(:run_task).never
+
+    WorkflowManager.start_workflow(activity)
+  end
+
+  test "start_workflow is a no-op when first task has already started" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: create_data_config_record_type(record_type: "already_started_workflow_records"),
+      files: create_uploaded_files(["test.csv"])
+    )
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+
+    assert_equal Task::QUEUED, first_task.progress_status
+    ProcessUploadedFilesJob.expects(:perform_later).never
+
+    WorkflowManager.start_workflow(activity)
+
+    assert_equal Task::QUEUED, first_task.reload.progress_status
+  end
+
+  test "start_workflow is a no-op when first task has already completed" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: create_data_config_record_type(record_type: "completed_workflow_records"),
+      files: create_uploaded_files(["test.csv"])
+    )
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+    first_task.update!(
+      progress_status: Task::COMPLETED,
+      outcome_status: Task::SUCCEEDED,
+      started_at: Time.current,
+      completed_at: Time.current
+    )
+
+    ProcessUploadedFilesJob.expects(:perform_later).never
+
+    WorkflowManager.start_workflow(activity)
+
+    assert first_task.reload.progress_completed?
+  end
+
   test "complete_task only advances activity on first completion" do
     finalizer_calls = 0
     finalizer = Object.new

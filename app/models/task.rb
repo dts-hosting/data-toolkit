@@ -62,7 +62,6 @@ class Task < ApplicationRecord
   task_type :process_uploaded_files do
     display_name "Process Uploaded Files"
     handler ProcessUploadedFilesJob
-    auto_trigger true
   end
 
   task_type :pre_check_ingest_data do

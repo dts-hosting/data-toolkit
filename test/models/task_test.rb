@@ -1,3 +1,4 @@
+require "test_helper"
 require "minitest/mock"
 
 class TaskTest < ActiveSupport::TestCase
@@ -361,7 +362,7 @@ class TaskTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    # Reload to re-establish inverse association cleared by with_lock during auto-trigger
+    # Reload to re-establish inverse association cleared by with_lock
     first_task = activity.tasks.reload.first
     mock_finalizer = Minitest::Mock.new
     mock_finalizer.expect :perform_later, nil, [first_task]
@@ -608,6 +609,19 @@ class TaskTest < ActiveSupport::TestCase
 
     assert_nil WorkflowManager.run_task(@task)
     assert_equal Task::RUNNING, @task.reload.progress_status
+  end
+
+  test "run_task is a no-op when task is already completed" do
+    @task.save!
+    @task.update!(
+      progress_status: Task::COMPLETED,
+      outcome_status: Task::SUCCEEDED,
+      started_at: Time.current,
+      completed_at: Time.current
+    )
+
+    assert_nil WorkflowManager.run_task(@task)
+    assert @task.reload.progress_completed?
   end
 
   test "run_task is a no-op when dependencies have not succeeded" do
