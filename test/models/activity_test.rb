@@ -211,7 +211,7 @@ class ActivityTest < ActiveSupport::TestCase
     activity.destroy
   end
 
-  test "auto-trigger task transitions to queued after activity creation" do
+  test "first task transitions to queued after activity creation" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create"},
@@ -219,8 +219,8 @@ class ActivityTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    auto_trigger_task = activity.tasks.find_by(type: "process_uploaded_files")
-    assert_equal Task::QUEUED, auto_trigger_task.progress_status
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+    assert_equal Task::QUEUED, first_task.progress_status
     activity.destroy
   end
 
@@ -244,7 +244,7 @@ class ActivityTest < ActiveSupport::TestCase
     end
   end
 
-  test "auto-trigger sees all sibling tasks during execution" do
+  test "sees all sibling tasks during execution" do
     activity = create_activity(
       type: :create_or_update_records,
       config: {action: "create"},
@@ -252,11 +252,11 @@ class ActivityTest < ActiveSupport::TestCase
       files: create_uploaded_files(["test.csv"])
     )
 
-    auto_trigger_task = activity.tasks.find_by(type: "process_uploaded_files")
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
     sibling_task = activity.tasks.find_by(type: "pre_check_ingest_data")
 
-    assert_equal Task::QUEUED, auto_trigger_task.progress_status
-    assert_not_nil sibling_task, "Sibling task should exist when auto-trigger fires"
+    assert_equal Task::QUEUED, first_task.progress_status
+    assert_not_nil sibling_task, "Sibling task should exist when first task fires"
     activity.destroy
   end
 

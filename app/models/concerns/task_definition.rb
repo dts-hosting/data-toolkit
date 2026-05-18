@@ -13,12 +13,11 @@ module TaskDefinition
     end
 
     attr_reader :name, :dependencies
-    attribute :display_name, :handler, :action_handler, :finalizer, :auto_trigger
+    attribute :display_name, :handler, :action_handler, :finalizer
 
     def initialize(name)
       @name = name
       @dependencies = []
-      @auto_trigger = false
     end
 
     def depends_on(*task_types)

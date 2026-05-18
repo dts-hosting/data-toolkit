@@ -96,12 +96,11 @@ class WorkflowManager
 
   ##### Activity entry points
 
-  # Called from Activity#after_create_commit. Starts every task whose type
-  # was defined with `auto_trigger true`.
+  # Called from Activity#after_create_commit. Starts the first task.
   def self.start_workflow(activity)
-    activity.tasks.reload.each do |task|
-      run_task(task) if task.task_config&.auto_trigger
-    end
+    first_task_type = activity.workflow.first
+    first_task = activity.tasks.find_by(type: first_task_type.to_s) if first_task_type
+    run_task(first_task) if first_task
     activity.tasks.reset
   end
 
