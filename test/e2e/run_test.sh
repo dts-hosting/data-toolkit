@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export DATA_TOOLKIT_URL=https://toolkit.lyrasistechnology.org/
+export DATA_TOOLKIT_URL=https://toolkit-qa.collectionspace.org
 export CSPACE_URL=https://anthro.collectionspace.org/
 export CSPACE_ADMIN=admin@anthro.collectionspace.org
 export CSPACE_PASSWORD=Administrator

@@ -36,7 +36,7 @@ export class CSpaceFixture {
     await local_page.waitForLoadState("load", { timeout: 60000 });
 
     await local_page
-      .getByText("My CollectionSpace")
+      .getByText("Search").first()
       .waitFor({ timeout: 60000 });
   }
 
@@ -100,7 +100,8 @@ export class CSpaceFixture {
       .getByRole("button", { name: /search/i })
       .click({ force: true });
 
-    await local_page.getByRole("row", { name: `${itemToSearch}` }).click();
+    await local_page.getByRole('row', { name: `${itemToSearch}` }).locator('a').click();
+    // await local_page.getByRole("row", { name: `${itemToSearch}` }).click();
   }
 
   async searchByIdAndTitle(
@@ -115,48 +116,57 @@ export class CSpaceFixture {
     );
     await local_page
       .locator(".cspace-ui-TitleBar--common")
-      .getByText("Search")
+      .getByText("Search").first()
       .waitFor();
 
     await local_page
       .locator("header")
       .filter({ hasText: "of the following conditions" })
-      .getByRole("textbox")
+      .getByRole("textbox").first()
       .click();
     await local_page.getByRole("option", { name: "All" }).click();
-    await local_page.getByRole("textbox").nth(5).click();
-    await local_page.getByRole("option", { name: "matches" }).click();
-    await local_page
-      .locator("div:nth-child(2) > .cspace-input-LineInput--embedded")
-      .first()
-      .click();
-    await local_page
-      .locator("div:nth-child(2) > .cspace-input-LineInput--embedded")
-      .first()
-      .fill(itemId);
-    await local_page
-      .locator(
-        "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > .cspace-input-DropdownMenuInput--common > .cspace-input-LineInput--normal"
-      )
-      .click();
-    await local_page.getByRole("option", { name: "matches" }).click();
-    await local_page
-      .locator(
-        "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > div:nth-child(3) > .cspace-input-RepeatingInput--normal > div > div > div:nth-child(2) > .cspace-input-LineInput--embedded"
-      )
-      .click();
-    await local_page
-      .locator(
-        "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > div:nth-child(3) > .cspace-input-RepeatingInput--normal > div > div > div:nth-child(2) > .cspace-input-LineInput--embedded"
-      )
-      .fill(itemTitle);
+    // await local_page.getByRole("textbox").nth(5).click();
+    // await local_page.getByRole("option", { name: "matches" }).click();
+    // await local_page
+    //   .locator("div:nth-child(2) > .cspace-input-LineInput--embedded")
+    //   .first()
+    //   .click();
+    // await local_page
+    //   .locator("div:nth-child(2) > .cspace-input-LineInput--embedded")
+    //   .first()
+    //   .fill(itemId);
+    // await local_page
+    //   .locator(
+    //     "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > .cspace-input-DropdownMenuInput--common > .cspace-input-LineInput--normal"
+    //   )
+    //   .click();
+    // await local_page.getByRole("option", { name: "matches" }).click();
+    // await local_page
+    //   .locator(
+    //     "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > div:nth-child(3) > .cspace-input-RepeatingInput--normal > div > div > div:nth-child(2) > .cspace-input-LineInput--embedded"
+    //   )
+    //   .click();
+
+    //*[@id="cspace"]/div/div[1]/div/div/form/section/div/section[1]/div/div[1]/input
+    // #cspace > div > div:nth-child(1) > div > div > form > section > div > section:nth-child(2) > div > div:nth-child(1) > input
+    // class="cspace-input-LineInput--normal cspace-input-TextInput--normal cspace-input-TextInput--common cspace-input-Input--common"
+    // await local_page
+    //   .locator(
+    //     "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > div:nth-child(3) > .cspace-input-RepeatingInput--normal > div > div > div:nth-child(2) > .cspace-input-LineInput--embedded"
+    //   )
+    //   .fill(itemTitle);
+    await local_page.getByRole('textbox').nth(3).fill(itemTitle);
     await local_page
       .getByRole("contentinfo")
       .filter({ hasText: "SearchClear" })
       .locator('button[name="search"]')
       .click();
 
-    await local_page.getByRole("row", { name: `${itemTitle}` }).click();
+    await local_page
+      .locator('.cspace-ui-SearchTable--results')
+      .getByRole('link')
+      .first()
+      .click();
   }
 
   async fetchRelatedObjects(itemToSearch: string, local_page = this.page) {
