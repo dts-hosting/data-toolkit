@@ -20,6 +20,11 @@ lint: ## make lint # Run all linters
 test: ## make test # Run all tests
 	@bin/rails db:test:prepare test test:system
 
+.PHONY: publish
+publish: ## make publish # Build and publish Docker image
+	@docker build -t lyrasis/data-toolkit:latest .
+	@docker push lyrasis/data-toolkit:latest
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

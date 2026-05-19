@@ -1,0 +1,55 @@
+<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mt-4" do %>
+  <%= render "shared/card/header", title: "Profile/version override" %>
+
+  <% if user.errors.any? %>
+    <div class="alert alert-error mb-4">
+      <div>
+        <h3 class="font-semibold"><%= pluralize(user.errors.count, "error") %>
+          prohibited this override from being saved:</h3>
+        <ul class="list-disc list-inside mt-2">
+          <% user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <% selected_profile_version_option = profile_version_options.find do |option|
+    option.profile == user.cspace_profile_override &&
+      option.version == user.cspace_ui_version_override
+  end %>
+
+  <%= form_with(model: user, local: true, html: {id: "profile-version-override-form"}) do |form| %>
+    <%= render "shared/card/property_grid" do %>
+      <%= form.label :profile_version_data_config_id,
+                 "Override profile/version",
+                 class: "label-text font-medium" %>
+      <div class="sm:col-span-3">
+        <%= form.collection_select :profile_version_data_config_id,
+                               profile_version_options,
+                               :id,
+                               :display_name,
+                               {
+                                 include_blank: "Select a supported profile/version",
+                                 selected: selected_profile_version_option&.id,
+                               },
+                               class: "select select-bordered w-full" %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <% if user.cspace_profile_version_overridden? %>
+      <%= button_to "Remove override",
+      reset_user_path(user),
+      method: :delete,
+      class: "btn btn-secondary btn-outline btn-sm" %>
+    <% else %>
+      <%= button_tag "Save override",
+      type: :submit,
+      form: "profile-version-override-form",
+      class: "btn btn-primary btn-sm" %>
+    <% end %>
+  </div>
+<% end %>

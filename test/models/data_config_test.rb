@@ -178,6 +178,87 @@ class DataConfigTest < ActiveSupport::TestCase
     assert_not_includes DataConfig.record_type(users(:admin)), @optlist_config
   end
 
+  test "record_type scope uses user's effective profile and version" do
+    user = users(:admin)
+    user.update!(
+      cspace_profile_override: "anthro",
+      cspace_ui_version_override: "8.2.0"
+    )
+    override_config = create_data_config_record_type(
+      profile: "anthro",
+      version: "8.2.0",
+      record_type: "collectionobject",
+      url: "https://example.com/anthro-collectionobject-8.2.0.json"
+    )
+    detected_config = create_data_config_record_type(
+      profile: user.cspace_profile,
+      version: user.cspace_ui_version,
+      record_type: "acquisitions",
+      url: "https://example.com/core-acquisitions-1.0.0.json"
+    )
+
+    scope = DataConfig.record_type(user)
+
+    assert_includes scope, override_config
+    assert_not_includes scope, detected_config
+  end
+
+  test "profile_version_options returns distinct pairs from supported config types" do
+    first = create_data_config_record_type(
+      profile: "anthro",
+      version: "8.2.0",
+      record_type: "collectionobject",
+      url: "https://example.com/anthro-collectionobject-8.2.0.json"
+    )
+    create_data_config_record_type(
+      profile: "anthro",
+      version: "8.2.0",
+      record_type: "media",
+      url: "https://example.com/anthro-media-8.2.0.json"
+    )
+    create_data_config_term_list(
+      profile: "core",
+      version: "1.0.0",
+      url: "https://example.com/core-vocabularies-1.0.0.json"
+    )
+    create_data_config_optlist_override(
+      profile: "media",
+      url: "https://example.com/media-optlist.json"
+    )
+
+    options = DataConfig.profile_version_options
+
+    assert_equal 1, options.count { |option| option.profile == "anthro" && option.version == "8.2.0" }
+    assert_includes options.map(&:id), first.id
+    assert_includes options.map(&:display_name), "core 1.0.0"
+    assert_not_includes options.map(&:display_name), "media"
+  end
+
+  test "profile_version_options sorts by profile ascending and version descending" do
+    [
+      ["anthro", "9.0.0"],
+      ["core", "10.0.0"],
+      ["anthro", "9.2.0"],
+      ["core", "9.0.0"],
+      ["anthro", "9.1.0"]
+    ].each do |profile, version|
+      create_data_config_record_type(
+        profile: profile,
+        version: version,
+        record_type: "collectionobject-#{profile}-#{version}",
+        url: "https://example.com/#{profile}-#{version}.json"
+      )
+    end
+
+    assert_equal [
+      "anthro 9.2.0",
+      "anthro 9.1.0",
+      "anthro 9.0.0",
+      "core 10.0.0",
+      "core 9.0.0"
+    ], DataConfig.profile_version_options.map(&:display_name)
+  end
+
   test "term_list scope" do
     @term_list_config.save!
     assert_includes DataConfig.term_list(users(:admin)), @term_list_config
