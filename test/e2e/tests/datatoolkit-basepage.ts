@@ -38,7 +38,7 @@ export class DataToolkitBasePage {
 
   async selectOption(optionTextToSearch: string) {
     // Locate the option scoped to the select element by its id
-    const select = await this.page.locator(this.optionFieldId)
+    const select = await this.page.locator(this.optionFieldId);
     const option = await select
       .locator("option")
       .filter({ hasText: new RegExp(`${optionTextToSearch}$`) })

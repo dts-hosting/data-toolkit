@@ -66,7 +66,9 @@ test("Check Create/Update Records", async ({
 
       // Wait for workflow tasks page to load and verify the results
       await page.getByText("Workflow Tasks").waitFor({ timeout: 5000 });
-      await expect(page.getByText("Succeeded")).not.toHaveCount(0, { timeout: 15000 });
+      await expect(page.getByText("Succeeded")).not.toHaveCount(0, {
+        timeout: 15000,
+      });
 
       // Take a screenshot for verification
       const screenshotPath = testInfo.outputPath(
@@ -120,7 +122,9 @@ test("Check Create/Update Records", async ({
 
       // Wait for workflow tasks page to load and verify the results
       await page.getByText("Workflow Tasks").waitFor({ timeout: 5000 });
-      await expect(page.getByText("Failed")).not.toHaveCount(0, { timeout: 15000 });
+      await expect(page.getByText("Failed")).not.toHaveCount(0, {
+        timeout: 15000,
+      });
 
       // Take a screenshot for verification
       const screenshotPath = testInfo.outputPath(
@@ -177,7 +181,9 @@ test("Check Media Derivatives Page", async ({
 
   // Wait for workflow tasks page to load and verify the results
   await page.getByText("Workflow Tasks").waitFor({ timeout: 5000 });
-  await expect(page.getByText("Succeeded")).not.toHaveCount(0, { timeout: 15000 });
+  await expect(page.getByText("Succeeded")).not.toHaveCount(0, {
+    timeout: 15000,
+  });
 });
 
 test("Check Profile Page", async ({ checkProfilePage, page }, testInfo) => {
@@ -204,12 +210,11 @@ test("Check Delete Records Page", async ({
   page,
 }, testInfo) => {
   await checkDeleteRecordsPage.goto("Delete Records", "New Delete Records");
-  await checkDeleteRecordsPage.fillFormAndSubmit(
-    "Object",
-    "data/test.csv"
-  );
+  await checkDeleteRecordsPage.fillFormAndSubmit("Object", "data/test.csv");
 
   // Wait for workflow tasks page to load and verify the results
   await page.getByText("Workflow Tasks").waitFor({ timeout: 5000 });
-  await expect(page.getByText("Succeeded")).not.toHaveCount(0, { timeout: 15000 });
+  await expect(page.getByText("Succeeded")).not.toHaveCount(0, {
+    timeout: 15000,
+  });
 });

@@ -35,9 +35,7 @@ export class CSpaceFixture {
     await local_page.getByRole("button").click({ force: true, timeout: 60000 });
     await local_page.waitForLoadState("load", { timeout: 60000 });
 
-    await local_page
-      .getByText("Search").first()
-      .waitFor({ timeout: 60000 });
+    await local_page.getByText("Search").first().waitFor({ timeout: 60000 });
   }
 
   async goto(
@@ -100,7 +98,10 @@ export class CSpaceFixture {
       .getByRole("button", { name: /search/i })
       .click({ force: true });
 
-    await local_page.getByRole('row', { name: `${itemToSearch}` }).locator('a').click();
+    await local_page
+      .getByRole("row", { name: `${itemToSearch}` })
+      .locator("a")
+      .click();
     // await local_page.getByRole("row", { name: `${itemToSearch}` }).click();
   }
 
@@ -116,13 +117,15 @@ export class CSpaceFixture {
     );
     await local_page
       .locator(".cspace-ui-TitleBar--common")
-      .getByText("Search").first()
+      .getByText("Search")
+      .first()
       .waitFor();
 
     await local_page
       .locator("header")
       .filter({ hasText: "of the following conditions" })
-      .getByRole("textbox").first()
+      .getByRole("textbox")
+      .first()
       .click();
     await local_page.getByRole("option", { name: "All" }).click();
     // await local_page.getByRole("textbox").nth(5).click();
@@ -155,7 +158,7 @@ export class CSpaceFixture {
     //     "li:nth-child(7) > .cspace-ui-FieldConditionInput--normal > div:nth-child(3) > .cspace-input-RepeatingInput--normal > div > div > div:nth-child(2) > .cspace-input-LineInput--embedded"
     //   )
     //   .fill(itemTitle);
-    await local_page.getByRole('textbox').nth(3).fill(itemTitle);
+    await local_page.getByRole("textbox").nth(3).fill(itemTitle);
     await local_page
       .getByRole("contentinfo")
       .filter({ hasText: "SearchClear" })
@@ -163,8 +166,8 @@ export class CSpaceFixture {
       .click();
 
     await local_page
-      .locator('.cspace-ui-SearchTable--results')
-      .getByRole('link')
+      .locator(".cspace-ui-SearchTable--results")
+      .getByRole("link")
       .first()
       .click();
   }
