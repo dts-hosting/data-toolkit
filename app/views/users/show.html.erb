@@ -33,14 +33,26 @@
 
     <%= render partial: "shared/card/info",
     locals: {
-      property: "Profile",
+      property: "Detected profile",
       value: @user&.cspace_profile,
     } %>
 
     <%= render partial: "shared/card/info",
     locals: {
-      property: "UI version",
+      property: "Detected UI version",
       value: @user&.cspace_ui_version,
+    } %>
+
+    <%= render partial: "shared/card/info",
+    locals: {
+      property: "Active profile",
+      value: @user&.effective_cspace_profile,
+    } %>
+
+    <%= render partial: "shared/card/info",
+    locals: {
+      property: "Active UI version",
+      value: @user&.effective_cspace_ui_version,
     } %>
 
     <%= render partial: "shared/card/info",
@@ -50,3 +62,5 @@
     } %>
   <% end %>
 <% end %>
+
+<%= render "override", user: @user, profile_version_options: @profile_version_options %>

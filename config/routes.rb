@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
   resource :session
-  resources :users, only: [:show]
+  resources :users, only: [:show, :update] do
+    member do
+      delete :reset
+    end
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Mount the mission_control-jobs engine
