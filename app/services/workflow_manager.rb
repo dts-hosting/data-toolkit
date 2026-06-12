@@ -5,8 +5,8 @@ class WorkflowManager
   ##### Task lifecycle
 
   # Eligibility-gated, single-winner via row lock. Builds actions if the
-  # task has an action_handler; enqueues the task's handler job otherwise
-  # fails fast with a no-items feedback.
+  # task has an action_handler; enqueues the task's handler job, or fails
+  # fast with a no-items feedback when the task ends up with no actions.
   def self.run_task(task)
     return unless task.ok_to_run?
 
@@ -32,6 +32,21 @@ class WorkflowManager
 
   def self.start_task(task)
     task.update!(progress_status: Progressable::RUNNING, started_at: Time.current)
+  end
+
+  # Recovery path for a task stuck in "queued" (its handler job was lost
+  # before it could start). Resets to pending under the lock, then re-runs.
+  # Safe to repeat: run_task is single-winner and action building keeps
+  # existing rows.
+  def self.requeue_task(task)
+    reset = false
+    task.with_lock do
+      next unless task.progress_queued? && task.started_at.nil?
+
+      task.update!(progress_status: Progressable::PENDING)
+      reset = true
+    end
+    run_task(task) if reset
   end
 
   # Terminal task transition. Sets outcome, then advances the activity once.
@@ -178,6 +193,10 @@ class WorkflowManager
     )
   end
 
+  # Builds pending actions for the task's processable data items (items
+  # whose prior actions errored are skipped). Re-runs are safe: insert_all
+  # keeps existing rows. Returns the total number of actions on the task,
+  # not the number inserted, so a re-run is not mistaken for "no items".
   def self.build_actions_for(task)
     all_data_items = task.activity.data_items
 
@@ -188,7 +207,6 @@ class WorkflowManager
     processable_items = all_data_items.where.not(id: errored_items)
 
     now = Time.current
-    inserted_count = 0
 
     processable_items.in_batches(of: BULK_INSERT_BATCH_SIZE) do |batch|
       records = batch.pluck(:id).map do |data_item_id|
@@ -196,12 +214,11 @@ class WorkflowManager
          created_at: now, updated_at: now}
       end
 
-      result = Action.insert_all(records)
-      inserted_count += result.count
+      Action.insert_all(records)
     end
 
     task.update_column(:actions_count, task.actions.count)
-    inserted_count
+    task.actions_count
   end
 
   def self.broadcast_progress(action, row)

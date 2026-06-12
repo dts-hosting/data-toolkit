@@ -421,8 +421,10 @@ class TaskTest < ActiveSupport::TestCase
     first_count = WorkflowManager.send(:build_actions_for, @task)
     second_count = WorkflowManager.send(:build_actions_for, @task)
 
+    # returns total actions on the task (not inserted rows), so a re-run
+    # reports the same count instead of being mistaken for "no items"
     assert_equal 5, first_count
-    assert_equal 0, second_count
+    assert_equal 5, second_count
     assert_equal 5, @task.actions.count
   end
 

@@ -168,6 +168,55 @@ class WorkflowManagerTest < ActiveSupport::TestCase
     assert_equal Task::RUNNING, @task.progress_status
   end
 
+  test "requeue_task re-runs a queued task" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: create_data_config_record_type(record_type: "requeue_records"),
+      files: create_uploaded_files(["test.csv"])
+    )
+    first_task = activity.tasks.find_by(type: "process_uploaded_files")
+    assert_equal Task::QUEUED, first_task.progress_status
+
+    ProcessUploadedFilesJob.expects(:perform_later).with(first_task).once
+
+    WorkflowManager.requeue_task(first_task)
+
+    assert first_task.reload.progress_queued?
+  end
+
+  test "requeue_task is a no-op for a task that is not queued" do
+    PreCheckIngestDataJob.expects(:perform_later).never
+
+    WorkflowManager.requeue_task(@task)
+
+    assert @task.reload.progress_running?
+  end
+
+  test "run_task re-runs a task whose actions already exist instead of failing" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create"},
+      data_config: create_data_config_record_type(record_type: "rerun_records"),
+      files: create_uploaded_files(["test.csv"])
+    )
+    activity.tasks.find_by(type: "process_uploaded_files").update!(
+      progress_status: Task::COMPLETED,
+      outcome_status: Task::SUCCEEDED,
+      completed_at: Time.current
+    )
+    pre_check_task = activity.tasks.find_by(type: "pre_check_ingest_data")
+    create_data_items_for_task(pre_check_task, 3)
+
+    PreCheckIngestDataJob.expects(:perform_later).with(pre_check_task).once
+
+    WorkflowManager.run_task(pre_check_task)
+
+    pre_check_task.reload
+    assert pre_check_task.progress_queued?
+    assert_equal 3, pre_check_task.actions_count
+  end
+
   test "run_task no-items failure advances only once" do
     activity = create_activity(
       type: :create_or_update_records,
