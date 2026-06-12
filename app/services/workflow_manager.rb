@@ -1,7 +1,5 @@
 # Single entry point for task/action/activity workflow transitions.
 class WorkflowManager
-  BULK_INSERT_BATCH_SIZE = 1000
-
   ##### Task lifecycle
 
   # Eligibility-gated, single-winner via row lock. Builds actions if the
@@ -122,6 +120,7 @@ class WorkflowManager
   # Decides what happens after a task finishes: next task on success-and-enabled,
   # or finalizer + auto-pause otherwise.
   def self.advance_activity(activity)
+    activity.tasks.reset
     task = activity.current_task
     return unless task&.progress_completed?
 
@@ -137,6 +136,7 @@ class WorkflowManager
   # Manual "Advance" button. Always runs the next task regardless of
   # outcome and resumes auto-advance for the rest of the workflow.
   def self.advance_manually(activity)
+    activity.tasks.reset
     return unless activity.current_task&.progress_completed?
     activity.resume_auto_advance!
     run_next(activity)
@@ -194,9 +194,10 @@ class WorkflowManager
   end
 
   # Builds pending actions for the task's processable data items (items
-  # whose prior actions errored are skipped). Re-runs are safe: insert_all
-  # keeps existing rows. Returns the total number of actions on the task,
-  # not the number inserted, so a re-run is not mistaken for "no items".
+  # whose prior actions errored are skipped) in a single INSERT ... SELECT,
+  # keeping the lock in run_task short. Re-runs are safe: existing rows are
+  # kept (ON CONFLICT DO NOTHING). Returns the total number of actions on
+  # the task, not the number inserted, so a re-run is not considered "no items".
   def self.build_actions_for(task)
     all_data_items = task.activity.data_items
 
@@ -204,18 +205,18 @@ class WorkflowManager
       .where(data_item_id: all_data_items.select(:id))
       .select(:data_item_id)
 
-    processable_items = all_data_items.where.not(id: errored_items)
+    select_sql = all_data_items
+      .where.not(id: errored_items)
+      .select(Task.sanitize_sql([
+        "? AS task_id, data_items.id AS data_item_id, ? AS progress_status, NOW(), NOW()",
+        task.id, Progressable::PENDING
+      ]))
+      .to_sql
 
-    now = Time.current
-
-    processable_items.in_batches(of: BULK_INSERT_BATCH_SIZE) do |batch|
-      records = batch.pluck(:id).map do |data_item_id|
-        {task_id: task.id, data_item_id: data_item_id, progress_status: Progressable::PENDING,
-         created_at: now, updated_at: now}
-      end
-
-      Action.insert_all(records)
-    end
+    Action.connection.execute(
+      "INSERT INTO actions (task_id, data_item_id, progress_status, created_at, updated_at) " \
+      "#{select_sql} ON CONFLICT (task_id, data_item_id) DO NOTHING"
+    )
 
     task.update_column(:actions_count, task.actions.count)
     task.actions_count
