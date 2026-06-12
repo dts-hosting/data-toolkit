@@ -50,7 +50,7 @@ class Activity < ApplicationRecord
   broadcasts_refreshes
 
   def current_task
-    tasks.where.not(progress_status: Task::PENDING).order(:created_at).last
+    tasks.reject(&:progress_pending?).max_by(&:id)
   end
 
   def done?
@@ -58,11 +58,11 @@ class Activity < ApplicationRecord
   end
 
   def last_task?
-    current_task == tasks.last
+    current_task == tasks.max_by(&:id)
   end
 
   def next_task
-    tasks.where(progress_status: Task::PENDING).order(:created_at).first
+    tasks.select(&:progress_pending?).min_by(&:id)
   end
 
   def auto_advance_enabled?

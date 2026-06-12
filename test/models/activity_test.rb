@@ -2,6 +2,8 @@ require "test_helper"
 # TODO: Activity subclass tests
 
 class ActivityTest < ActiveSupport::TestCase
+  include ActiveRecord::Assertions::QueryAssertions
+
   def setup
     @user = users(:admin)
     @data_config = create_data_config_record_type
@@ -321,5 +323,18 @@ class ActivityTest < ActiveSupport::TestCase
     activity.update_column(:updated_at, 4.days.ago)
 
     assert_not_includes Activity.expired_non_failed, activity
+  end
+
+  test "task lookups issue no queries when tasks are preloaded" do
+    activity = create_activity(type: :create_or_update_records, config: {action: "create"},
+      data_config: @data_config, files: create_uploaded_files(["test.csv"]))
+    Current.collectionspace = activity.user.cspace_url
+    loaded = Activity.accessible.find(activity.id)
+
+    assert_no_queries do
+      loaded.current_task
+      loaded.next_task
+      loaded.done?
+    end
   end
 end
