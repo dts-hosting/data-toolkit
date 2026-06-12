@@ -35,7 +35,7 @@ class Task < ApplicationRecord
   end
 
   def ok_to_run?
-    met_dependencies && progress_pending? && started_at.nil?
+    met_dependencies? && progress_pending? && started_at.nil?
   end
 
   def checkin_frequency
@@ -88,11 +88,11 @@ class Task < ApplicationRecord
     ((actions_completed_count.to_f / actions_count) * 100).round
   end
 
-  def met_dependencies
+  def met_dependencies?
     return true if dependencies.empty?
 
-    dependencies.all? do |dependency|
-      activity.tasks.exists?(type: dependency.to_s, outcome_status: SUCCEEDED)
-    end
+    activity.tasks
+      .where(type: dependencies.map(&:to_s), outcome_status: SUCCEEDED)
+      .count == dependencies.size
   end
 end
