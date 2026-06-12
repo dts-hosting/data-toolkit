@@ -43,7 +43,7 @@ class Task < ApplicationRecord
     return 0 if item_count.zero?
 
     # cap 10% checkin, but lower as item count increases
-    [Math.sqrt(item_count) / item_count, 0.1].min
+    [1 / Math.sqrt(item_count), 0.1].min
   end
 
   def progress

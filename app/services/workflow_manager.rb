@@ -54,8 +54,7 @@ class WorkflowManager
     transitioned = false
 
     task.with_lock do
-      task.reload
-      return true if task.progress_completed?
+      next if task.progress_completed?
 
       task.update!(
         progress_status: Progressable::COMPLETED,
@@ -83,8 +82,7 @@ class WorkflowManager
     transitioned = false
 
     action.with_lock do
-      action.reload
-      return true if action.progress_completed?
+      next if action.progress_completed?
 
       action.update!(
         progress_status: Progressable::COMPLETED,
@@ -118,13 +116,15 @@ class WorkflowManager
   end
 
   # Decides what happens after a task finishes: next task on success-and-enabled,
-  # or finalizer + auto-pause otherwise.
+  # or finalizer + auto-pause otherwise. The finalizer (feedback aggregation)
+  # is skipped on success deliberately: a succeeded task has no action
+  # feedback to aggregate.
   def self.advance_activity(activity)
     activity.tasks.reset
     task = activity.current_task
     return unless task&.progress_completed?
 
-    if task.outcome_succeeded? && activity.auto_advance_enabled?
+    if task.outcome_succeeded? && activity.auto_advance_configured?
       activity.resume_auto_advance!
       run_next(activity)
     else

@@ -65,7 +65,11 @@ class Activity < ApplicationRecord
     tasks.select(&:progress_pending?).min_by(&:id)
   end
 
-  def auto_advance_enabled?
+  # The user's configured preference. This is distinct from the auto-advance
+  # column, which is runtime state: paused when a task finishes unsuccessfully
+  # so the user can review, resumed when the workflow moves on (automatically
+  # or via the Advance button).
+  def auto_advance_configured?
     config.fetch("auto_advance", true)
   end
 
@@ -132,11 +136,12 @@ class Activity < ApplicationRecord
     end
   end
 
+  # config is jsonb: keys are strings once cast, so merge on string keys.
   def set_config_defaults
-    defaults = {auto_advance: true}
+    defaults = {"auto_advance" => true}
     if activity_config&.config_defaults
-      defaults = defaults.merge(activity_config.config_defaults)
+      defaults = defaults.merge(activity_config.config_defaults.deep_stringify_keys)
     end
-    self.config = defaults.merge((config || {}).symbolize_keys)
+    self.config = defaults.merge((config || {}).deep_stringify_keys)
   end
 end
