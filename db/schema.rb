@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_12_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,7 +26,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_120000) do
     t.index ["data_item_id"], name: "index_actions_on_data_item_id"
     t.index ["progress_status"], name: "index_actions_on_progress_status"
     t.index ["task_id", "data_item_id"], name: "index_actions_on_task_id_and_data_item_id", unique: true
-    t.index ["task_id"], name: "index_actions_on_task_id"
+    t.index ["task_id", "progress_status"], name: "index_actions_on_task_id_and_progress_status"
     t.index ["task_id"], name: "index_actions_on_task_id_with_feedback", where: "(feedback IS NOT NULL)"
   end
 

@@ -1,12 +1,10 @@
 # Single entry point for task/action/activity workflow transitions.
 class WorkflowManager
-  BULK_INSERT_BATCH_SIZE = 1000
-
   ##### Task lifecycle
 
   # Eligibility-gated, single-winner via row lock. Builds actions if the
-  # task has an action_handler; enqueues the task's handler job otherwise
-  # fails fast with a no-items feedback.
+  # task has an action_handler; enqueues the task's handler job, or fails
+  # fast with a no-items feedback when the task ends up with no actions.
   def self.run_task(task)
     return unless task.ok_to_run?
 
@@ -34,6 +32,21 @@ class WorkflowManager
     task.update!(progress_status: Progressable::RUNNING, started_at: Time.current)
   end
 
+  # Recovery path for a task stuck in "queued" (its handler job was lost
+  # before it could start). Resets to pending under the lock, then re-runs.
+  # Safe to repeat: run_task is single-winner and action building keeps
+  # existing rows.
+  def self.requeue_task(task)
+    reset = false
+    task.with_lock do
+      next unless task.progress_queued? && task.started_at.nil?
+
+      task.update!(progress_status: Progressable::PENDING)
+      reset = true
+    end
+    run_task(task) if reset
+  end
+
   # Terminal task transition. Sets outcome, then advances the activity once.
   # Returns true so callers can use `complete_task(...) && return` patterns.
   def self.complete_task(task, outcome:, feedback: nil)
@@ -41,8 +54,7 @@ class WorkflowManager
     transitioned = false
 
     task.with_lock do
-      task.reload
-      return true if task.progress_completed?
+      next if task.progress_completed?
 
       task.update!(
         progress_status: Progressable::COMPLETED,
@@ -70,8 +82,7 @@ class WorkflowManager
     transitioned = false
 
     action.with_lock do
-      action.reload
-      return true if action.progress_completed?
+      next if action.progress_completed?
 
       action.update!(
         progress_status: Progressable::COMPLETED,
@@ -105,12 +116,15 @@ class WorkflowManager
   end
 
   # Decides what happens after a task finishes: next task on success-and-enabled,
-  # or finalizer + auto-pause otherwise.
+  # or finalizer + auto-pause otherwise. The finalizer (feedback aggregation)
+  # is skipped on success deliberately: a succeeded task has no action
+  # feedback to aggregate.
   def self.advance_activity(activity)
+    activity.tasks.reset
     task = activity.current_task
     return unless task&.progress_completed?
 
-    if task.outcome_succeeded? && activity.auto_advance_enabled?
+    if task.outcome_succeeded? && activity.auto_advance_configured?
       activity.resume_auto_advance!
       run_next(activity)
     else
@@ -122,6 +136,7 @@ class WorkflowManager
   # Manual "Advance" button. Always runs the next task regardless of
   # outcome and resumes auto-advance for the rest of the workflow.
   def self.advance_manually(activity)
+    activity.tasks.reset
     return unless activity.current_task&.progress_completed?
     activity.resume_auto_advance!
     run_next(activity)
@@ -178,6 +193,11 @@ class WorkflowManager
     )
   end
 
+  # Builds pending actions for the task's processable data items (items
+  # whose prior actions errored are skipped) in a single INSERT ... SELECT,
+  # keeping the lock in run_task short. Re-runs are safe: existing rows are
+  # kept (ON CONFLICT DO NOTHING). Returns the total number of actions on
+  # the task, not the number inserted, so a re-run is not considered "no items".
   def self.build_actions_for(task)
     all_data_items = task.activity.data_items
 
@@ -185,23 +205,21 @@ class WorkflowManager
       .where(data_item_id: all_data_items.select(:id))
       .select(:data_item_id)
 
-    processable_items = all_data_items.where.not(id: errored_items)
+    select_sql = all_data_items
+      .where.not(id: errored_items)
+      .select(Task.sanitize_sql([
+        "? AS task_id, data_items.id AS data_item_id, ? AS progress_status, NOW(), NOW()",
+        task.id, Progressable::PENDING
+      ]))
+      .to_sql
 
-    now = Time.current
-    inserted_count = 0
-
-    processable_items.in_batches(of: BULK_INSERT_BATCH_SIZE) do |batch|
-      records = batch.pluck(:id).map do |data_item_id|
-        {task_id: task.id, data_item_id: data_item_id, progress_status: Progressable::PENDING,
-         created_at: now, updated_at: now}
-      end
-
-      result = Action.insert_all(records)
-      inserted_count += result.count
-    end
+    Action.connection.execute(
+      "INSERT INTO actions (task_id, data_item_id, progress_status, created_at, updated_at) " \
+      "#{select_sql} ON CONFLICT (task_id, data_item_id) DO NOTHING"
+    )
 
     task.update_column(:actions_count, task.actions.count)
-    inserted_count
+    task.actions_count
   end
 
   def self.broadcast_progress(action, row)

@@ -50,7 +50,7 @@ class Activity < ApplicationRecord
   broadcasts_refreshes
 
   def current_task
-    tasks.where.not(progress_status: Task::PENDING).order(:created_at).last
+    tasks.reject(&:progress_pending?).max_by(&:id)
   end
 
   def done?
@@ -58,14 +58,18 @@ class Activity < ApplicationRecord
   end
 
   def last_task?
-    current_task == tasks.last
+    current_task == tasks.max_by(&:id)
   end
 
   def next_task
-    tasks.where(progress_status: Task::PENDING).order(:created_at).first
+    tasks.select(&:progress_pending?).min_by(&:id)
   end
 
-  def auto_advance_enabled?
+  # The user's configured preference. This is distinct from the auto-advance
+  # column, which is runtime state: paused when a task finishes unsuccessfully
+  # so the user can review, resumed when the workflow moves on (automatically
+  # or via the Advance button).
+  def auto_advance_configured?
     config.fetch("auto_advance", true)
   end
 
@@ -132,11 +136,12 @@ class Activity < ApplicationRecord
     end
   end
 
+  # config is jsonb: keys are strings once cast, so merge on string keys.
   def set_config_defaults
-    defaults = {auto_advance: true}
+    defaults = {"auto_advance" => true}
     if activity_config&.config_defaults
-      defaults = defaults.merge(activity_config.config_defaults)
+      defaults = defaults.merge(activity_config.config_defaults.deep_stringify_keys)
     end
-    self.config = defaults.merge((config || {}).symbolize_keys)
+    self.config = defaults.merge((config || {}).deep_stringify_keys)
   end
 end
