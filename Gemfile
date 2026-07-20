@@ -74,7 +74,7 @@ gem "csvlint",
 gem "local_time"
 gem "mission_control-jobs"
 gem "pagy"
-gem "rails_icons", "~> 1.8"
+gem "rails_icons", "~> 1.9"
 gem "scout_apm"
 gem "tailwindcss-rails", "~> 4.6"
 gem "tailwindcss-ruby", "~> 4.3"
