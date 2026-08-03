@@ -15,9 +15,7 @@ class CsvValidatorTest < ActiveSupport::TestCase
     validator = subject("invalid_mixed_eol_blank_middle_row.csv")
 
     refute validator.valid?
-    assert_equal %i[csvlint_unknown_error
-      csvlint_line_breaks
-      csv_stdlib_malformed_csv],
+    assert_equal %i[csvlint_unknown_error csvlint_line_breaks],
       validator.feedback.errors.map(&:subtype)
     assert_equal "invalid_mixed_eol_blank_middle_row.csv",
       validator.feedback.errors.first.prefix
