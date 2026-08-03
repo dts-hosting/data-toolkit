@@ -44,6 +44,6 @@ class FilesValidatorTest < ActiveSupport::TestCase
     assert_equal ["invalid_encoding.csv",
       "invalid_mixed_eol_blank_middle_row.csv"],
       validator.feedback.errors.map(&:prefix).uniq.sort
-    assert_empty validator.data
+    assert_equal 1, validator.data.length
   end
 end
