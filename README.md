@@ -25,6 +25,8 @@ docker compose up -d db
 ./bin/rails db:setup
 ```
 
+The development/test urls are derived from `DATABASE_URL` in `.env`.
+
 For production `DATABASE_URL` is required as an environment variable in the form:
 
 - `postgres://$username:$password@$host:$port/$db_name`
@@ -87,11 +89,35 @@ There is a task for generating basic sample data for objects:
 bundle exec rake sample:objects[20000]
 ```
 
-## Deployment
+## QA with the production image
 
-Locally with Docker.
+`docker compose` runs the **production** image (the same `Dockerfile` that ships to
+Docker Hub) against a local PostgreSQL, for QA of a release candidate. It is not a
+development environment, for that use `bin/dev` on the host with `docker compose up -d db`.
 
 ```bash
 docker compose build
-docker compose up
+docker compose up -d
 ```
+
+The app is served by Thruster on <http://localhost:3000> (container port 80). The
+entrypoint runs `db:prepare` on boot, creating `toolkit_qa`, `toolkit_qa_cable`,
+`toolkit_qa_cache` and `toolkit_qa_queue` on first start.
+
+Because it runs as `RAILS_ENV=production`, Active Storage uses S3
+(`config/environments/production.rb`). Set your QA bucket in `.env`:
+
+```bash
+ACTIVE_STORAGE_S3_BUCKET=your-qa-bucket
+AWS_REGION=us-east-1
+```
+
+and export credentials in your shell before `docker compose up` — they are passed
+through to the container and deliberately not committed:
+
+```bash
+export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=...
+```
+
+`.env` also sets `RAILS_ASSUME_SSL=false` and `RAILS_FORCE_SSL=false` so QA is
+reachable over plain HTTP.

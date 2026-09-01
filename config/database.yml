@@ -6,35 +6,35 @@ default: &default
 development:
   primary:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_development"
+    url: <%= "#{ENV["DATABASE_URL"]}_development" %>
   cable:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_development_cable"
+    url: <%= "#{ENV["DATABASE_URL"]}_development_cable" %>
     migrations_paths: db/cable_migrate
   cache:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_development_cache"
+    url: <%= "#{ENV["DATABASE_URL"]}_development_cache" %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_development_queue"
+    url: <%= "#{ENV["DATABASE_URL"]}_development_queue" %>
     migrations_paths: db/queue_migrate
 
 test:
   primary:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_test"
+    url: <%= "#{ENV["DATABASE_URL"]}_test" %>
   cable:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_test_cable"
+    url: <%= "#{ENV["DATABASE_URL"]}_test_cable" %>
     migrations_paths: db/cable_migrate
   cache:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_test_cache"
+    url: <%= "#{ENV["DATABASE_URL"]}_test_cache" %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    url: "postgres://toolkit:toolkit@localhost:5432/toolkit_test_queue"
+    url: <%= "#{ENV["DATABASE_URL"]}_test_queue" %>
     migrations_paths: db/queue_migrate
 
 production:

@@ -1,5 +1,4 @@
 [tools]
-ruby = "4"
 node = "lts"
 pnpm = "latest"
 
