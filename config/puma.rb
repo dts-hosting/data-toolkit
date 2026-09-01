@@ -34,7 +34,10 @@ port ENV.fetch("PORT", 3000)
 plugin :tmp_restart
 
 # Run the Solid Queue supervisor inside of Puma for single-server deployments
-plugin :solid_queue if ENV.fetch("SOLID_QUEUE_IN_PUMA", false) == "true"
+if ENV.fetch("SOLID_QUEUE_IN_PUMA", false) == "true"
+  plugin :solid_queue
+  solid_queue_mode :async if RUBY_PLATFORM.include?("darwin")
+end
 
 # Build tailwindcss
 plugin :tailwindcss if ENV.fetch("RAILS_ENV", "development") == "development"
