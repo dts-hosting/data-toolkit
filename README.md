@@ -25,7 +25,7 @@ docker compose up -d db
 ./bin/rails db:setup
 ```
 
-The development/test urls are derived from `DATABASE_URL` in `.env`.
+The development/test connection settings are in `config/database.yml`.
 
 For production `DATABASE_URL` is required as an environment variable in the form:
 

@@ -1,40 +1,49 @@
 default: &default
   adapter: postgresql
   encoding: unicode
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # For details on connection pooling, see Rails configuration guide
+  # https://guides.rubyonrails.org/configuring.html#database-pooling
+  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
+# Local credentials match the `db` service in docker-compose.yml.
 development:
-  primary:
+  primary: &primary_development
     <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_development" %>
+    database: toolkit_development
+    host: localhost
+    username: toolkit
+    password: toolkit
   cable:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_development_cable" %>
+    <<: *primary_development
+    database: toolkit_development_cable
     migrations_paths: db/cable_migrate
   cache:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_development_cache" %>
+    <<: *primary_development
+    database: toolkit_development_cache
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_development_queue" %>
+    <<: *primary_development
+    database: toolkit_development_queue
     migrations_paths: db/queue_migrate
 
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
 test:
-  primary:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_test" %>
+  primary: &primary_test
+    <<: *primary_development
+    database: toolkit_test
   cable:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_test_cable" %>
+    <<: *primary_test
+    database: toolkit_test_cable
     migrations_paths: db/cable_migrate
   cache:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_test_cache" %>
+    <<: *primary_test
+    database: toolkit_test_cache
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    url: <%= "#{ENV["DATABASE_URL"]}_test_queue" %>
+    <<: *primary_test
+    database: toolkit_test_queue
     migrations_paths: db/queue_migrate
 
 production:
