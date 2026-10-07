@@ -1,6 +1,3 @@
-Prettier:
-  enabled: true
-  command: ["pnpm", "exec", "prettier", ".", "--check"]
 StandardRB:
   enabled: true
   command: ["bundle", "exec", "standardrb"]

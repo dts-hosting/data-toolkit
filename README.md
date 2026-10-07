@@ -8,8 +8,8 @@ Install [mise](https://mise.jdx.dev/installing-mise.html) then run:
 
 ```bash
 mise trust
-mise install # install Ruby, Node, pnpm
-make install # install gems, packages
+mise install # install Ruby, Node
+make install # install gems
 ```
 
 ### PostgreSQL Setup
