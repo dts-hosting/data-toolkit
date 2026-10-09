@@ -9,12 +9,10 @@ hooks: ## make hooks # Install overcommit and init it
 .PHONY: install
 install: ## make install # Install dependencies
 	@bundle install
-	@pnpm install
 
 .PHONY: lint
 lint: ## make lint # Run all linters
 	@bundle exec standardrb --fix
-	@pnpm exec prettier . --write
 
 .PHONY: test
 test: ## make test # Run all tests

@@ -8,8 +8,8 @@ Install [mise](https://mise.jdx.dev/installing-mise.html) then run:
 
 ```bash
 mise trust
-mise install # install Ruby, Node, pnpm
-make install # install gems, packages
+mise install # install Ruby, Node
+make install # install gems
 ```
 
 ### PostgreSQL Setup
@@ -25,7 +25,7 @@ docker compose up -d db
 ./bin/rails db:setup
 ```
 
-The development/test urls are derived from `DATABASE_URL` in `.env`.
+The development/test connection settings are in `config/database.yml`.
 
 For production `DATABASE_URL` is required as an environment variable in the form:
 
