@@ -8,9 +8,12 @@ Install [mise](https://mise.jdx.dev/installing-mise.html) then run:
 
 ```bash
 mise trust
-mise install # install Ruby, Node
-make install # install gems
+mise install # install Ruby, Node, lefthook
+mise run install # install gems
+mise run hooks # install git hooks (lefthook)
 ```
+
+Run `mise tasks` to list the available tasks (`install`, `hooks`, `lint`, `test`, `publish`).
 
 ### PostgreSQL Setup
 
