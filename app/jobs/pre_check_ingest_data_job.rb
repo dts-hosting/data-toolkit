@@ -1,43 +1,17 @@
-class PreCheckIngestDataJob < ApplicationJob
-  queue_as :default
+class PreCheckIngestDataJob < GenericQueueActionJob
+  private
 
-  def perform(task)
-    WorkflowManager.start_task(task)
-    Rails.logger.info "#{self.class.name} started"
+  def ready?(task, feedback)
+    handler = task.activity.data_handler
+    IngestDataPreCheckFirstItem.new(handler, task.data_items.first.data, feedback).ok?
+  rescue CollectionSpace::Mapper::NoClientServiceError => e
+    fail_with(feedback, "collectionspace-client does not have a service configured for #{e.message}")
+  rescue CollectionSpace::Mapper::IdFieldNotInMapperError
+    fail_with(feedback, "cannot determine the unique ID field for this record type from DataConfig")
+  end
 
-    feedback = task.feedback_for
-    activity = task.activity
-
-    begin
-      handler = activity.data_handler
-    rescue CollectionSpace::Mapper::NoClientServiceError => err
-      fail_msg = "collectionspace-client does not have a service configured " \
-        "for #{err.message}"
-    rescue CollectionSpace::Mapper::IdFieldNotInMapperError
-      fail_msg = "cannot determine the unique ID field for this " \
-        "record type from DataConfig"
-    end
-
-    if fail_msg
-      Rails.logger.error fail_msg
-      feedback.add_to_errors(subtype: :application_error, details: fail_msg)
-      WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return
-    end
-
-    first_data_item = task.data_items.first.data
-    checker = IngestDataPreCheckFirstItem.new(handler, first_data_item, feedback)
-    WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback) && return unless checker.ok?
-
-    task.actions.in_batches(of: 1000) do |batch|
-      jobs = batch.map { |action| task.action_handler.new(activity, action) }
-      ActiveJob.perform_all_later(jobs)
-    end
-
-    Rails.logger.info "#{self.class.name} finished spawning sub-jobs"
-  rescue => e
-    Rails.logger.error e.message
-    feedback ||= task.feedback_for
-    feedback.add_to_errors(subtype: :application_error, details: e)
-    WorkflowManager.complete_task(task, outcome: Task::FAILED, feedback: feedback)
+  def fail_with(feedback, msg)
+    feedback.add_to_errors(subtype: :application_error, details: msg)
+    false
   end
 end

@@ -36,9 +36,8 @@ module CollectionSpace
       blob.csid && blob.derivatives_count.to_i == EXPECTED_DERIVABLE_COUNT
     end
 
-    def perform_with(action)
-      feedback = action.feedback_for
-
+    # Adds any problems found to `feedback` and returns it.
+    def perform_with(feedback)
       begin
         retrieve_data
       rescue => e
