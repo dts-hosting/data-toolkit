@@ -60,6 +60,10 @@ needs to be configured for a production environment. You can override the defaul
 set in `.env` by creating `.env.local` and redefining the value. This is useful for
 testing CloudWatch publishing: `CW_ENABLED=true`.
 
+## Workflows
+
+See [docs/workflows.md](docs/workflows.md) for how activities, tasks and jobs fit together.
+
 ## CLI tasks
 
 ```bash

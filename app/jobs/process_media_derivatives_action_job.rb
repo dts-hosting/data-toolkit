@@ -1,27 +1,19 @@
-class ProcessMediaDerivativesActionJob < ApplicationJob
-  queue_as :default
+class ProcessMediaDerivativesActionJob < ActionJob
+  private
 
-  def perform(activity, action)
-    WorkflowManager.start_action(action)
+  def process(activity, action, feedback)
     handler = activity.data_handler
-    data = action.data_item.data
-
-    cfg = Rails.cache.fetch("rm_cfg_for_activity_#{activity.id}", expires_in: 24.hours) do
+    cfg = Rails.cache.fetch("cfg_for_activity_#{activity.id}", expires_in: 24.hours) do
       handler.recordmapper.send(:hash)[:config]
     end
 
-    type = cfg["service_path"]
     field = cfg["identifier_field"]
-    identifier = data[field.downcase].to_s
-
     service = CollectionSpace::CheckMediaService.new(
-      handler.client, type: type, field: field, value: identifier
+      handler.client,
+      type: cfg["service_path"],
+      field: field,
+      value: action.data_item.data[field.downcase].to_s
     )
-
-    WorkflowManager.complete_action(action, feedback: service.perform_with(action))
-  rescue => e
-    feedback = action.feedback_for
-    feedback.add_to_errors(subtype: :application_error, details: e)
-    WorkflowManager.complete_action(action, feedback: feedback)
+    service.perform_with(feedback)
   end
 end

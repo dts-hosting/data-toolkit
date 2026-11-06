@@ -144,7 +144,7 @@ module CollectionSpace
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, set_blob(csid: "b1", mime_type: "image/jpeg", derivatives_count: 5) do
-        feedback = @service.perform_with(action)
+        feedback = @service.perform_with(action.feedback_for)
         assert feedback.ok?
       end
     end
@@ -153,7 +153,7 @@ module CollectionSpace
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, set_blob(csid: "b1", mime_type: "application/pdf") do
-        feedback = @service.perform_with(action)
+        feedback = @service.perform_with(action.feedback_for)
         assert feedback.ok?
       end
     end
@@ -162,7 +162,7 @@ module CollectionSpace
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, nil do
-        feedback = @service.perform_with(action)
+        feedback = @service.perform_with(action.feedback_for)
         assert feedback.ok?
       end
     end
@@ -171,7 +171,7 @@ module CollectionSpace
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, set_blob(csid: "b1", mime_type: "image/jpeg", derivatives_count: 3) do
-        feedback = @service.perform_with(action)
+        feedback = @service.perform_with(action.feedback_for)
         refute feedback.ok?
       end
     end
@@ -180,7 +180,7 @@ module CollectionSpace
       action = create_action_for_service_test
 
       @service.stub :retrieve_data, -> { raise "Connection refused" } do
-        feedback = @service.perform_with(action)
+        feedback = @service.perform_with(action.feedback_for)
         refute feedback.ok?
       end
     end
