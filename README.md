@@ -8,9 +8,12 @@ Install [mise](https://mise.jdx.dev/installing-mise.html) then run:
 
 ```bash
 mise trust
-mise install # install Ruby, Node
-make install # install gems
+mise install # install Ruby, Node, lefthook
+mise run install # install gems
+mise run hooks # install git hooks (lefthook)
 ```
+
+Run `mise tasks` to list the available tasks (`install`, `hooks`, `lint`, `test`, `publish`).
 
 ### PostgreSQL Setup
 
@@ -25,7 +28,12 @@ docker compose up -d db
 ./bin/rails db:setup
 ```
 
-The development/test connection settings are in `config/database.yml`.
+The development/test connection settings are in `config/database.yml`. To connect:
+
+```bash
+# replace pgcli with psql as preferred
+PGPASSWORD=toolkit pgcli -h 127.0.0.1 -u toolkit -d toolkit_development
+```
 
 For production `DATABASE_URL` is required as an environment variable in the form:
 
@@ -62,13 +70,14 @@ PASSWORD=Administrator
 ./bin/rake "crud:create:user[$CSPACE_URL,$EMAIL_ADDRESS,$PASSWORD]" | jq .
 
 # import data configs from a manifest registry
-MR_URL=https://gist.githubusercontent.com/mark-cooper/0492cc97d53a47105dd29ca86799c8c7/raw/f376621f1c2e110f88fc1bdd10c5437f0abc99a5/meta-manifest2.json
+# https://github.com/collectionspace/cspace-config-untangler/tree/main/data/mapper_manifests
+MR_URL=https://raw.githubusercontent.com/collectionspace/cspace-config-untangler/refs/heads/main/data/mapper_manifests/data_toolkit_meta_manifest.json
 ./bin/rake "crud:import:manifest_registry[$MR_URL]" | jq .
 
 # display data configs scoped to user
 USER_ID=1
 DATA_CFG_TYPE=record_type
-DATA_CFG_RECORD_TYPE=collectionobject
+DATA_CFG_RECORD_TYPE=Object
 ./bin/rake "crud:read:data_configs[$USER_ID,$DATA_CFG_TYPE,$DATA_CFG_RECORD_TYPE]" | jq .
 
 # create an activity

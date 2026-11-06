@@ -1,5 +1,30 @@
 [tools]
+lefthook = "2"
 node = "lts"
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
+ruby.compile = false
+
+[tasks.install]
+description = "Install dependencies"
+run = "bundle install"
+
+[tasks.hooks]
+description = "Install git hooks (lefthook)"
+run = "lefthook install"
+
+[tasks.lint]
+description = "Run all linters"
+run = "bundle exec standardrb --fix"
+
+[tasks.test]
+description = "Run all tests"
+run = "bin/rails db:test:prepare test test:system"
+
+[tasks.publish]
+description = "Build and publish Docker image"
+run = [
+  "docker build -t lyrasis/data-toolkit:latest .",
+  "docker push lyrasis/data-toolkit:latest",
+]

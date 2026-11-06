@@ -32,7 +32,6 @@ end
 group :development do
   gem "htmlbeautifier"
   gem "letter_opener"
-  gem "overcommit", require: false
   gem "web-console"
 end
 

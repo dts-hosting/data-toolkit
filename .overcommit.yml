@@ -1,3 +1,0 @@
-StandardRB:
-  enabled: true
-  command: ["bundle", "exec", "standardrb"]
