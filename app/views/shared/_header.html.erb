@@ -8,13 +8,8 @@
     </div>
     <div class="navbar-end">
       <% if authenticated? %>
-        <%= link_to "My profile",
-        user_path(Current.user),
-        class: "btn btn-success btn-outline mr-2" %>
-        <%= button_to "Sign Out",
-        session_path,
-        method: :delete,
-        class: "btn btn-secondary btn-outline" %>
+        <%= link_to "My profile", user_path(Current.user), class: "btn btn-success mr-2" %>
+        <%= button_to "Sign Out", session_path, method: :delete, class: "btn btn-secondary" %>
       <% end %>
     </div>
   </div>

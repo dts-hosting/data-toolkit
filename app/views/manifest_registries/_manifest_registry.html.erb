@@ -7,15 +7,15 @@
     <div class="flex gap-2">
       <%= link_to "View Details",
       manifest_registry_path(manifest_registry),
-      class: "btn btn-sm btn-primary btn-outline" %>
+      class: "btn btn-sm btn-primary" %>
       <%= button_to "Update Registry",
       run_manifest_registry_path(manifest_registry),
       method: :post,
-      class: "btn btn-sm btn-success btn-outline" %>
+      class: "btn btn-sm btn-success" %>
       <%= button_to "Delete",
       manifest_registry_path(manifest_registry),
       method: :delete,
-      class: "btn btn-sm btn-error btn-outline",
+      class: "btn btn-sm btn-error",
       disabled: !manifest_registry.safe_to_delete?,
       form: {
         data: {
