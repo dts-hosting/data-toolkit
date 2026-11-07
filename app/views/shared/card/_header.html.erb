@@ -1,5 +1,8 @@
 <div class="flex justify-between items-center mb-6">
-  <h2 class="card-title"><%= title %></h2>
+  <h2 class="card-title">
+    <% if local_assigns[:icon] %><%= icon local_assigns[:icon], class: "size-6" %><% end %>
+    <%= title %>
+  </h2>
   <% if local_assigns[:actions] %>
     <div class="flex gap-2">
       <%= actions %>

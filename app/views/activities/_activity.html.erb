@@ -2,7 +2,7 @@
 <%= render "shared/card/base", id: dom_id(activity), card_class: "bg-base-100 border border-base-300 shadow-md mb-3" do %>
   <div class="card-title justify-between">
     <%= link_to activity_path(activity), class: "link link-info" do %>
-      <%= render partial: "shared/card/title", locals: { title: activity.label } %>
+      <%= render partial: "shared/card/title", locals: { title: activity.label, icon: activity.icon } %>
     <% end %>
     <div class="card-actions">
       <% if Current.user.is? activity.user %>

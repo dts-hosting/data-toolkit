@@ -190,6 +190,22 @@ class ActivityTest < ActiveSupport::TestCase
     assert_includes Activity.activity_types_registry.keys, :create_or_update_records
   end
 
+  test "displayable activity types are sorted by display name and each has an icon" do
+    types = Activity.displayable_activity_types
+
+    assert_equal types.map(&:display_name).sort, types.map(&:display_name)
+    types.each { |t| assert t.icon.present?, "#{t.name} has no icon" }
+  end
+
+  test "activity icon comes from its activity type" do
+    assert_equal "trash", Activity.new(type: :delete_records).icon
+    assert_equal "play", Activity.new(type: :unknown_type).icon
+  end
+
+  test "activity type icon defaults to play" do
+    assert_equal "play", ActivityDefinition::ActivityTypeConfiguration.new(:example).icon
+  end
+
   test "creating activity with multi-step workflow produces expected task rows in order" do
     activity = create_activity(
       type: :create_or_update_records,
