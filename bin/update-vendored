@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Update vendored front-end assets that Dependabot does not track.
+#
+#   bin/update-vendored                 # latest daisyUI, local-time JS synced to the gem
+#   bin/update-vendored 5.5.20          # specific daisyUI version
+#
+# - daisyUI: app/assets/tailwind/daisyui.mjs (downloaded from GitHub releases)
+# - local-time: vendored JS pinned via importmap, matched to the local_time gem
+#   version in Gemfile.lock (so it stays in sync with Dependabot gem bumps)
+
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+DAISYUI_FILE="app/assets/tailwind/daisyui.mjs"
+DAISYUI_VERSION="${1:-latest}"
+
+daisyui_version() { grep -oE 'var version = "[^"]+"' "$DAISYUI_FILE" | cut -d'"' -f2; }
+
+# --- daisyUI -----------------------------------------------------------------
+if [[ "$DAISYUI_VERSION" == "latest" ]]; then
+  url="https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.mjs"
+else
+  url="https://github.com/saadeghi/daisyui/releases/download/v${DAISYUI_VERSION}/daisyui.mjs"
+fi
+
+before=$(daisyui_version)
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+curl -fsSL "$url" -o "$tmp"
+grep -q 'var version = ' "$tmp" || {
+  echo "Downloaded file doesn't look like daisyui.mjs" >&2
+  exit 1
+}
+mv "$tmp" "$DAISYUI_FILE"
+echo "daisyUI: $before -> $(daisyui_version)"
+
+# --- local-time ----------------------------------------------------------------
+gem_version=$(grep -oE '^    local_time \([^)]+\)' Gemfile.lock | grep -oE '[0-9][^)]*')
+pinned_version=$(grep -oE 'pin "local-time" # @[^ ]+' config/importmap.rb | sed 's/.*@//')
+
+if [[ "$gem_version" == "$pinned_version" ]]; then
+  echo "local-time: $pinned_version (matches gem)"
+else
+  bin/importmap pin "local-time@${gem_version}"
+  echo "local-time: $pinned_version -> $gem_version"
+fi
+
+# --- rebuild -------------------------------------------------------------------
+bin/rails tailwindcss:build
+
+echo
+git status --short "$DAISYUI_FILE" config/importmap.rb vendor/javascript
