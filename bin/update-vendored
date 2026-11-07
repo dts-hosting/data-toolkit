@@ -4,35 +4,46 @@
 #   bin/update-vendored                 # latest daisyUI, local-time JS synced to the gem
 #   bin/update-vendored 5.5.20          # specific daisyUI version
 #
-# - daisyUI: app/assets/tailwind/daisyui.mjs (downloaded from GitHub releases)
+# - daisyUI: app/assets/tailwind/daisyui.mjs and daisyui-theme.mjs (GitHub releases,
+#   both from the same version)
 # - local-time: vendored JS pinned via importmap, matched to the local_time gem
 #   version in Gemfile.lock (so it stays in sync with Dependabot gem bumps)
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-DAISYUI_FILE="app/assets/tailwind/daisyui.mjs"
+DAISYUI_DIR="app/assets/tailwind"
 DAISYUI_VERSION="${1:-latest}"
+RELEASES="https://github.com/saadeghi/daisyui/releases"
 
-daisyui_version() { grep -oE 'var version = "[^"]+"' "$DAISYUI_FILE" | cut -d'"' -f2; }
+daisyui_version() { grep -oE 'var version = "[^"]+"' "$1" | cut -d'"' -f2 || true; }
 
 # --- daisyUI -----------------------------------------------------------------
 if [[ "$DAISYUI_VERSION" == "latest" ]]; then
-  url="https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.mjs"
+  url="$RELEASES/latest/download/daisyui.mjs"
 else
-  url="https://github.com/saadeghi/daisyui/releases/download/v${DAISYUI_VERSION}/daisyui.mjs"
+  url="$RELEASES/download/v${DAISYUI_VERSION}/daisyui.mjs"
 fi
 
-before=$(daisyui_version)
-tmp=$(mktemp)
-trap 'rm -f "$tmp"' EXIT
-curl -fsSL "$url" -o "$tmp"
-grep -q 'var version = ' "$tmp" || {
+before=$(daisyui_version "$DAISYUI_DIR/daisyui.mjs")
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+curl -fsSL "$url" -o "$tmp/daisyui.mjs"
+version=$(daisyui_version "$tmp/daisyui.mjs")
+[[ -n "$version" ]] || {
   echo "Downloaded file doesn't look like daisyui.mjs" >&2
   exit 1
 }
-mv "$tmp" "$DAISYUI_FILE"
-echo "daisyUI: $before -> $(daisyui_version)"
+# The theme plugin has no version marker, so fetch it from the resolved release
+curl -fsSL "$RELEASES/download/v${version}/daisyui-theme.mjs" -o "$tmp/daisyui-theme.mjs"
+grep -q 'theme_default' "$tmp/daisyui-theme.mjs" || {
+  echo "Downloaded file doesn't look like daisyui-theme.mjs" >&2
+  exit 1
+}
+
+mv "$tmp/daisyui.mjs" "$tmp/daisyui-theme.mjs" "$DAISYUI_DIR/"
+echo "daisyUI: $before -> $version"
 
 # --- local-time ----------------------------------------------------------------
 gem_version=$(grep -oE '^    local_time \([^)]+\)' Gemfile.lock | grep -oE '[0-9][^)]*')
@@ -49,4 +60,4 @@ fi
 bin/rails tailwindcss:build
 
 echo
-git status --short "$DAISYUI_FILE" config/importmap.rb vendor/javascript
+git status --short "$DAISYUI_DIR" config/importmap.rb vendor/javascript

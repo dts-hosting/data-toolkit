@@ -1,5 +1,5 @@
 <%= turbo_stream_from activity %>
-<%= render "shared/card/base", id: dom_id(activity), card_class: "bg-base-100 shadow-md mb-3" do %>
+<%= render "shared/card/base", id: dom_id(activity), card_class: "bg-base-100 border border-base-300 shadow-md mb-3" do %>
   <div class="card-title justify-between">
     <%= link_to activity_path(activity), class: "link link-info" do %>
       <%= render partial: "shared/card/title", locals: { title: activity.label } %>

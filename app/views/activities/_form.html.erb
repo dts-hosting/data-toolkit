@@ -1,5 +1,5 @@
 <%= form_with(model: activity, scope: :activity, url: activities_path, local: true) do |form| %>
-  <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
+  <%= render "shared/card/base", card_class: "bg-base-100 shadow-lg" do %>
     <% actions_content = capture do %>
       <%= form.submit "Submit", class: "btn btn-primary btn-sm" %>
       <%= link_to "Cancel", :back, class: "btn btn-secondary btn-sm" %>

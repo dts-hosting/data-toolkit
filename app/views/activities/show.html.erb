@@ -1,6 +1,6 @@
 <%= turbo_stream_from @activity %>
 
-<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-6" do %>
+<%= render "shared/card/base", card_class: "bg-base-100 shadow-lg mb-6" do %>
   <div id="<%= dom_id(@activity) %>">
     <% actions_content = capture do %>
       <% if Current.user.is? @activity.user %>
@@ -67,7 +67,7 @@
 <% end %>
 
 <%= render "shared/card/base",
-           card_class: "bg-base-300 shadow-lg" do %>
+           card_class: "bg-base-100 shadow-lg" do %>
   <h2 class="card-title mb-4">Workflow Tasks</h2>
   <div class="overflow-x-auto">
     <table class="table table-hover bg-base-100">

@@ -1,5 +1,5 @@
 <%= turbo_stream_from manifest_registry %>
-<%= render "shared/card/base", id: dom_id(manifest_registry), card_class: "bg-base-100 shadow-md mb-3" do %>
+<%= render "shared/card/base", id: dom_id(manifest_registry), card_class: "bg-base-100 border border-base-300 shadow-md mb-3" do %>
   <div class="flex justify-between items-center mb-4">
     <h3 class="text-lg font-medium break-all">
       <a href="<%= manifest_registry.url %>" target="_blank" class="link link-info"><%= manifest_registry.name_for_url %></a>

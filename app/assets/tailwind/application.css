@@ -3,6 +3,15 @@
 @source inline("badge-{primary,secondary,info,success,warning,error}");
 @plugin "./daisyui.mjs";
 
+/* Light theme tweaks: darker info so link-info passes WCAG AA (5:1 on white) */
+@plugin "./daisyui-theme.mjs" {
+  name: "light";
+  default: true;
+  color-scheme: light;
+  --color-info: oklch(52% 0.16 232.661);
+  --color-info-content: oklch(98% 0.01 232.661);
+}
+
 /* Fix vertical alignment of active option value in select */
 @layer components {
   .select:not([multiple]) {
