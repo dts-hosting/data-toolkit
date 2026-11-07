@@ -13,13 +13,14 @@ module ActivityDefinition
     end
 
     attr_reader :name
-    attribute :display_name, :file_requirement, :has_batch_config,
+    attribute :display_name, :icon, :file_requirement, :has_batch_config,
       :has_config_fields, :workflow, :data_config_type,
       :data_handler, :select_attributes, :boolean_attributes,
       :config_defaults, :validations
 
     def initialize(name)
       @name = name
+      @icon = "play"
       @file_requirement = :none
       @has_batch_config = false
       @has_config_fields = false
@@ -62,8 +63,8 @@ module ActivityDefinition
       activity_types_registry.transform_values(&:display_name).invert
     end
 
-    def activity_type_display_names
-      activity_types_registry.values.map(&:display_name).compact.sort
+    def displayable_activity_types
+      activity_types_registry.values.select(&:display_name).sort_by(&:display_name)
     end
 
     def find_activity_type_by_param_name(param_name)
@@ -96,6 +97,10 @@ module ActivityDefinition
 
   def display_name
     activity_config&.display_name || type.to_s.titleize
+  end
+
+  def icon
+    activity_config&.icon || "play"
   end
 
   def file_requirement

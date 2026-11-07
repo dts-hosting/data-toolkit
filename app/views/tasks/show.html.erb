@@ -1,6 +1,6 @@
 <%= turbo_stream_from @task %>
 
-<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+<%= render "shared/card/base", card_class: "bg-base-100 shadow-lg mb-4" do %>
   <% actions_content = capture do %>
     <%= link_to activity_path(@activity), class: "btn btn-info btn-sm" do %>
       <%= icon "arrow-uturn-left", class: "size-3" %>
@@ -27,13 +27,13 @@
 <% end %>
 
 <% if @task.files.attached? %>
-  <%= render "shared/card/base", card_class: "bg-base-300 shadow-lg mb-4" do %>
+  <%= render "shared/card/base", card_class: "bg-base-100 shadow-lg mb-4" do %>
     <%= render "shared/card/header", title: "Files" %>
 
     <div class="space-y-2">
       <% @task.files.each do |file| %>
         <%= link_to rails_blob_path(file, disposition: "attachment"),
-                    class: "flex items-center gap-3 p-3 rounded-lg bg-base-100 hover:bg-base-200 transition-colors group" do %>
+                    class: "flex items-center gap-3 p-3 rounded-lg bg-base-100 border border-base-300 hover:bg-base-200 transition-colors group" do %>
           <div class="flex-shrink-0"><%= icon_for_file(file) %></div>
 
           <div class="flex-1 min-w-0">

@@ -84,6 +84,7 @@ class Activity < ApplicationRecord
   # Activity type definitions
   activity_type :check_media_derivatives do
     display_name "Check Media Derivatives"
+    icon "photo"
     file_requirement :one_or_more
     workflow :process_uploaded_files, :pre_check_ingest_data, :process_media_derivatives
     data_config_type "media_record_type"
@@ -92,6 +93,7 @@ class Activity < ApplicationRecord
 
   activity_type :create_or_update_records do
     display_name "Create or Update Records"
+    icon "pencil-square"
     file_requirement :one
     has_batch_config true
     has_config_fields true
@@ -106,6 +108,7 @@ class Activity < ApplicationRecord
 
   activity_type :delete_records do
     display_name "Delete Records"
+    icon "trash"
     file_requirement :one
     has_batch_config true
     workflow [:process_uploaded_files]
@@ -115,11 +118,13 @@ class Activity < ApplicationRecord
 
   activity_type :export_record_ids do
     display_name "Export Record IDs"
+    icon "arrow-down-tray"
     data_config_type "record_type"
   end
 
   activity_type :import_terms do
     display_name "Import Terms"
+    icon "arrow-up-tray"
     file_requirement :one
     data_config_type "term_list"
   end

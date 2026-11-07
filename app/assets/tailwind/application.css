@@ -3,6 +3,19 @@
 @source inline("badge-{primary,secondary,info,success,warning,error}");
 @plugin "./daisyui.mjs";
 
+/*
+ * daisyUI's default info blue is too light to read as link text on white.
+ * Darken it in the light theme so links meet the WCAG 4.5:1 contrast minimum.
+ * See https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+ */
+@plugin "./daisyui-theme.mjs" {
+  name: "light";
+  default: true;
+  color-scheme: light;
+  --color-info: oklch(52% 0.16 232.661);
+  --color-info-content: oklch(98% 0.01 232.661);
+}
+
 /* Fix vertical alignment of active option value in select */
 @layer components {
   .select:not([multiple]) {

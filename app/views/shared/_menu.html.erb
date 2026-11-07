@@ -1,4 +1,4 @@
-<%= render "shared/card/base", card_class: "bg-base-300 shadow-lg" do %>
+<%= render "shared/card/base", card_class: "bg-base-100 shadow-lg" do %>
   <h2 class="card-title mb-4">Activities</h2>
   <div class="mb-4">
     <%= render partial: "shared/card/subtitle", locals: { title: "View" } %>
@@ -27,12 +27,12 @@
   <div class="mb-4">
     <%= render partial: "shared/card/subtitle", locals: { title: "Perform" } %>
     <ul class="menu w-full">
-      <% Activity.activity_type_display_names.each do |name| %>
+      <% Activity.displayable_activity_types.each do |activity_type| %>
         <%= render partial: "shared/menu/item",
         locals: {
-          menu_item_name: name,
-          menu_item_icon: "plus-circle",
-          menu_item_path: new_activity_with_type_path(type: name.parameterize),
+          menu_item_name: activity_type.display_name,
+          menu_item_icon: activity_type.icon,
+          menu_item_path: new_activity_with_type_path(type: activity_type.display_name.parameterize),
         } %>
       <% end %>
     </ul>

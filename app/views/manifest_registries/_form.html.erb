@@ -1,6 +1,6 @@
 <%= form_with(model: manifest_registry, local: true) do |form| %>
   <%= render "shared/card/base",
-             card_class: "bg-base-300 shadow-lg mb-4" do %>
+             card_class: "bg-base-100 shadow-lg mb-4" do %>
     <% actions_content = capture do %>
       <%= form.submit "Add Registry", class: "btn btn-sm btn-primary" %>
     <% end %>
