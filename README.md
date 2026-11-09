@@ -134,3 +134,7 @@ export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=...
 
 `.env` also sets `RAILS_ASSUME_SSL=false` and `RAILS_FORCE_SSL=false` so QA is
 reachable over plain HTTP.
+
+## License
+
+Released under the [Educational Community License, Version 2.0](LICENSE) (ECL-2.0).
