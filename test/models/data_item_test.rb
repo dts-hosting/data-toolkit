@@ -1,6 +1,8 @@
 require "test_helper"
 
 class DataItemTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   setup do
     activity = create_activity
     @data_item = DataItem.new(
@@ -63,5 +65,43 @@ class DataItemTest < ActiveSupport::TestCase
     assert_equal 2, @data_item.tasks.count
     assert_includes @data_item.tasks, task1
     assert_includes @data_item.tasks, task2
+  end
+
+  test "should attach an xml payload" do
+    @data_item.save!
+    refute @data_item.payload.attached?
+
+    xml = "<document><objectNumber>123</objectNumber></document>"
+    @data_item.payload.attach(
+      io: StringIO.new(xml),
+      filename: "#{@data_item.id}.xml",
+      content_type: "application/xml"
+    )
+
+    assert @data_item.payload.attached?
+    assert_equal xml, @data_item.reload.payload.download
+    assert_equal "application/xml", @data_item.payload.content_type
+  end
+
+  test "should replace an existing payload" do
+    @data_item.save!
+    @data_item.payload.attach(io: StringIO.new("<old/>"), filename: "old.xml", content_type: "application/xml")
+    @data_item.payload.attach(io: StringIO.new("<new/>"), filename: "new.xml", content_type: "application/xml")
+
+    assert_equal "<new/>", @data_item.reload.payload.download
+    assert_equal 1, ActiveStorage::Attachment.where(record: @data_item, name: "payload").count
+  end
+
+  test "should purge payload when destroyed" do
+    @data_item.save!
+    @data_item.payload.attach(io: StringIO.new("<xml/>"), filename: "item.xml", content_type: "application/xml")
+    blob = @data_item.payload.blob
+
+    assert_enqueued_with(job: ActiveStorage::PurgeJob, args: [blob]) do
+      @data_item.destroy!
+    end
+
+    perform_enqueued_jobs(only: ActiveStorage::PurgeJob)
+    refute ActiveStorage::Blob.exists?(blob.id)
   end
 end
