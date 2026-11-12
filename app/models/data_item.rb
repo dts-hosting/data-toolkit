@@ -3,6 +3,9 @@ class DataItem < ApplicationRecord
   has_many :actions, dependent: :destroy
   has_many :tasks, through: :actions
 
+  # Generated CollectionSpace XML
+  has_one_attached :payload
+
   validates :data, presence: true
   validates :position, presence: true
   validates :position, uniqueness: {scope: :activity_id}
