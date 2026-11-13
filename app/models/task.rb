@@ -59,6 +59,12 @@ class Task < ApplicationRecord
     progress_completed? ? outcome_status : progress_status
   end
 
+  # The task before this one in the activity's workflow (nil for the first).
+  def previous_task_type
+    index = activity.workflow.index(task_type)
+    activity.workflow[index - 1] if index&.positive?
+  end
+
   task_type :process_uploaded_files do
     display_name "Process Uploaded Files"
     handler ProcessUploadedFilesJob
@@ -69,7 +75,6 @@ class Task < ApplicationRecord
     handler PreCheckIngestDataJob
     action_handler PreCheckIngestActionJob
     finalizer GenericTaskFinalizerJob
-    depends_on :process_uploaded_files
   end
 
   task_type :process_media_derivatives do
@@ -77,7 +82,6 @@ class Task < ApplicationRecord
     handler GenericQueueActionJob
     action_handler ProcessMediaDerivativesActionJob
     finalizer GenericFeedbackReportJob
-    depends_on :process_uploaded_files, :pre_check_ingest_data
   end
 
   task_type :prepare_transfers do
@@ -85,7 +89,6 @@ class Task < ApplicationRecord
     handler GenericQueueActionJob
     action_handler PrepareTransfersActionJob
     finalizer GenericFeedbackReportJob
-    depends_on :pre_check_ingest_data
   end
 
   task_type :process_transfers do
@@ -93,7 +96,6 @@ class Task < ApplicationRecord
     handler GenericQueueActionJob
     action_handler ProcessTransfersActionJob
     finalizer GenericFeedbackReportJob
-    depends_on :prepare_transfers
   end
 
   task_type :process_deletes do
@@ -101,13 +103,11 @@ class Task < ApplicationRecord
     handler GenericQueueActionJob
     action_handler ProcessDeletesActionJob
     finalizer GenericFeedbackReportJob
-    depends_on :pre_check_ingest_data
   end
 
   task_type :delete_actions do
     display_name "Delete Actions"
     handler DeleteActionsJob
-    depends_on :process_uploaded_files
   end
 
   private
@@ -118,11 +118,13 @@ class Task < ApplicationRecord
     ((actions_completed_count.to_f / actions_count) * 100).round
   end
 
+  # Tasks run in workflow order: a task may run once the task before it has
+  # succeeded, which implies every earlier task has too. The first task has
+  # no predecessor.
   def met_dependencies?
-    return true if dependencies.empty?
+    previous = previous_task_type
+    return true unless previous
 
-    activity.tasks
-      .where(type: dependencies.map(&:to_s), outcome_status: SUCCEEDED)
-      .count == dependencies.size
+    activity.tasks.exists?(type: previous.to_s, outcome_status: SUCCEEDED)
   end
 end
