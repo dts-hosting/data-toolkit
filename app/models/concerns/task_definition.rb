@@ -12,21 +12,14 @@ module TaskDefinition
       end
     end
 
-    attr_reader :name, :dependencies
+    attr_reader :name
     attribute :display_name, :handler, :action_handler, :finalizer
 
     def initialize(name)
       @name = name
-      @dependencies = []
-    end
-
-    def depends_on(*task_types)
-      return @dependencies if task_types.empty?
-      @dependencies = task_types.flatten
     end
 
     def finalize!
-      @dependencies = dependencies.dup.freeze
       freeze
     end
   end
@@ -53,11 +46,6 @@ module TaskDefinition
 
   def action_handler
     task_config&.action_handler
-  end
-
-  def dependencies
-    return [] unless task_config
-    task_config.dependencies
   end
 
   def display_name
