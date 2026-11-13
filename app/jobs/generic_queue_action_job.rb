@@ -3,6 +3,8 @@
 # finalized by WorkflowManager when the last action completes.
 class GenericQueueActionJob < ApplicationJob
   queue_as :default
+  # Run ahead of queued per-item action jobs (lower runs first)
+  queue_with_priority(-10)
 
   def perform(task)
     WorkflowManager.start_task(task)

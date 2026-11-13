@@ -23,7 +23,7 @@ production:
     schedule: every hour
   publish_queue_size:
     class: "PublishQueueSizeJob"
-    schedule: every 5 minutes
+    schedule: every minute
   task_reconciler:
     class: "TaskReconcilerJob"
     schedule: every 10 minutes

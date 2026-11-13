@@ -1,5 +1,7 @@
 class GenericTaskFinalizerJob < ApplicationJob
   queue_as :default
+  # Run ahead of queued per-item action jobs (lower runs first)
+  queue_with_priority(-10)
 
   def perform(task)
     Rails.logger.info "#{self.class.name} started"
