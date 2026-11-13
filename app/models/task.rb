@@ -80,6 +80,36 @@ class Task < ApplicationRecord
     depends_on :process_uploaded_files, :pre_check_ingest_data
   end
 
+  task_type :prepare_transfers do
+    display_name "Prepare Transfers"
+    handler GenericQueueActionJob
+    action_handler PrepareTransfersActionJob
+    finalizer GenericFeedbackReportJob
+    depends_on :pre_check_ingest_data
+  end
+
+  task_type :process_transfers do
+    display_name "Process Transfers"
+    handler GenericQueueActionJob
+    action_handler ProcessTransfersActionJob
+    finalizer GenericFeedbackReportJob
+    depends_on :prepare_transfers
+  end
+
+  task_type :process_deletes do
+    display_name "Process Deletes"
+    handler GenericQueueActionJob
+    action_handler ProcessDeletesActionJob
+    finalizer GenericFeedbackReportJob
+    depends_on :pre_check_ingest_data
+  end
+
+  task_type :delete_actions do
+    display_name "Delete Actions"
+    handler DeleteActionsJob
+    depends_on :process_uploaded_files
+  end
+
   private
 
   def calculate_progress

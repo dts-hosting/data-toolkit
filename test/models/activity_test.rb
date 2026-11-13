@@ -96,10 +96,10 @@ class ActivityTest < ActiveSupport::TestCase
 
     current_expected = activity.tasks.where(type: "pre_check_ingest_data").first
     current_expected.update!(progress_status: Task::QUEUED)
-    # TODO: update when workflow fully defined
+    next_expected = activity.tasks.where(type: "prepare_transfers").first
 
     assert_equal current_expected, activity.current_task
-    assert_nil activity.next_task
+    assert_equal next_expected, activity.next_task
     activity.destroy
   end
 
@@ -215,8 +215,32 @@ class ActivityTest < ActiveSupport::TestCase
     )
 
     task_types = activity.tasks.order(:created_at).pluck(:type)
-    assert_equal ["process_uploaded_files", "pre_check_ingest_data"], task_types
+    assert_equal %w[
+      process_uploaded_files pre_check_ingest_data prepare_transfers
+      process_transfers delete_actions
+    ], task_types
     activity.destroy
+  end
+
+  test "delete records workflow produces expected task rows in order" do
+    activity = create_activity(
+      type: :delete_records,
+      data_config: @data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    task_types = activity.tasks.order(:created_at).pluck(:type)
+    assert_equal %w[
+      process_uploaded_files pre_check_ingest_data process_deletes delete_actions
+    ], task_types
+    activity.destroy
+  end
+
+  test "delete records activity has a data handler" do
+    handler = Object.new
+    CollectionSpaceMapper.stubs(:single_record_type_handler_for).returns(handler)
+
+    assert_same handler, Activity.new(type: :delete_records).data_handler
   end
 
   test "creating activity with empty workflow produces zero task rows" do

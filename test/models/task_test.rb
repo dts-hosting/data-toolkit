@@ -324,7 +324,7 @@ class TaskTest < ActiveSupport::TestCase
     second_task.update!(progress_status: Task::PENDING)
 
     assert_equal true, activity.config["auto_advance"]
-    assert_equal 2, activity.tasks.count
+    assert_equal activity.workflow.size, activity.tasks.count
     assert_equal second_task, activity.next_task
     assert_equal Task::PENDING, second_task.progress_status
 

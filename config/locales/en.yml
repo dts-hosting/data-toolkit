@@ -86,6 +86,10 @@ en:
           record_not_found: "Record not found: %{details}"
         message:
           blob_data: "Blob data: %{details}"
+    process_transfers:
+      feedback:
+        error:
+          payload_missing: "No prepared XML found for %{details}"
     process_uploaded_files:
       feedback:
         error:
