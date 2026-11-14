@@ -3,6 +3,13 @@
 # finalized by WorkflowManager when the last action completes.
 class GenericQueueActionJob < ApplicationJob
   queue_as :default
+
+  # Each batch is enqueued in one transaction, and jobs only become runnable when
+  # it commits. For action jobs that limit concurrency, each job also takes a
+  # per-client semaphore, whose row lock is held until commit, so finishing jobs
+  # of that client wait on it. Smaller batches start work sooner and keep those
+  # waits short (about 1s at 200).
+  ENQUEUE_BATCH_SIZE = 200
   # Run ahead of queued per-item action jobs (lower runs first)
   queue_with_priority(-10)
 
@@ -30,7 +37,7 @@ class GenericQueueActionJob < ApplicationJob
 
   def queue_actions(task)
     activity = task.activity
-    task.actions.in_batches(of: 1000) do |batch|
+    task.actions.in_batches(of: ENQUEUE_BATCH_SIZE) do |batch|
       ActiveJob.perform_all_later(batch.map { |action| task.action_handler.new(activity, action) })
     end
   end

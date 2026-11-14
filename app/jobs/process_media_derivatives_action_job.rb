@@ -1,4 +1,6 @@
 class ProcessMediaDerivativesActionJob < ActionJob
+  limits_client_concurrency
+
   private
 
   def process(activity, action, feedback)

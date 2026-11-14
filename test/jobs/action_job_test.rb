@@ -36,6 +36,13 @@ class ActionJobTest < ActiveJob::TestCase
     @action = Action.create!(task: @activity.current_task, data_item: data_item)
   end
 
+  test "concurrency key is per CollectionSpace client, normalized" do
+    assert_equal @activity.user.cspace_url.downcase.chomp("/"), ActionJob.client_key(@activity)
+
+    other = Struct.new(:user).new(Struct.new(:cspace_url).new("HTTPS://Example.org/ "))
+    assert_equal "https://example.org", ActionJob.client_key(other)
+  end
+
   test "completes the action and stores nil feedback when there is nothing to report" do
     NoopActionJob.perform_now(@activity, @action)
 
