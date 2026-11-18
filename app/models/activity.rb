@@ -97,7 +97,8 @@ class Activity < ApplicationRecord
     file_requirement :one
     has_batch_config true
     has_config_fields true
-    workflow :process_uploaded_files, :pre_check_ingest_data
+    workflow :process_uploaded_files, :pre_check_ingest_data, :prepare_transfers,
+      :process_transfers, :delete_actions
     data_config_type "record_type"
     data_handler ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
     config_defaults action: "create"
@@ -111,8 +112,10 @@ class Activity < ApplicationRecord
     icon "trash"
     file_requirement :one
     has_batch_config true
-    workflow [:process_uploaded_files]
+    workflow :process_uploaded_files, :pre_check_ingest_data, :process_deletes,
+      :delete_actions
     data_config_type "record_type"
+    data_handler ->(activity) { CollectionSpaceMapper.single_record_type_handler_for(activity) }
     select_attributes [] # TODO: [:record_matchpoint]
   end
 

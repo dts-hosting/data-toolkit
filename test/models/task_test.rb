@@ -95,7 +95,7 @@ class TaskTest < ActiveSupport::TestCase
     first_task = activity.tasks.find_by(type: "process_uploaded_files")
     dependent_task = activity.tasks.find_by(type: "pre_check_ingest_data")
 
-    assert_includes dependent_task.dependencies, first_task.task_type
+    assert_equal first_task.task_type, dependent_task.previous_task_type
     assert_not dependent_task.ok_to_run?
 
     WorkflowManager.complete_task(first_task, outcome: Task::SUCCEEDED)
@@ -324,7 +324,7 @@ class TaskTest < ActiveSupport::TestCase
     second_task.update!(progress_status: Task::PENDING)
 
     assert_equal true, activity.config["auto_advance"]
-    assert_equal 2, activity.tasks.count
+    assert_equal activity.workflow.size, activity.tasks.count
     assert_equal second_task, activity.next_task
     assert_equal Task::PENDING, second_task.progress_status
 
@@ -624,6 +624,41 @@ class TaskTest < ActiveSupport::TestCase
 
     assert_nil WorkflowManager.run_task(@task)
     assert @task.reload.progress_completed?
+  end
+
+  test "previous_task_type follows each activity's workflow" do
+    transfers = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+    deletes = create_activity(
+      type: :delete_records,
+      config: {auto_advance: false},
+      data_config: transfers.data_config,
+      files: create_uploaded_files(["test.csv"])
+    )
+
+    assert_nil transfers.tasks.find_by(type: "process_uploaded_files").previous_task_type
+    assert_equal :process_transfers, transfers.tasks.find_by(type: "delete_actions").previous_task_type
+    assert_equal :process_deletes, deletes.tasks.find_by(type: "delete_actions").previous_task_type
+  end
+
+  test "delete_actions is not ok to run until the previous task succeeds" do
+    activity = create_activity(
+      type: :create_or_update_records,
+      config: {action: "create", auto_advance: false},
+      data_config: create_data_config_record_type({record_type: "acquisitions"}),
+      files: create_uploaded_files(["test.csv"])
+    )
+    activity.tasks.find_by(type: "process_uploaded_files").update!(outcome_status: Task::SUCCEEDED)
+    delete_actions = activity.tasks.find_by(type: "delete_actions")
+
+    refute delete_actions.ok_to_run?
+
+    activity.tasks.find_by(type: "process_transfers").update!(outcome_status: Task::SUCCEEDED)
+    assert delete_actions.reload.ok_to_run?
   end
 
   test "run_task is a no-op when dependencies have not succeeded" do
